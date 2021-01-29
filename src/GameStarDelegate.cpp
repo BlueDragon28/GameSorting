@@ -19,8 +19,10 @@ void GameStarDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 	{
 		GameStarRating gStarRating = qvariant_cast<GameStarRating>(index.data());
 
-		if (option.state & QStyle::State_Selected)
+		if (option.state & QStyle::State_Selected && option.state & QStyle::State_Active)
 			painter->fillRect(option.rect, option.palette.highlight());
+		else if (option.state & QStyle::State_Selected && !(option.state & QStyle::State_Active))
+			painter->fillRect(option.rect, option.palette.midlight());
 
 		gStarRating.paint(painter, option.rect, option.palette, GameStarRating::EditMode::ReadOnly);
 	}

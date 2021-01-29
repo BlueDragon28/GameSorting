@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QColor>
+#include <QLineF>
 
 GameStarRating::GameStarRating(int starCount, int maxStarCount, QWidget* parent) :
 	m_starCount(std::max(1, std::min(maxStarCount, starCount))),
@@ -58,7 +59,6 @@ void GameStarRating::paint(QPainter* painter, const QRect& rect, const QPalette&
 	painter->setPen(Qt::NoPen);
 
 	painter->setBrush(editMode == EditMode::Editable ? palette.highlight() : palette.windowText());
-
 	painter->translate(rect.x() + (0.5f * m_paintScaleFactor), rect.y() + (rect.height() / 2.f));
 	painter->scale(m_paintScaleFactor, m_paintScaleFactor);
 
@@ -66,6 +66,23 @@ void GameStarRating::paint(QPainter* painter, const QRect& rect, const QPalette&
 	{
 		painter->drawPolygon(m_starPolygon, Qt::WindingFill);
 		painter->translate(1, 0);
+	}
+
+	// Drawing line in editMode
+	if (editMode == EditMode::Editable)
+	{
+		const QVector<QLine> lines =
+		{
+			QLine(0, 0, rect.width(), 0),
+			QLine(rect.width(), 0, rect.width(), rect.height()),
+			QLine(rect.width(), rect.height(), 0, rect.height()),
+			QLine(0, rect.height(), 0, 0)
+		};
+
+		painter->restore();
+		painter->translate(rect.x(), rect.y());
+		painter->setBrush(palette.dark());
+		painter->drawLines(lines);
 	}
 
 	painter->restore();
