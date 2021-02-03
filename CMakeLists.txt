@@ -62,3 +62,31 @@ add_executable(GameSorting
 	${RESOURCES})
 target_link_libraries(GameSorting Qt5::Widgets)
 set_target_properties(GameSorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+if (WIN32)
+	if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+		add_custom_target(Qt5Binaries 
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Cored.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Guid.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Widgetsd.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Svgd.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/platforms/qwindowsd.dll" "${CMAKE_BINARY_DIR}/bin/plugins/platforms/qwindowsd.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/styles/qwindowsvistastyled.dll" "${CMAKE_BINARY_DIR}/bin/plugins/styles/qwindowsvistastyled.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/imageformats/qicod.dll" "${CMAKE_BINARY_DIR}/bin/plugins/imageformats/qicod.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/imageformats/qsvgd.dll" "${CMAKE_BINARY_DIR}/bin/plugins/imageformats/qsvgd.dll"
+			)
+		add_dependencies(GameSorting Qt5Binaries)
+	else()
+		add_custom_target(Qt5Binaries 
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Core.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Gui.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Widgets.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../bin/Qt5Svg.dll" "${CMAKE_BINARY_DIR}/bin"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/platforms/qwindows.dll" "${CMAKE_BINARY_DIR}/bin/plugins/platforms/qwindows.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/styles/qwindowsvistastyle.dll" "${CMAKE_BINARY_DIR}/bin/plugins/styles/qwindowsvistastyle.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/imageformats/qico.dll" "${CMAKE_BINARY_DIR}/bin/plugins/imageformats/qico.dll"
+			COMMAND ${CMAKE_COMMAND} -E copy "${Qt5_DIR}/../../../plugins/imageformats/qsvg.dll" "${CMAKE_BINARY_DIR}/bin/plugins/imageformats/qsvg.dll"
+			)
+		add_dependencies(GameSorting Qt5Binaries)
+	endif()
+endif()

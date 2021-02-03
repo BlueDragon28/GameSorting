@@ -48,7 +48,8 @@ void AboutDialog::createAboutText()
 			"<b>Library used :</b><br>"
 			"Qt " QT_VERSION_STR "<br><br>"
 			"<b>Author :</b><br>"
-			"Erwan28250");
+			"Erwan Saclier de la B%1tie").arg(QChar('â'));
+	
 
 	QLabel* aboutLabel = new QLabel();
 	aboutLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
