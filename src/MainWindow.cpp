@@ -21,6 +21,7 @@
 #include "GameStarDelegate.h"
 #include "GameTabAndList.h"
 #include "AboutDialog.h"
+#include "LicenceDialog.h"
 
 #include <QVBoxLayout>
 #include <QMenuBar>
@@ -61,7 +62,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	//m_gameListView(new QTableView(this)),
 	//m_gModel(new GameListModel(this)),
 	m_gTabAndList(new GameTabAndList(this)),
-	m_aboutDialog(nullptr)
+	m_aboutDialog(nullptr),
+	m_licenceDialog(nullptr)
 {
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
@@ -77,7 +79,8 @@ MainWindow::MainWindow(const QString& filePath, bool noSettings, QWidget* parent
 	//m_gameListView(new QTableView(this)),
 	//m_gModel(new GameListModel(this)),
 	m_gTabAndList(new GameTabAndList(this)),
-	m_aboutDialog(nullptr)
+	m_aboutDialog(nullptr),
+	m_licenceDialog(nullptr)
 {
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
@@ -101,7 +104,8 @@ MainWindow::MainWindow(const QString& filePath, bool noSettings, QWidget* parent
 }
 
 MainWindow::~MainWindow()
-{}
+{
+}
 
 void MainWindow::createMenu()
 {
@@ -253,18 +257,6 @@ void MainWindow::createMenu()
 	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [addGameDebugAct](bool value) { addGameDebugAct->setEnabled(!value); });
 	debugMenu->addAction(addGameDebugAct);
 
-	debugMenu->addSeparator();
-
-	QAction* debugFilterAct = new QAction(tr("Debug filter"), this);
-	debugFilterAct->setToolTip(tr("Debug games with the type \"Type 3\""));
-	connect(debugFilterAct, &QAction::triggered, [this]() { m_gTabAndList->filterGamesFromType("Type 3"); });
-	debugMenu->addAction(debugFilterAct);
-
-	QAction* disableFilterAct = new QAction(tr("Disable filter"), this);
-	disableFilterAct->setToolTip(tr("Disable filter."));
-	connect(disableFilterAct, &QAction::triggered, [this]() { m_gTabAndList->filterGamesFromType(QString()); });
-	debugMenu->addAction(disableFilterAct);
-
 #endif // NDEBUG
 
 	QMenu* helpMenu = menuBar()->addMenu(tr("Help"));
@@ -273,6 +265,11 @@ void MainWindow::createMenu()
 	aboutAct->setToolTip(tr("Information about this application"));
 	connect(aboutAct, &QAction::triggered, this, &MainWindow::aboutApp);
 	helpMenu->addAction(aboutAct);
+
+	QAction* licenceAct = new QAction(tr("Licence"), this);
+	licenceAct->setToolTip(tr("Information about the licence of this application."));
+	connect(licenceAct, &QAction::triggered, this, &MainWindow::aboutLicence);
+	helpMenu->addAction(licenceAct);
 }
 
 void MainWindow::createCentralWidget()
@@ -871,4 +868,19 @@ void MainWindow::aboutApp()
 	}
 
 	m_aboutDialog->show();
+}
+
+void MainWindow::aboutLicence()
+{
+	// Show a little dialog about the licence of the application.
+
+	if (!m_licenceDialog)
+	{
+		m_licenceDialog = new LicenceDialog(this);
+		connect(m_licenceDialog, &QDialog::destroyed, [this]() { m_licenceDialog = nullptr; });
+		m_licenceDialog->raise();
+		m_licenceDialog->activateWindow();
+	}
+
+	m_licenceDialog->show();
 }

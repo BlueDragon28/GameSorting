@@ -16,47 +16,20 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "AboutDialog.h"
-#include "CommonStruct.h"
+#ifndef GAMESORTING_LICENCEDIALOG
+#define GAMESORTING_LICENCEDIALOG
 
-#include <QLabel>
-#include <QVBoxLayout>
+#include <QDialog>
 
-AboutDialog::AboutDialog(QWidget* parent) :
-	QDialog(parent)
+class LicenceDialog : public QDialog
 {
-	setDialogParameters();
-	createAboutText();
-}
+	Q_OBJECT
+public:
+	explicit LicenceDialog(QWidget* parent);
 
-void AboutDialog::setDialogParameters()
-{
-	setModal(false);
+private:
+	void setDialogParameters();
+	void createLicenceText();
+};
 
-	Qt::WindowFlags wFlags = windowFlags();
-	wFlags &= ~Qt::WindowContextHelpButtonHint;
-	setWindowFlags(wFlags);
-
-	setWindowTitle(tr("About"));
-}
-
-void AboutDialog::createAboutText()
-{
-	QString strAbout =
-		tr("<b>About this application :</b><br><br>"
-			"<b>Name :</b><br>Game Sorting v" GAMESORTING_VERSION "<br><br>"
-			"<b>Library used :</b><br>"
-			"Qt " QT_VERSION_STR "<br><br>"
-			"<b>Author :</b><br>"
-			"Erwan Saclier de la B%1tie (Erwan28250)").arg(QChar('â'));
-	
-
-	QLabel* aboutLabel = new QLabel();
-	aboutLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	aboutLabel->setText(strAbout);
-
-	QVBoxLayout *vLayout = new QVBoxLayout();
-	vLayout->addWidget(aboutLabel);
-
-	setLayout(vLayout);
-}
+#endif // GAMESORTING_LICENCEDIALOG

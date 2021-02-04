@@ -27,6 +27,7 @@
 class GameTabAndList;
 class QTableView;
 class AboutDialog;
+class LicenceDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -52,6 +53,7 @@ protected:
 
 private slots:
 	void aboutApp();
+	void aboutLicence();
 
 private:
 	void createMenu();
@@ -69,6 +71,7 @@ private:
 	GameTabAndList* m_gTabAndList;
 	QString m_gFilePath, m_lastOpenedDir;
 	AboutDialog* m_aboutDialog;
+	LicenceDialog* m_licenceDialog;
 };
 
 #endif // GAMESORTING_MAINWINDOW
