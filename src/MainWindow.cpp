@@ -41,8 +41,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
-#include <QCoreApplication>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QScreen>
 #include <QCloseEvent>
 #include <QLabel>
@@ -464,7 +463,11 @@ void MainWindow::readSettings(bool readSettings, bool loadLastSavedFile)
 	}
 	else
 	{
+#if QT_VERSION_MINOR >= 14
 		QSize screenSize = screen()->availableSize();
+#else
+		QSize screenSize = qApp->primaryScreen()->availableSize();
+#endif
 
 		QSize windowSize(screenSize.width() / 3, screenSize.height() / 2);
 		QPoint windowPos(
