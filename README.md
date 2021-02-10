@@ -62,7 +62,7 @@ sudo pacman -S base-devel qt5-base cmake git
 Open a terminal, and use the git command to download the project :
 
 ```
-git clone https:\\
+git clone https://github.com/Erwan28250/GameSorting.git
 ```
 
 Now, you can build the project :
