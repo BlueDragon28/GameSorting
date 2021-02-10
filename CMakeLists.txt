@@ -20,7 +20,7 @@ project(GameSorting VERSION 0.11 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 include_directories(include/)
 
@@ -62,3 +62,4 @@ add_executable(GameSorting
 	${RESOURCES})
 target_link_libraries(GameSorting Qt5::Widgets)
 set_target_properties(GameSorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+install(TARGETS GameSorting RUNTIME DESTINATION bin)
