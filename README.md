@@ -4,10 +4,13 @@ Game Sorting is a little C++ application I've wrote to help classify my list of 
 
 # Installation
 
-The app work on both Windows and Linux. I tried to explain the compilation process step by step below, the only dependency you need is Qt 5. The app have been tested with Qt 5.15.
+The app work on both Windows and Linux. You can download the build of Game Sorting from the [release page](https://github.com/Erwan28250/GameSorting/releases/). 
+You can also compile GameSorting from the sources, I tried to explain the compilation process step by step below, the only dependency you need is Qt 5. The app have been tested with Qt 5.15.
+
+# Building from sources
 
 ### Windows
------------
+
 To Compile on Windows, you need a C++11 compiler like [Visual Studio](https://visualstudio.microsoft.com/fr/), the framework [Qt 5](https://www.qt.io/) and [CMake](https://cmake.org/) to configure the project.
 
 To install Visual Studio, go to the [Visual Studio](https://visualstudio.microsoft.com/fr/) website and download Visual Studio Community. On the installation, when the install tools ask you what modules you want to install, tick the Desktop C++ module.
@@ -39,25 +42,27 @@ Now, from the folder `Qt5Dir\compiler\plugins` copy the following DLLs to the sp
 Now you can enjoy :slightly_smiling_face:.
 
 ### Linux
----------
+
 On Linux, you need to install a compiler like `gcc`, the framework `Qt`, `CMake` to configure the project for compilation and `git` to download the project.
 
+#### Dependencies
+
 ##### Ubuntu
-------------
+
 On Ubuntu, install the packages `build-essential`, `qtdeclarative5-dev`, `cmake` and `git`
 ```
 sudo apt install build-essential qtdeclarative5-dev cmake git
 ```
 
 ##### Arch Linux
-----------------
+
 On Arch Linux, install the packages `base-devel`, `qt5-base`, `cmake` and `git`.
 
 ```
 sudo pacman -S base-devel qt5-base cmake git
 ```
 
---------------------------------------------------------------------------------------------------
+#### Build process
 
 Open a terminal, and use the git command to download the project :
 

@@ -64,7 +64,7 @@ QVariant GameListModel::headerData(int section, Qt::Orientation orientation, int
 		else if (section == 1)
 			return tr("Game type");
 		else if (section == 2)
-			return tr("Rate");
+			return tr("Game rate");
 	}
 	return QVariant();
 }
