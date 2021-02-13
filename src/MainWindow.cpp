@@ -58,8 +58,6 @@
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
-	//m_gameListView(new QTableView(this)),
-	//m_gModel(new GameListModel(this)),
 	m_gTabAndList(new GameTabAndList(this)),
 	m_aboutDialog(nullptr),
 	m_licenceDialog(nullptr)
@@ -109,8 +107,7 @@ MainWindow::~MainWindow()
 void MainWindow::createMenu()
 {
 	/*
-	*	Creation of the menu "File" and adding the button Quit
-	*	for quitting the application.
+	*	Creation of the menu "File".
 	*	The first call of menuBar()->addMenu() create the menu bar
 	*	in the MainWindow.
 	*/
@@ -172,7 +169,6 @@ void MainWindow::createMenu()
 	QAction* addAct = new QAction(addIcon, tr("&Add game"), this);
 	addAct->setShortcut(Qt::CTRL | Qt::Key_A);
 	addAct->setToolTip(tr("Adding a new game to the games list"));
-	//connect(addAct, &QAction::triggered, m_gModel, qOverload<>(&GameListModel::appendGame));
 	connect(addAct, &QAction::triggered, this, &MainWindow::appendGame);
 	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [addAct](bool value) { addAct->setEnabled(!value); });
 	editMenu->addAction(addAct);
@@ -219,7 +215,7 @@ void MainWindow::createMenu()
 	QIcon sortingEnabledMenuIcon = QIcon(":/Images/Sorting_lowResolution.svg");
 	QAction* sortingEnabledMenuAct = new QAction(sortingEnabledMenuIcon, tr("Enable sorting"), this);
 	sortingEnabledMenuAct->setCheckable(true);
-	connect(sortingEnabledMenuAct, &QAction::toggled, m_gTabAndList, &GameTabAndList::setSortingEnabled);
+	connect(sortingEnabledMenuAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::setSortingEnabled);
 	connect(m_gTabAndList, &GameTabAndList::gameListSorted, sortingEnabledMenuAct, &QAction::setChecked);
 	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [sortingEnabledMenuAct](bool value) { if (value) sortingEnabledMenuAct->setChecked(false); sortingEnabledMenuAct->setEnabled(!value); });
 	editMenu->addAction(sortingEnabledMenuAct);
@@ -227,7 +223,7 @@ void MainWindow::createMenu()
 	QIcon sortingEnabledBarIcon = QIcon(":/Images/Sorting.svg");
 	QAction* sortingEnabledBarAct = new QAction(sortingEnabledBarIcon, tr("Enable sorting"), this);
 	sortingEnabledBarAct->setCheckable(true);
-	connect(sortingEnabledBarAct, &QAction::toggled, m_gTabAndList, &GameTabAndList::setSortingEnabled);
+	connect(sortingEnabledBarAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::setSortingEnabled);
 	connect(m_gTabAndList, &GameTabAndList::gameListSorted, sortingEnabledBarAct, &QAction::setChecked);
 	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [sortingEnabledBarAct](bool value) { if (value) sortingEnabledBarAct->setChecked(false); sortingEnabledBarAct->setEnabled(!value); });
 	connect(sortingEnabledMenuAct, &QAction::triggered, sortingEnabledBarAct, &QAction::setChecked);
@@ -255,7 +251,6 @@ void MainWindow::createMenu()
 	connect(addGameDebugAct, &QAction::triggered, this, &MainWindow::addGame);
 	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [addGameDebugAct](bool value) { addGameDebugAct->setEnabled(!value); });
 	debugMenu->addAction(addGameDebugAct);
-
 #endif // NDEBUG
 
 	QMenu* helpMenu = menuBar()->addMenu(tr("Help"));
@@ -415,7 +410,6 @@ void MainWindow::filteringGameList()
 {
 	// Apply a filter set by the user to the current focussed games list.
 
-	//QDialog dialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	QDialog dialog(this);
 	Qt::WindowFlags wFlags = dialog.windowFlags();
 	wFlags &= ~Qt::WindowContextHelpButtonHint;
@@ -498,14 +492,6 @@ void MainWindow::readSettings(bool readSettings, bool loadLastSavedFile)
 			}
 		}
 	}
-
-	// Read back if isSortingEnabled is set or not.
-	/*QVariant vIsSortingEnabled = settings.value("gamelist/isSortingEnabled");
-	if (vIsSortingEnabled.isValid() && readSettings)
-	{
-		bool bIsSortingEnabled = vIsSortingEnabled.toBool();
-		m_isSortingEnabledAct->setChecked(bIsSortingEnabled);
-	}*/
 }
 
 void MainWindow::writeSettings()
@@ -532,9 +518,6 @@ void MainWindow::writeSettings()
 	}
 	else
 		settings.setValue("mainwindow/lastopeneddirectory", QVariant::fromValue(m_lastOpenedDir));
-
-	// Save if the isSortingEnabled is set or not.
-	//settings.setValue("gamelist/isSortingEnabled", m_gTabAndList->isSortingEnabled());
 }
 
 bool MainWindow::saveFile(const QString& filePath) const
@@ -700,9 +683,6 @@ const TabAndListData MainWindow::openFile(const QString& fileName, bool& result)
 		result = false;
 		return {};
 	}
-
-	/*// returning a default empty game list if opening the file failed.
-	return {};*/
 }
 
 const TabAndListData MainWindow::openFileVersion002And003(QDataStream& dataStream, bool v003, bool& result) const

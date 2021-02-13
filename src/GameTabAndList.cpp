@@ -61,11 +61,14 @@ GameTabAndList::~GameTabAndList()
 	{
 		for (int i = 0; i < m_tabBar->count(); i++)
 		{
-			QWidget* view = m_gViews->widget(i);
 			if (m_gViews)
-				m_gViews->removeWidget(view);
-			m_tabBar->removeTab(i);
-			delete view;
+			{
+				QWidget* view = m_gViews->widget(i);
+				if (view)
+					m_gViews->removeWidget(view);
+				m_tabBar->removeTab(i);
+				delete view;
+			}
 		}
 	}
 }
@@ -320,8 +323,6 @@ TabAndListData GameTabAndList::gamesData() const
 
 		gData.gamesListSortIndicator[i].sortColumn = view->view()->horizontalHeader()->sortIndicatorSection();
 		gData.gamesListSortIndicator[i].sortOrder = view->view()->horizontalHeader()->sortIndicatorOrder();
-		//gData.gamesListSortIndicator[i].sortColumn = 0;
-		//gData.gamesListSortIndicator[i].sortOrder = static_cast<quint8>(Qt::DescendingOrder);
 		gData.gamesData[i] = view->gamesData();
 		gData.gamesListSortIndicator[i].isEnabled = view->isSortingEnabled();
 	}
@@ -335,8 +336,8 @@ void GameTabAndList::setGamesAndTabData(const TabAndListData& gamesData)
 	for (int i = 0; i < gamesData.tabCount; i++)
 	{
 		GameListView* view = new GameListView();
-		view->appendGames(gamesData.gamesData.at(i));
 		view->setSortingEnabled(gamesData.gamesListSortIndicator.at(i).isEnabled);
+		view->appendGames(gamesData.gamesData.at(i), false); // If sorting is enabled in the file, it's not necessary to sorting it again.
 		view->view()->horizontalHeader()->setSortIndicator(gamesData.gamesListSortIndicator.at(i).sortColumn, static_cast<Qt::SortOrder>(gamesData.gamesListSortIndicator.at(i).sortOrder));
 		m_gViews->addWidget(view);
 		m_tabBar->addTab(gamesData.tabNames.at(i));

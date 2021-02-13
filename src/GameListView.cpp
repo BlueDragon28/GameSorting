@@ -59,16 +59,16 @@ GameListView::GameListView(QWidget* parent) :
 
 GameListView::~GameListView()
 {
-// Deleting all the memory allocated manually.
-if (m_view)
-{
-	// the selection model from the view is not deleted manually.
-	QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
-	delete m_view;
-	delete itemDelegate;
-}
-if (m_model)
-delete m_model;
+	// Deleting all the memory allocated manually.
+	if (m_view)
+	{
+		// the selection model from the view is not deleted manually.
+		QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
+		delete m_view;
+		delete itemDelegate;
+	}
+	if (m_model)
+		delete m_model;
 }
 
 void GameListView::createLayout()
@@ -100,9 +100,9 @@ void GameListView::appendGame(const GameListModel::GameList& game)
 	m_model->appendGame(game);
 }
 
-void GameListView::appendGames(const QVector<GameListModel::GameList>& games)
+void GameListView::appendGames(const QVector<GameListModel::GameList>& games, bool isSorting)
 {
-	m_model->appendGames(games);
+	m_model->appendGames(games, isSorting);
 }
 
 void GameListView::removeGames()
@@ -234,42 +234,6 @@ void GameListView::pasteFromClipboard()
 				gameNames.erase(it.base());
 		}
 
-		/*QItemSelectionModel* selectionModel = m_view->selectionModel();
-
-		if (selectionModel->hasSelection())
-		{
-			QList<QModelIndex> selectionList = selectionModel->selectedRows(0);
-
-			int gameNamesIndex(0), gameNamesEnd(gameNames.size() - 1);
-
-			for (int i = 0; i < selectionList.size(); i++)
-			{
-				QStringList strGameTypeRate = gameNames.at(gameNamesIndex).split(';');
-				for (QStringList::reverse_iterator rit = gameNames.rbegin(); rit != gameNames.rend(); rit++)
-				{
-					if ((*rit).isEmpty())
-						gameNames.erase(rit.base());
-				}
-
-				if (strGameTypeRate.size() > 0)
-					m_model->setData(selectionList.at(i), QVariant::fromValue(strGameTypeRate.at(0)));
-				if (strGameTypeRate.size() > 1)
-					m_model->setData(m_model->index(selectionList.at(i).row(), 1), QVariant::fromValue(strGameTypeRate.at(1)));
-				if (strGameTypeRate.size() > 2)
-				{
-					bool result;
-					int rate = strGameTypeRate.at(2).toInt(&result);
-					if (result)
-						m_model->setData(m_model->index(selectionList.at(i).row(), 2), QVariant::fromValue(GameStarRating(rate)));
-				}
-
-				if (gameNamesIndex < gameNamesEnd)
-					gameNamesIndex++;
-			}
-		}
-		else
-		{*/
-
 		QVector<GameListModel::GameList> games(gameNames.size(), { "", "No categorie", 1 });
 
 		for (int i = 0; i < gameNames.size(); i++)
@@ -295,7 +259,6 @@ void GameListView::pasteFromClipboard()
 		}
 
 		m_model->appendGames(games);
-		//}
 	}
 }
 

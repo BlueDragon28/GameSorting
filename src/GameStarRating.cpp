@@ -27,18 +27,6 @@ GameStarRating::GameStarRating(int starCount, int maxStarCount, QWidget* parent)
 	m_maxStarCount(std::max(1, maxStarCount)),
 	m_paintScaleFactor(20)
 {
-	/*m_starPolygon
-		<< QPointF(-0.294f, -0.405f) * .5f
-		<< QPointF(0.0f, -1.0f) * .5f
-		<< QPointF(0.294f, -0.405f) * .5f
-		<< QPointF(0.951f, -0.309f) * .5f
-		<< QPointF(0.476f, 0.155f) * .5f
-		<< QPointF(0.588f, 0.809f) * .5f
-		<< QPointF(0.0f, 0.5f) * .5f
-		<< QPointF(-0.588f, 0.809f) * .5f
-		<< QPointF(-0.476f, 0.155f) * .5f
-		<< QPointF(-0.951f, -0.309f) * .5f
-		<< QPointF(-0.294f, -0.405f) * .5f;*/
 	initStarPolygon();
 }
 
@@ -77,7 +65,7 @@ void GameStarRating::paint(QPainter* painter, const QRect& rect, const QPalette&
 	painter->setPen(Qt::NoPen);
 
 	painter->setBrush(editMode == EditMode::Editable ? palette.highlight() : palette.windowText());
-	painter->translate(rect.x() + (0.5f * m_paintScaleFactor), rect.y() + (rect.height() / 2.f));
+	painter->translate(rect.x() + (0.5 * m_paintScaleFactor), rect.y() + (rect.height() / 2.));
 	painter->scale(m_paintScaleFactor, m_paintScaleFactor);
 
 	for (int i = 0; i < starCount(); i++)

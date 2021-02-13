@@ -104,7 +104,6 @@ void GameListModel::appendGame()
 	m_data.append({ tr("New game"), tr("No categorie"), GameStarRating() });
 	endInsertRows();
 	emit listEdited();
-	//emit updateSorting();
 	emit emitUpdateSorting();
 }
 
@@ -115,11 +114,10 @@ void GameListModel::appendGame(const GameList& newGame)
 	m_data.append(newGame);
 	endInsertRows();
 	emit listEdited();
-	//emit updateSorting();
 	emit emitUpdateSorting();
 }
 
-void GameListModel::appendGames(const QVector<GameList>& newGames)
+void GameListModel::appendGames(const QVector<GameList>& newGames, bool isSorting)
 {
 	// Insert newGames in the array.
 	if (!newGames.isEmpty())
@@ -128,9 +126,11 @@ void GameListModel::appendGames(const QVector<GameList>& newGames)
 		beginInsertRows(QModelIndex(), begin, end);
 		m_data.append(newGames);
 		endInsertRows();
-		emit listEdited();
-		//emit updateSorting();
-		emit emitUpdateSorting();
+		if (isSorting)
+		{
+			emit listEdited();
+			emit emitUpdateSorting();
+		}
 	}
 }
 
@@ -179,8 +179,6 @@ bool GameListModel::setData(const QModelIndex& index, const QVariant& value, int
 				m_data[index.row()].rate = qvariant_cast<GameStarRating>(value);
 			emit listEdited();
 			emit dataChanged(index, index, { role });
-			//emit updateSorting();
-			//emit emitUpdateSorting();
 			emit emitUpdateSorting();
 		}
 		else
@@ -259,9 +257,6 @@ bool GameListModel::insertRows(int row, int count, const QModelIndex& parent)
 	}
 	endInsertRows();
 
-	//emit listEdited();
-	//updateSortingWhenDataChanged();
-
 	return true;
 }
 
@@ -272,34 +267,8 @@ bool GameListModel::removeRows(int row, int count, const QModelIndex& parent)
 	m_data.remove(row, count);
 	endRemoveRows();
 
-	//emit listEdited();
-
 	return true;
 }
-
-/*bool GameListModel::moveRows(const QModelIndex& scrParent, int scrRow, int count, const QModelIndex& dstParent, int dstRow)
-{
-	if (scrRow < 0 || scrRow >= m_data.size() || dstRow < 0 || dstRow > m_data.size()) return false;
-	beginMoveRows(scrParent, scrRow, scrRow + count - 1, dstParent, dstRow);
-	for (int i = 0; i < count; i++)
-	{
-		GameList gameList = {};
-		gameList.name = "New game";
-		gameList.type = "No categorie";
-		m_data.insert(dstRow + i, gameList);
-		int removeIndex;
-		if (dstRow > scrRow)
-			removeIndex = scrRow;
-		else
-			removeIndex = scrRow + 1;
-		m_data.remove(removeIndex);
-	}
-	endMoveRows();
-
-	//std::cout << QString("Move rows : scrRow %1, count %2, dstRow %3\n").arg(scrRow).arg(count).arg(dstRow).toStdString();
-
-	return true;
-}*/
 
 bool GameListModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
 {

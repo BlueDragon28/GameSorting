@@ -51,7 +51,6 @@ public:
 	Qt::DropActions supportedDropActions() const override;
 	bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 	bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
-	//bool moveRows(const QModelIndex& scrParent, int scrRow, int count, const QModelIndex& dstParent, int dstRow) override;
 	bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
 	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 	const GameList getGame(int index) const;
@@ -69,7 +68,7 @@ signals:
 public slots:
 	void appendGame();
 	void appendGame(const GameList& game);
-	void appendGames(const QVector<GameList>& games);
+	void appendGames(const QVector<GameList>& games, bool isSorting = true);
 	void removeGames(QModelIndexList& selectionList);
 	void clear();
 	void setSortingEnabled(bool isEnabled);

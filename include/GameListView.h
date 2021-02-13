@@ -44,7 +44,7 @@ public:
 public slots:
 	void appendGame();
 	void appendGame(const GameListModel::GameList& game);
-	void appendGames(const QVector<GameListModel::GameList>& games);
+	void appendGames(const QVector<GameListModel::GameList>& games, bool isSorting = true);
 	void removeGames();
 	void clearGameList();
 	void setSortingEnabled(bool isEnabled);
