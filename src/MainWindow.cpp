@@ -60,7 +60,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	m_gTabAndList(new GameTabAndList(this)),
 	m_aboutDialog(nullptr),
-	m_licenceDialog(nullptr)
+	m_licenceDialog(nullptr),
+	m_lastOpenedFiles(nullptr)
 {
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
@@ -77,26 +78,15 @@ MainWindow::MainWindow(const QString& filePath, bool noSettings, QWidget* parent
 	//m_gModel(new GameListModel(this)),
 	m_gTabAndList(new GameTabAndList(this)),
 	m_aboutDialog(nullptr),
-	m_licenceDialog(nullptr)
+	m_licenceDialog(nullptr),
+	m_lastOpenedFiles(nullptr)
 {
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
 	createMenu();
 	createCentralWidget();
 	readSettings(!noSettings, filePath.isEmpty() ? true : false);
-	if (!filePath.isEmpty() && QFile::exists(filePath))
-	{
-		bool result = false;
-		TabAndListData gamesList = openFile(filePath, result);
-		if (result)
-		{
-			m_gTabAndList->clearTabs();
-			m_gTabAndList->setGamesAndTabData(gamesList);
-		}
-		else
-			QMessageBox::warning(this, tr("Opening file"), tr("Failed to open the file %1.").arg(filePath), QMessageBox::Ok);
-	}
-	setFileNameIntoWindowTitle();
+	openingAFile(filePath);
 	connect(m_gTabAndList, &GameTabAndList::listEdited, this, &MainWindow::setFileNameIntoWindowTitle);
 }
 
@@ -129,6 +119,9 @@ void MainWindow::createMenu()
 	connect(openGameListAct, &QAction::triggered, this, &MainWindow::openGameList);
 	fileMenu->addAction(openGameListAct);
 	fileBar->addAction(openGameListAct);
+
+	m_lastOpenedFiles = new QMenu(tr("Recent files"));
+	fileMenu->addMenu(m_lastOpenedFiles);
 
 	QIcon saveGameListIcon(":/Images/Save.svg");
 	QAction* saveGameListAct = new QAction(saveGameListIcon, tr("&Save"), this);
@@ -335,17 +328,7 @@ void MainWindow::openGameList()
 
 	// If the user has selected a file, trying to opening it.
 	QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-	bool result = false;
-	const TabAndListData gamesData = openFile(dialog.selectedFiles().first(), result);
-
-	if (result)
-	{
-		m_gFilePath = dialog.selectedFiles().first();
-		setFileNameIntoWindowTitle();
-
-		m_gTabAndList->clearTabs();
-		m_gTabAndList->setGamesAndTabData(gamesData);
-	}
+	openingAFile(dialog.selectedFiles().first());
 
 	QGuiApplication::restoreOverrideCursor();
 }
@@ -402,6 +385,7 @@ bool MainWindow::saveAsGameList()
 		m_gFilePath = dialog.selectedFiles().first();
 		m_gTabAndList->pendingChangeSaved();
 		setFileNameIntoWindowTitle();
+		newOpenedFiles(m_gFilePath);
 	}
 	return result;
 }
@@ -475,22 +459,37 @@ void MainWindow::readSettings(bool readSettings, bool loadLastSavedFile)
 	if (vLastOpenedDirectory.isValid() && readSettings)
 		m_lastOpenedDir = vLastOpenedDirectory.toString();
 
+	// Retrieve the "recentFiles"
+	QVariant vRecentFiles = settings.value("gamelist/recentfiles");
+	if (vRecentFiles.isValid() && readSettings)
+	{
+		QByteArray bRecentFiles = vRecentFiles.toByteArray();
+		QDataStream recentFilesDataStream(bRecentFiles);
+		quint8 numberOfFiles = 0;
+		if (!recentFilesDataStream.atEnd())
+			recentFilesDataStream.readRawData(reinterpret_cast<char*>(&numberOfFiles), sizeof(quint8));
+
+		for (int i = 0; i < numberOfFiles; i++)
+		{
+			QString filePath;
+			if (!recentFilesDataStream.atEnd())
+			{
+				recentFilesDataStream >> filePath;
+				m_lastOpenedFilesPath.append(filePath);
+			}
+			else
+				break;
+		}
+
+		updateLastOpenedFileMenu();
+	}
+
 	// open the last opened file.
 	QVariant vLastFilePath = settings.value("gamelist/lastgamelist");
 	if (vLastFilePath.isValid() && readSettings && loadLastSavedFile)
 	{
 		QString lastFilePath = vLastFilePath.toString();
-		if (!lastFilePath.isEmpty() && QFile::exists(lastFilePath))
-		{
-			bool result = false;
-			const TabAndListData gamesData = openFile(lastFilePath, result);
-			if (result)
-			{
-				m_gTabAndList->clearTabs();
-				m_gTabAndList->setGamesAndTabData(gamesData);
-				m_gFilePath = lastFilePath;
-			}
-		}
+		openingAFile(lastFilePath, false);
 	}
 }
 
@@ -518,6 +517,26 @@ void MainWindow::writeSettings()
 	}
 	else
 		settings.setValue("mainwindow/lastopeneddirectory", QVariant::fromValue(m_lastOpenedDir));
+
+	// Save the recent files into "gamelist/recentfiles".
+	if (m_lastOpenedFilesPath.isEmpty())
+	{
+		if (settings.contains("gamelist/recentfiles"))
+			settings.remove("gamelist/recentfiles");
+	}
+	else
+	{
+		QByteArray bRecentFile;
+		QDataStream recentFileDataStream(&bRecentFile, QIODevice::WriteOnly);
+
+		quint8 numberOfRecentFiles = m_lastOpenedFilesPath.size();
+		recentFileDataStream.writeRawData(reinterpret_cast<const char*>(&numberOfRecentFiles), sizeof(quint8));
+
+		for (int i = 0; i < numberOfRecentFiles; i++)
+			recentFileDataStream << m_lastOpenedFilesPath.at(i);
+
+		settings.setValue("gamelist/recentfiles", bRecentFile);
+	}
 }
 
 bool MainWindow::saveFile(const QString& filePath) const
@@ -841,7 +860,6 @@ void MainWindow::setFileNameIntoWindowTitle()
 void MainWindow::aboutApp()
 {
 	// Show a little dialog about this application.
-
 	if (!m_aboutDialog)
 	{
 		m_aboutDialog = new AboutDialog(this);
@@ -866,4 +884,75 @@ void MainWindow::aboutLicence()
 	}
 
 	m_licenceDialog->show();
+}
+
+void MainWindow::newOpenedFiles(const QString& filePath)
+{
+	// Adding the new opened file into the lastOpenedFilePath list.
+	// But before, removing this filepath from the list to make it on the top of it.
+	QString absoluteRecentFilePath = QFileInfo(filePath).absoluteFilePath();
+	m_lastOpenedFilesPath.removeAll(absoluteRecentFilePath);
+	m_lastOpenedFilesPath.prepend(absoluteRecentFilePath);
+	updateLastOpenedFileMenu();
+}
+
+void MainWindow::updateLastOpenedFileMenu()
+{
+	// First delete all the actions.
+	for (int i = 0; i < m_lastOpenedFilesActions.size(); i++)
+		delete m_lastOpenedFilesActions[i];
+	m_lastOpenedFilesActions.clear();
+
+	if (m_lastOpenedFilesPath.size() > 10)
+		m_lastOpenedFilesPath.removeLast();
+
+	// Now, create all the actions based on m_lastOpenedFilesPath if there are any.
+	QList<QString>::const_iterator it;
+	for (it = m_lastOpenedFilesPath.cbegin(); it != m_lastOpenedFilesPath.cend(); it++)
+	{
+		QFileInfo filePathInfo((*it));
+		QAction* recentFilePath = new QAction(filePathInfo.fileName(), this);
+		connect(recentFilePath, &QAction::triggered, [this, it]() { openingRecentFile((*it)); });
+		m_lastOpenedFiles->addAction(recentFilePath);
+		m_lastOpenedFilesActions.prepend(recentFilePath);
+	}
+}
+
+bool MainWindow::openingAFile(const QString& filePath, bool warningOnFail)
+{
+	if (!filePath.isEmpty() && QFileInfo::exists(filePath))
+	{
+		bool result = false;
+		const TabAndListData gamesData = openFile(filePath, result);
+		if (result)
+		{
+			m_gTabAndList->clearTabs();
+			m_gTabAndList->setGamesAndTabData(gamesData);
+			m_gFilePath = filePath;
+			newOpenedFiles(filePath);
+			setFileNameIntoWindowTitle();
+		}
+		else if (!result && warningOnFail)
+			QMessageBox::warning(this, tr("Opening file"), tr("Failed to open the file %1.").arg(filePath), QMessageBox::Ok);
+
+		return result;
+	}
+
+	return false;
+}
+
+void MainWindow::openingRecentFile(const QString& filePath)
+{
+	bool result = openingAFile(filePath, false);
+
+	if (!result)
+	{
+		QMessageBox::warning(this, tr("Error opening file"), tr("The file \"%1\" cannot be open.").arg(filePath), QMessageBox::Ok);
+		
+		int indexOf = m_lastOpenedFilesPath.indexOf(filePath);
+		if (indexOf > -1)
+			m_lastOpenedFilesPath.removeAt(indexOf);
+
+		updateLastOpenedFileMenu();
+	}
 }

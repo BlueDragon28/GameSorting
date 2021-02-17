@@ -67,11 +67,18 @@ private:
 	void removeGame();
 	bool maybeSave();
 	void setFileNameIntoWindowTitle();
+	void newOpenedFiles(const QString& filePath);
+	void updateLastOpenedFileMenu();
+	bool openingAFile(const QString& filePath, bool warningOnFail = true);
+	void openingRecentFile(const QString& filePath);
 
 	GameTabAndList* m_gTabAndList;
 	QString m_gFilePath, m_lastOpenedDir;
+	QList<QString> m_lastOpenedFilesPath;
 	AboutDialog* m_aboutDialog;
 	LicenceDialog* m_licenceDialog;
+	QMenu* m_lastOpenedFiles;
+	QList<QAction*> m_lastOpenedFilesActions;
 };
 
 #endif // GAMESORTING_MAINWINDOW

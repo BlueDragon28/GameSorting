@@ -23,7 +23,7 @@
 #include <QString>
 #include "GameListModel.h"
 
-#define GAMESORTING_VERSION "0.12"
+#define GAMESORTING_VERSION "0.13-alpha"
 
 struct GameListViewSortIndicator
 {
