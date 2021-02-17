@@ -1,8 +1,8 @@
-# MIT License
+ï»¿# MIT License
 # 
 # This file is part of the GameSorting
 # 
-# Copyright © 2021 Erwan Saclier de la Bâtie
+# Copyright Â© 2021 Erwan Saclier de la BÃ¢tie
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
 # to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
@@ -14,11 +14,11 @@
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.16.0)
 
 project(GameSorting VERSION 0.13 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
@@ -28,11 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-if (CMAKE_VERSION VERSION_LESS "3.7.0")
-	set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
-
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 6.0 COMPONENTS Widgets REQUIRED)
 
 # Automatically add into variable the headers and sources files.
 file(GLOB HEADERS include/*.h)
@@ -60,6 +56,6 @@ add_executable(GameSorting
 	${SOURCES}
 	${HEADERS}
 	${RESOURCES})
-target_link_libraries(GameSorting Qt5::Widgets)
+target_link_libraries(GameSorting PRIVATE Qt6::Widgets)
 set_target_properties(GameSorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 install(TARGETS GameSorting RUNTIME DESTINATION bin)

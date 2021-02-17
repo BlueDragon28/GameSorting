@@ -1,9 +1,9 @@
-/*
+ï»¿/*
 * MIT License
 *
 * This file is part of the GameSorting
 *
-* Copyright © 2021 Erwan Saclier de la Bâtie
+* Copyright Â© 2021 Erwan Saclier de la BÃ¢tie
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -48,8 +48,7 @@ void AboutDialog::createAboutText()
 			"<b>Library used :</b><br>"
 			"Qt " QT_VERSION_STR "<br><br>"
 			"<b>Author :</b><br>"
-			"Erwan Saclier de la B%1tie (Erwan28250)").arg(QChar('â'));
-	
+			"Erwan Saclier de la BÃ¢tie (Erwan28250)");
 
 	QLabel* aboutLabel = new QLabel();
 	aboutLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

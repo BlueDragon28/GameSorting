@@ -1,4 +1,4 @@
-# About Game Sorting
+﻿# About Game Sorting
 
 Game Sorting is a little C++ application I've wrote to help classify my list of wished games. It's main purpose is for games, but it can be used for other uses. It's just a simple app that display a Table with three columns : **Game name**, **Game type** and the **Game rate**. It also have multiple tabs, you can close them (except the last one) and open new one.
 

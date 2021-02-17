@@ -1,9 +1,9 @@
-/*
+ï»¿/*
 * MIT License
 *
 * This file is part of the GameSorting
 *
-* Copyright © 2021 Erwan Saclier de la Bâtie
+* Copyright Â© 2021 Erwan Saclier de la BÃ¢tie
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -28,8 +28,6 @@ int main(int argc, char** argv)
 {
 	// Initialize the resources of the program (images, etc).
 	Q_INIT_RESOURCE(gamesorting);
-
-	qRegisterMetaTypeStreamOperators<GameStarRating>("GameStarRating");
 
 	// Creating an application object.
 	QApplication app(argc, argv);
