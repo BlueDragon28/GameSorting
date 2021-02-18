@@ -55,7 +55,7 @@ sudo apt install build-essential cmake git libopengl-dev
 ```
 
 Then, you need to install Qt6 manually. Go to the [Qt Website](https://www.qt.io/). Then go to the **Download. Try.**, **Download for Open Source** and then **Online installer** at bottom of the page.
-To run the installer, you first need to make the downloaded file executable. Open a terminal in where the file is downloaded and enter the command ``chmod +x *filename*` where *filename* is the name of the downloaded file.
+To run the installer, you first need to make the downloaded file executable. Open a terminal in where the file is downloaded and enter the command `chmod +x filename` where ***filename*** is the name of the downloaded file.
 Execute the installer and follow it. When you are at the **components selection** section tick the `Qt/Qt 6.0.1/Desktop gcc 64-bit` (6.0.1 or higher) and the click next to install.
 
 The next steps are below, there is only one more variable to set to cmake. Set the variable **CMAKE_INSTALL_PREFIX** to `Qt6Dir/QtVersion/gcc_64` where **Qt6Dir** is where Qt6 is installed and QtVersion the version of Qt (ex: 6.0.1).
@@ -89,4 +89,5 @@ make install
 
 # Licence
 Please see the LICENSE file.
+
 
