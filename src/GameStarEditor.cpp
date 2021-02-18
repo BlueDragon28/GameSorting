@@ -63,7 +63,7 @@ void GameStarEditor::mouseMoveEvent(QMouseEvent* event)
 	* the method called the update method to force the widget to repaint and finally, the 
 	* mouseMoveEvent from the QWidget is called to process the mouse event.
 	*/
-	int starNumber = getStarNumberFromCursorPosition(event->x());
+	int starNumber = getStarNumberFromCursorPosition(event->position().x());
 
 	if (starNumber != m_gStarRating.starCount() && starNumber != -1)
 	{
