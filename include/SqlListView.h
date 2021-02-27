@@ -1,4 +1,4 @@
-﻿/*
+/*
 * MIT License
 *
 * This file is part of the GameSorting
@@ -16,19 +16,28 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_LISTTABLEVIEW
-#define GAMESORTING_LISTTABLEVIEW
+#ifndef GAMESORTING_SQLLISTVIEW_H
+#define GAMESORTING_SQLLISTVIEW_H
 
-#include "QTableView"
+#include <QWidget>
 
-class ListTableView : public QTableView
+class QSqlRelationalTableModel;
+class QTableView;
+
+class SqlListView : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	ListTableView(QWidget* parent = nullptr);
-
+    explicit SqlListView(QWidget* parent = nullptr);
+    
 protected:
-	virtual void mousePressEvent(QMouseEvent* evt);
+
+private:
+    void setupWidget();
+    void setupView();
+
+    QTableView* m_view;
+    QSqlRelationalTableModel* m_model;
 };
 
-#endif // GAMESORTING_LISTTABLEVIEW
+#endif

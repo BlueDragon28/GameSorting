@@ -20,65 +20,24 @@
 #define GAMESORTING_MAINWINDOW
 
 #include <QMainWindow>
+#include <QSqlDatabase>
 #include <QString>
-#include "GameListModel.h"
-#include "CommonStruct.h"
 
-class GameTabAndList;
+class TabAndList;
 class QTableView;
-class AboutDialog;
-class LicenceDialog;
 
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
 	MainWindow(QWidget* parent = nullptr);
-	MainWindow(const QString& filePath, bool noSettings = false, QWidget* parent = nullptr);
 	~MainWindow();
-
-#ifndef NDEBUG
-	void addGame();
-#endif // NDEBUG
-
-public slots:
-	void newGameList();
-	void openGameList();
-	bool saveGameList();
-	bool saveAsGameList();
-	void filteringGameList();
-
-protected:
-	virtual void closeEvent(QCloseEvent* e);
-
-private slots:
-	void aboutApp();
-	void aboutLicence();
 
 private:
 	void createMenu();
 	void createCentralWidget();
-	void readSettings(bool readSettings = true, bool loadLastSavedFile = true);
-	void writeSettings();
-	bool saveFile(const QString& filePath) const;
-	const TabAndListData openFile(const QString& filePath, bool& result) const;
-	const TabAndListData openFileVersion002And003(QDataStream& dataStream, bool v003, bool& result) const;
-	void appendGame();
-	void removeGame();
-	bool maybeSave();
-	void setFileNameIntoWindowTitle();
-	void newOpenedFiles(const QString& filePath);
-	void updateLastOpenedFileMenu();
-	bool openingAFile(const QString& filePath, bool warningOnFail = true);
-	void openingRecentFile(const QString& filePath);
 
-	GameTabAndList* m_gTabAndList;
-	QString m_gFilePath, m_lastOpenedDir;
-	QList<QString> m_lastOpenedFilesPath;
-	AboutDialog* m_aboutDialog;
-	LicenceDialog* m_licenceDialog;
-	QMenu* m_lastOpenedFiles;
-	QList<QAction*> m_lastOpenedFilesActions;
+	TabAndList* m_tabAndList;
 };
 
 #endif // GAMESORTING_MAINWINDOW

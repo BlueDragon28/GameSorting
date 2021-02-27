@@ -28,7 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.0 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 6.0 COMPONENTS Widgets Sql REQUIRED)
 
 # Automatically add into variable the headers and sources files.
 file(GLOB HEADERS include/*.h)
@@ -56,6 +56,6 @@ add_executable(GameSorting
 	${SOURCES}
 	${HEADERS}
 	${RESOURCES})
-target_link_libraries(GameSorting PRIVATE Qt6::Widgets)
+target_link_libraries(GameSorting PRIVATE Qt6::Widgets Qt6::Sql)
 set_target_properties(GameSorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 install(TARGETS GameSorting RUNTIME DESTINATION bin)

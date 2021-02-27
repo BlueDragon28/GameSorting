@@ -1,4 +1,4 @@
-﻿/*
+/*
 * MIT License
 *
 * This file is part of the GameSorting
@@ -16,37 +16,28 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "GameTextLineEditor.h"
+#include "SqlListView.h"
+#include <QSqlRelationalTableModel>
+#include <QTableView>
+#include <QVBoxLayout>
 
-#include <QKeyEvent>
-#include <QTabBar>
-
-GameTextLineEditor::GameTextLineEditor(int tabIndex, QTabBar* tabBar, QWidget* parent) :
-	QLineEdit(parent),
-	m_tabIndex(tabIndex),
-	m_tabBar(tabBar)
+SqlListView::SqlListView(QWidget* parent) :
+    QWidget(parent),
+    m_view(new QTableView(this)),
+    m_model(new QSqlRelationalTableModel(this))
 {
-	setText(m_tabBar->tabText(m_tabIndex));
-	selectAll();
-	setGeometry(m_tabBar->tabRect(m_tabIndex));
-	setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	show();
-	setFocus();
-	connect(this, &GameTextLineEditor::editingFinished, this, &GameTextLineEditor::updateTabBarName);
+    setupWidget();
+    setupView();
 }
 
-void GameTextLineEditor::keyReleaseEvent(QKeyEvent* evt)
+void SqlListView::setupWidget()
 {
-	if (evt->key() == Qt::Key_Escape)
-		emit editingCancelled();
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->addWidget(m_view);
 }
 
-void GameTextLineEditor::resizeToTab()
+void SqlListView::setupView()
 {
-	setGeometry(m_tabBar->tabRect(m_tabIndex));
-}
-
-void GameTextLineEditor::updateTabBarName()
-{
-	m_tabBar->setTabText(m_tabIndex, text());
+    m_view->setModel(m_model);
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
 * MIT License
 *
 * This file is part of the GameSorting
@@ -16,19 +16,28 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "ListTableView.h"
+#include "TabAndList.h"
+#include "SqlListView.h"
 
-#include <QItemSelectionModel>
-#include <QMouseEvent>
+#include <QVBoxLayout>
+#include <QTabBar>
 
-ListTableView::ListTableView(QWidget* parent) :
-	QTableView(parent)
-{}
-
-void ListTableView::mousePressEvent(QMouseEvent* evt)
+TabAndList::TabAndList(QWidget* parent) :
+    QWidget(parent),
+    m_tabBar(new QTabBar(this)),
+    m_view(new SqlListView(this))
 {
-	if (evt->button() == Qt::RightButton)
-		selectionModel()->clearSelection();
-	else
-		QTableView::mousePressEvent(evt);
+    setupView();
+}
+
+void TabAndList::setupView()
+{
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setSpacing(0);
+    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->addWidget(m_tabBar);
+    vLayout->addWidget(m_view);
+
+    m_tabBar->addTab(tr("Hello World!"));
+    m_tabBar->addTab(tr("This is a test!"));
 }
