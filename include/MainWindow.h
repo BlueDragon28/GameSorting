@@ -38,6 +38,7 @@ private:
 	void createCentralWidget();
 
 	TabAndList* m_tabAndList;
+	QSqlDatabase m_db;
 };
 
 #endif // GAMESORTING_MAINWINDOW

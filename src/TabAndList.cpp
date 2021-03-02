@@ -24,7 +24,7 @@
 
 TabAndList::TabAndList(QWidget* parent) :
     QWidget(parent),
-    m_tabBar(new QTabBar(this)),
+    m_tabBar(nullptr),
     m_view(new SqlListView(this))
 {
     setupView();
@@ -35,9 +35,9 @@ void TabAndList::setupView()
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setSpacing(0);
     vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(m_tabBar);
+    //vLayout->addWidget(m_tabBar);
     vLayout->addWidget(m_view);
 
-    m_tabBar->addTab(tr("Hello World!"));
-    m_tabBar->addTab(tr("This is a test!"));
+    /*m_tabBar->addTab(tr("Hello World!"));
+    m_tabBar->addTab(tr("This is a test!"));*/
 }

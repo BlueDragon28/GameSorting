@@ -19,13 +19,24 @@
 #include "MainWindow.h"
 #include "TabAndList.h"
 
+#include <QApplication>
 #include <QVBoxLayout>
 #include <QScreen>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
-	m_tabAndList(new TabAndList(this))
+	m_tabAndList(nullptr),
+	m_db(QSqlDatabase::addDatabase("QSQLITE"))
 {
+	// Opening the database
+	m_db.setDatabaseName(":memory:");
+	if (!m_db.open())
+	{
+		QMessageBox::critical(this, tr("SQL Error"), tr("Failed to open sqlite database."), QMessageBox::Ok);
+		std::exit(EXIT_FAILURE);
+	}
+
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
 	createMenu();
@@ -43,5 +54,6 @@ void MainWindow::createMenu()
 
 void MainWindow::createCentralWidget()
 {
+	m_tabAndList = new TabAndList(this);
 	setCentralWidget(m_tabAndList);
 }

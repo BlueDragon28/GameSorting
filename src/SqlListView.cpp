@@ -19,7 +19,10 @@
 #include "SqlListView.h"
 #include <QSqlRelationalTableModel>
 #include <QTableView>
+#include <QSqlQuery>
 #include <QVBoxLayout>
+#include <QMessageBox>
+#include <QSqlError>
 
 SqlListView::SqlListView(QWidget* parent) :
     QWidget(parent),
@@ -28,6 +31,39 @@ SqlListView::SqlListView(QWidget* parent) :
 {
     setupWidget();
     setupView();
+
+    // Create TestTable table
+    QSqlQuery defaultTableQuery(
+        "CREATE TABLE TestTable ("
+        "GameID INTEGER PRIMARY KEY,"
+        "Name TEXT NOT NULL,"
+        "Type TEXT NOT NULL,"
+        "Rate INTEGER);");
+    if (!defaultTableQuery.isActive())
+        QMessageBox::critical(this, tr("Table creation error"), tr("Failed to create table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);
+    defaultTableQuery.clear();
+
+    // Insert data into table
+    if (!defaultTableQuery.exec(
+        "INSERT INTO TestTable (Name, Type, Rate) "
+        "VALUES "
+        "(\"Horizon Zero Dawn\", \"Adventure\", 5), "
+        "(\"Subnautica\", \"Subwater\", 5), "
+        "(\"Among Us\", \"Survival\", 5); "))
+        QMessageBox::critical(this, tr("Table insertion error"), tr("Failed to insert data into table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);
+
+    m_model->setTable("TestTable");
+    m_model->select();
+    m_view->setColumnHidden(0, true);
+
+    if (!defaultTableQuery.exec(
+        "INSERT INTO TestTable (Name, Type, Rate) "
+        "VALUES "
+        "(\"Horizon Zero Dawn\", \"Adventure\", 5), "
+        "(\"Subnautica\", \"Subwater\", 5), "
+        "(\"Among Us\", \"Survival\", 5); "))
+        QMessageBox::critical(this, tr("Table insertion error"), tr("Failed to insert data into table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);
+    m_model->select();
 }
 
 void SqlListView::setupWidget()
