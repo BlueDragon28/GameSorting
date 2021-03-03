@@ -20,6 +20,7 @@
 #define GAMESORTING_TABANDLIST_H
 
 #include <QWidget>
+#include <QSqlDatabase>
 #include <QTabBar>
 
 class QTabBar;
@@ -29,13 +30,14 @@ class TabAndList : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TabAndList(QWidget* parent = nullptr);
+    explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
 
 protected:
 
 private:
     void setupView();
 
+    QSqlDatabase& m_db;
     QTabBar* m_tabBar;
     SqlListView* m_view;
 };

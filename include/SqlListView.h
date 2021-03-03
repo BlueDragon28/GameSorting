@@ -20,15 +20,16 @@
 #define GAMESORTING_SQLLISTVIEW_H
 
 #include <QWidget>
+#include <QSqlDatabase>
 
-class QSqlRelationalTableModel;
+class TableModel;
 class QTableView;
 
 class SqlListView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SqlListView(QWidget* parent = nullptr);
+    explicit SqlListView(QSqlDatabase& db, QWidget* parent = nullptr);
     
 protected:
 
@@ -36,8 +37,9 @@ private:
     void setupWidget();
     void setupView();
 
+    QSqlDatabase& m_db;
     QTableView* m_view;
-    QSqlRelationalTableModel* m_model;
+    TableModel* m_model;
 };
 
 #endif

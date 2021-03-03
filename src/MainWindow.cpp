@@ -54,6 +54,6 @@ void MainWindow::createMenu()
 
 void MainWindow::createCentralWidget()
 {
-	m_tabAndList = new TabAndList(this);
+	m_tabAndList = new TabAndList(m_db, this);
 	setCentralWidget(m_tabAndList);
 }

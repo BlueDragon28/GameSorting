@@ -22,10 +22,11 @@
 #include <QVBoxLayout>
 #include <QTabBar>
 
-TabAndList::TabAndList(QWidget* parent) :
+TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
+    m_db(db),
     m_tabBar(nullptr),
-    m_view(new SqlListView(this))
+    m_view(new SqlListView(m_db, this))
 {
     setupView();
 }

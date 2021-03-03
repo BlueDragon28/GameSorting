@@ -17,23 +17,24 @@
 */
 
 #include "SqlListView.h"
-#include <QSqlRelationalTableModel>
+#include "TableModel.h"
 #include <QTableView>
 #include <QSqlQuery>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSqlError>
 
-SqlListView::SqlListView(QWidget* parent) :
+SqlListView::SqlListView(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
+    m_db(db),
     m_view(new QTableView(this)),
-    m_model(new QSqlRelationalTableModel(this))
+    m_model(new TableModel(m_db, this))
 {
     setupWidget();
     setupView();
 
     // Create TestTable table
-    QSqlQuery defaultTableQuery(
+    /*QSqlQuery defaultTableQuery(
         "CREATE TABLE TestTable ("
         "GameID INTEGER PRIMARY KEY,"
         "Name TEXT NOT NULL,"
@@ -50,20 +51,19 @@ SqlListView::SqlListView(QWidget* parent) :
         "(\"Horizon Zero Dawn\", \"Adventure\", 5), "
         "(\"Subnautica\", \"Subwater\", 5), "
         "(\"Among Us\", \"Survival\", 5); "))
-        QMessageBox::critical(this, tr("Table insertion error"), tr("Failed to insert data into table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);
+        QMessageBox::critical(this, tr("Table insertion error"), tr("Failed to insert data into table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);*/
 
-    m_model->setTable("TestTable");
-    m_model->select();
-    m_view->setColumnHidden(0, true);
+    m_model->setTableName("TestTable");
+    //m_view->setColumnHidden(0, true);
 
-    if (!defaultTableQuery.exec(
+    /*if (!defaultTableQuery.exec(
         "INSERT INTO TestTable (Name, Type, Rate) "
         "VALUES "
         "(\"Horizon Zero Dawn\", \"Adventure\", 5), "
         "(\"Subnautica\", \"Subwater\", 5), "
         "(\"Among Us\", \"Survival\", 5); "))
         QMessageBox::critical(this, tr("Table insertion error"), tr("Failed to insert data into table TestTable.\n%1").arg(defaultTableQuery.lastError().text()), QMessageBox::Ok);
-    m_model->select();
+    m_model->select();*/
 }
 
 void SqlListView::setupWidget()
