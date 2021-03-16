@@ -41,7 +41,7 @@ void TableModel::createTable()
     {
         QString statement = QString(
             "CREATE TABLE %1 (\n"
-            "   GameID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+            "   GameID INTEGER PRIMARY KEY,\n"
             "   GamePos INTEGER,\n"
             "   Name TEXT DEFAULT \"New Game\",\n"
             "   Categories INTEGER,\n"
@@ -489,7 +489,7 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
                     game.sensitiveContent = query.value(8).toInt();
                     game.url = query.value(9).toString();
                     game.rate = query.value(10).toInt();
-                    m_listData.prepend(game);
+                    gameList.prepend(game);
                 }
                 m_listData.append(gameList.cbegin(), gameList.cend());
                 m_listCount = m_listData.size();
