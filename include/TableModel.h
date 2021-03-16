@@ -45,9 +45,10 @@ public:
     // Headers column's name.
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    void updateQuery();
+
 protected:
     void createTable();
-    void updateQuery();
 
 private:
     template<typename T>

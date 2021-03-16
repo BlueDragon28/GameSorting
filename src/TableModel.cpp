@@ -40,20 +40,20 @@ void TableModel::createTable()
     if (m_db.isOpen())
     {
         QString statement = QString(
-            "CREATE TABLE %1 ( "
-            "   GameID INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "   Name TEXT DEFAULT \"New Game\", "
-            "   Categories INTEGER, "
-            "   Developpers INTEGER, "
-            "   Publishers INTEGER, "
-            "   Platform INTEGER, "
-            "   Services INTEGER, "
-            "   Url TEXT, "
+            "CREATE TABLE %1 (\n"
+            "   GameID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+            "   Name TEXT DEFAULT \"New Game\",\n"
+            "   Categories INTEGER,\n"
+            "   Developpers INTEGER,\n"
+            "   Publishers INTEGER,\n"
+            "   Platform INTEGER,\n"
+            "   Services INTEGER,\n"
+            "   Url TEXT,\n"
             "   Rate INTEGER);")
                 .arg(m_tableName);
 
 #ifndef NDEBUG
-        std::cout << statement.toLocal8Bit().constData() << std::endl;
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
         if (m_query.exec(statement))
@@ -133,22 +133,22 @@ void TableModel::updateQuery()
         m_query.clear();
 
         QString statement = QString(
-            "SELECT "
-            "   GameID, "
-            "   Name, "
-            "   Categories, "
-            "   Developpers, "
-            "   Publishers, "
-            "   Platform, "
-            "   Services, "
-            "   Url, "
-            "   Rate "
-            "FROM "
+            "SELECT\n"
+            "   GameID,\n"
+            "   Name,\n"
+            "   Categories,\n"
+            "   Developpers,\n"
+            "   Publishers,\n"
+            "   Platform,\n"
+            "   Services,\n"
+            "   Url,\n"
+            "   Rate\n"
+            "FROM\n"
             "   %1;")
                 .arg(m_tableName);
         
 #ifndef NDEBUG
-        std::cout << statement.toLocal8Bit().constData() << std::endl;
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
         if(m_query.exec(statement))
@@ -353,17 +353,17 @@ bool TableModel::updateField(QSqlQuery& query, const QString& columnName, int ro
 {
     // Helper member function to help update field on SQLite side.
     QString statement = QString(
-        "UPDATE %1 "
-        "SET "
-        "   %2 = \"%3\" "
-        "WHERE "
+        "UPDATE %1\n"
+        "SET\n"
+        "   %2 = \"%3\"\n"
+        "WHERE\n"
         "   GameID = %4;")
             .arg(m_tableName, columnName)
             .arg(value)
             .arg(m_listData.at(rowNB).gameID);
     
 #ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl;
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
     if (!query.exec(statement))
@@ -388,27 +388,27 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
         // Executing the sql statement for inserting new rows.
         QSqlQuery query(m_db);
         QString statement = QString(
-            "INSERT INTO %1 ( "
-            "   Name, "
-            "   Categories, "
-            "   Developpers, "
-            "   Publishers, "
-            "   Platform, "
-            "   Services, "
-            "   Url, "
-            "   Rate ) "
-            "VALUES ")
+            "INSERT INTO %1 (\n"
+            "   Name,\n"
+            "   Categories,\n"
+            "   Developpers,\n"
+            "   Publishers,\n"
+            "   Platform,\n"
+            "   Services,\n"
+            "   Url,\n"
+            "   Rate )\n"
+            "VALUES")
                 .arg(m_tableName);
 
         for (int i = 0; i < count; i++)
         {
             statement += 
-                "   (\"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
+                "\n   (\"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
         }
         statement[statement.size() - 1] = ';';
 
 #ifndef NDEBUG
-        std::cout << statement.toLocal8Bit().constData() << std::endl;
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
         // Then, querying the new inserted data and add it to the m_listData
@@ -416,27 +416,27 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
         {
             query.clear();
             statement = QString(
-            "SELECT "
-            "   GameID, "
-            "   Name, "
-            "   Categories, "
-            "   Developpers, "
-            "   Publishers, "
-            "   Platform, "
-            "   Services, "
-            "   Url, "
-            "   Rate "
-            "FROM "
-            "   %1 "
-            "ORDER BY "
-            "   GameID DESC "
-            "LIMIT "
+            "SELECT\n"
+            "   GameID,\n"
+            "   Name,\n"
+            "   Categories,\n"
+            "   Developpers,\n"
+            "   Publishers,\n"
+            "   Platform,\n"
+            "   Services,\n"
+            "   Url,\n"
+            "   Rate\n"
+            "FROM\n"
+            "   %1\n"
+            "ORDER BY\n"
+            "   GameID DESC\n"
+            "LIMIT\n"
             "   %2;")
                 .arg(m_tableName)
                 .arg(count);
 
 #ifndef NDEBUG
-            std::cout << statement.toLocal8Bit().constData() << std::endl;
+            std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
             
             if (query.exec(statement))
@@ -493,7 +493,7 @@ bool TableModel::removeRows(int row, int count, const QModelIndex& parent)
         // Defining the SQL statement.
         QSqlQuery query(m_db);
         QString statement  = QString(
-            "DELETE FROM %1 "
+            "DELETE FROM %1\n"
             "WHERE GameID ")
             .arg(m_tableName);
         
@@ -513,7 +513,7 @@ bool TableModel::removeRows(int row, int count, const QModelIndex& parent)
         }
 
 #ifndef NDEBUG
-        std::cout << statement.toLocal8Bit().constData() << std::endl;
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
         // Execute the SQL statement.
