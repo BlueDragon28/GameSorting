@@ -20,7 +20,7 @@
 #include <QSqlError>
 #include <iostream>
 
-#define TABLE_COLUMN_COUNT 7
+#define TABLE_COLUMN_COUNT 8
 
 TableModel::TableModel(const QString& tableName, QSqlDatabase& db, QObject* parent) :
     QAbstractTableModel(parent),
@@ -42,12 +42,14 @@ void TableModel::createTable()
         QString statement = QString(
             "CREATE TABLE %1 (\n"
             "   GameID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+            "   GamePos INTEGER,\n"
             "   Name TEXT DEFAULT \"New Game\",\n"
             "   Categories INTEGER,\n"
             "   Developpers INTEGER,\n"
             "   Publishers INTEGER,\n"
             "   Platform INTEGER,\n"
             "   Services INTEGER,\n"
+            "   SensitiveContent INTEGER,\n"
             "   Url TEXT,\n"
             "   Rate INTEGER);")
                 .arg(m_tableName);
@@ -109,6 +111,8 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
             case 5:
                 return m_listData.at(index.row()).services;
             case 6:
+                return m_listData.at(index.row()).sensitiveContent;
+            case 7:
                 return m_listData.at(index.row()).rate;
             }
         }
@@ -135,12 +139,14 @@ void TableModel::updateQuery()
         QString statement = QString(
             "SELECT\n"
             "   GameID,\n"
+            "   GamePos,\n"
             "   Name,\n"
             "   Categories,\n"
             "   Developpers,\n"
             "   Publishers,\n"
             "   Platform,\n"
             "   Services,\n"
+            "   SensitiveContent,\n"
             "   Url,\n"
             "   Rate\n"
             "FROM\n"
@@ -160,14 +166,16 @@ void TableModel::updateQuery()
             {
                 GameItem game = {};
                 game.gameID = m_query.value(0).toInt();
-                game.name = m_query.value(1).toString();
-                game.categories = m_query.value(2).toInt();
-                game.developpers = m_query.value(3).toInt();
-                game.publishers = m_query.value(4).toInt();
-                game.platform = m_query.value(5).toInt();
-                game.services = m_query.value(6).toInt();
-                game.url = m_query.value(7).toString();
-                game.rate = m_query.value(8).toInt();
+                game.gamePos = m_query.value(1).toInt();
+                game.name = m_query.value(2).toString();
+                game.categories = m_query.value(3).toInt();
+                game.developpers = m_query.value(4).toInt();
+                game.publishers = m_query.value(5).toInt();
+                game.platform = m_query.value(6).toInt();
+                game.services = m_query.value(7).toInt();
+                game.sensitiveContent = m_query.value(8).toInt();
+                game.url = m_query.value(9).toString();
+                game.rate = m_query.value(10).toInt();
                 m_listData.append(game);
             }
 
@@ -208,6 +216,8 @@ QVariant TableModel::headerData(int section, Qt::Orientation orientation, int ro
         case 5:
             return "Services";
         case 6:
+            return "Sensitive Content";
+        case 7:
             return "Rate";
         }
     }
@@ -220,7 +230,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
     // Setting field data.
     // Each column is different, so we working on each column independently.
     if (role == Qt::EditRole && 
-        index.column() >= 0 && index.column() <= 6 &&
+        index.column() >= 0 && index.column() <= TABLE_COLUMN_COUNT &&
         index.row() >= 0 && index.row() < m_listData.size())
     {
         switch (index.column())
@@ -330,6 +340,20 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
         {
             if (value.canConvert<int>())
             {
+                int sensitiveContent = value.toInt();
+                m_listData[index.row()].sensitiveContent = sensitiveContent;
+
+                QSqlQuery query(m_db);
+                bool result = updateField<int>(query, "SensitiveContent", index.row(), sensitiveContent);
+                if (result)
+                    emit dataChanged(index, index, {Qt::EditRole});
+            }
+        } break;
+
+        case 7:
+        {
+            if (value.canConvert<int>())
+            {
                 int rate = value.toInt();
                 m_listData[index.row()].rate = rate;
 
@@ -389,12 +413,14 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
         QSqlQuery query(m_db);
         QString statement = QString(
             "INSERT INTO %1 (\n"
+            "   GamePos,\n"
             "   Name,\n"
             "   Categories,\n"
             "   Developpers,\n"
             "   Publishers,\n"
             "   Platform,\n"
             "   Services,\n"
+            "   SensitiveContent,\n"
             "   Url,\n"
             "   Rate )\n"
             "VALUES")
@@ -403,7 +429,7 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
         for (int i = 0; i < count; i++)
         {
             statement += 
-                "\n   (\"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
+                "\n   (NULL, \"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
         }
         statement[statement.size() - 1] = ';';
 
@@ -418,12 +444,14 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
             statement = QString(
             "SELECT\n"
             "   GameID,\n"
+            "   GamePos,\n"
             "   Name,\n"
             "   Categories,\n"
             "   Developpers,\n"
             "   Publishers,\n"
             "   Platform,\n"
             "   Services,\n"
+            "   SensitiveContent,\n"
             "   Url,\n"
             "   Rate\n"
             "FROM\n"
@@ -451,14 +479,16 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
                 {
                     GameItem game = {};
                     game.gameID = query.value(0).toInt();
-                    game.name = query.value(1).toString();
-                    game.categories = query.value(2).toInt();
-                    game.developpers = query.value(3).toInt();
-                    game.publishers = query.value(4).toInt();
-                    game.platform = query.value(5).toInt();
-                    game.services = query.value(6).toInt();
-                    game.url = query.value(7).toString();
-                    game.rate = query.value(8).toInt();
+                    game.gamePos = query.value(1).toInt();
+                    game.name = query.value(2).toString();
+                    game.categories = query.value(3).toInt();
+                    game.developpers = query.value(4).toInt();
+                    game.publishers = query.value(5).toInt();
+                    game.platform = query.value(6).toInt();
+                    game.services = query.value(7).toInt();
+                    game.sensitiveContent = query.value(8).toInt();
+                    game.url = query.value(9).toString();
+                    game.rate = query.value(10).toInt();
                     m_listData.prepend(game);
                 }
                 m_listData.append(gameList.cbegin(), gameList.cend());

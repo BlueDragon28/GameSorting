@@ -36,8 +36,6 @@ SqlListView::SqlListView(QSqlDatabase& db, QWidget* parent) :
     setupView();
 
     addingItem();
-    /*addingItem();
-    addingItem();*/
 }
 
 void SqlListView::setupWidget()

@@ -6,12 +6,14 @@
 struct GameItem
 {
     int gameID;
+    int gamePos;
     QString name;
     int categories;
     int developpers;
     int publishers;
     int platform;
     int services;
+    int sensitiveContent;
     QString url;
     int rate;
 };
