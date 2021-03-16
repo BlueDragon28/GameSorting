@@ -442,59 +442,60 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
         {
             query.clear();
             statement = QString(
-            "SELECT\n"
-            "   GameID,\n"
-            "   GamePos,\n"
-            "   Name,\n"
-            "   Categories,\n"
-            "   Developpers,\n"
-            "   Publishers,\n"
-            "   Platform,\n"
-            "   Services,\n"
-            "   SensitiveContent,\n"
-            "   Url,\n"
-            "   Rate\n"
-            "FROM\n"
-            "   %1\n"
-            "ORDER BY\n"
-            "   GameID DESC\n"
-            "LIMIT\n"
-            "   %2;")
-                .arg(m_tableName)
-                .arg(count);
-
+                "SELECT\n"
+                "   GameID,\n"
+                "   GamePos,\n"
+                "   Name,\n"
+                "   Categories,\n"
+                "   Publishers,\n"
+                "   Platform,\n"
+                "   Services,\n"
+                "   SensitiveContent,\n"
+                "   Url,\n"
+                "   Rate\n"
+                "FROM\n"
+                "   %1;")
+                    .arg(m_tableName);
+                
 #ifndef NDEBUG
             std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
-            
+
             if (query.exec(statement))
             {
-                if (count == 1)
-                    beginInsertRows(parent, m_listCount, m_listCount);
-                else
-                    beginInsertRows(parent, m_listCount, m_listCount + (count - 1));
-
-                QList<GameItem> gameList;
-                while(query.next())
+                if (query.last())
                 {
-                    GameItem game = {};
-                    game.gameID = query.value(0).toInt();
-                    game.gamePos = query.value(1).toInt();
-                    game.name = query.value(2).toString();
-                    game.categories = query.value(3).toInt();
-                    game.developpers = query.value(4).toInt();
-                    game.publishers = query.value(5).toInt();
-                    game.platform = query.value(6).toInt();
-                    game.services = query.value(7).toInt();
-                    game.sensitiveContent = query.value(8).toInt();
-                    game.url = query.value(9).toString();
-                    game.rate = query.value(10).toInt();
-                    gameList.prepend(game);
-                }
-                m_listData.append(gameList.cbegin(), gameList.cend());
-                m_listCount = m_listData.size();
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), m_listCount, m_listCount);
+                    else
+                        beginInsertRows(QModelIndex(), m_listCount, m_listCount + (count - 1));
 
-                endInsertRows();
+                    QList<GameItem> gameList;
+                    int i = 0;
+                    do
+                    {
+                        GameItem game = {};
+                        game.gameID = query.value(0).toInt();
+                        game.gamePos = query.value(1).toInt();
+                        game.name = query.value(2).toString();
+                        game.categories = query.value(3).toInt();
+                        game.developpers = query.value(4).toInt();
+                        game.publishers = query.value(5).toInt();
+                        game.platform = query.value(6).toInt();
+                        game.services = query.value(7).toInt();
+                        game.sensitiveContent = query.value(8).toInt();
+                        game.url = query.value(9).toString();
+                        game.rate = query.value(10).toInt();
+                        gameList.prepend(game);
+                        i++;
+                    } while (query.previous() && i < count);
+                    m_listData.append(gameList.cbegin(), gameList.cend());
+                    m_listCount = m_listData.size();
+
+                    endInsertRows();
+                }
+                else
+                    updateQuery();
             }
             else
                 updateQuery();
