@@ -30,7 +30,7 @@ SqlListView::SqlListView(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
     m_view(new QTableView(this)),
-    m_model(new TableModel("MyTable", m_db, this))
+    m_model(new TableModel("MyTable", GameSorting::GAMELIST, m_db, this))
 {
     setupWidget();
     setupView();

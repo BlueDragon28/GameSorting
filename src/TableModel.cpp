@@ -22,11 +22,12 @@
 
 #define TABLE_COLUMN_COUNT 8
 
-TableModel::TableModel(const QString& tableName, QSqlDatabase& db, QObject* parent) :
+TableModel::TableModel(const QString& tableName, GameSorting::ListType type, QSqlDatabase& db, QObject* parent) :
     QAbstractTableModel(parent),
     m_db(db),
     m_query(m_db),
     m_tableName(tableName),
+    m_listType(type),
     m_isTableCreated(false),
     m_isTableChanged(false),
     m_listCount(0)

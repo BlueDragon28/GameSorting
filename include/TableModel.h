@@ -31,7 +31,7 @@ class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit TableModel(const QString& tableName, QSqlDatabase& db, QObject* parent = nullptr);
+    explicit TableModel(const QString& tableName, GameSorting::ListType type, QSqlDatabase& db, QObject* parent = nullptr);
 
     // Data interface.
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -56,9 +56,10 @@ private:
 
     QSqlDatabase& m_db;
     QSqlQuery m_query;
+    QString m_tableName;
+    GameSorting::ListType m_listType;
     QList<GameItem> m_listData;
     bool m_isTableCreated, m_isTableChanged;
-    QString m_tableName;
     int m_listCount;
 };
 

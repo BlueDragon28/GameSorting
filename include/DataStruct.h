@@ -3,6 +3,14 @@
 
 #include <QString>
 
+namespace GameSorting
+{
+    enum ListType
+    {
+        GAMELIST
+    };
+}
+
 struct GameItem
 {
     int gameID;
