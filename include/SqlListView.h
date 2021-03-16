@@ -30,6 +30,9 @@ class SqlListView : public QWidget
     Q_OBJECT
 public:
     explicit SqlListView(QSqlDatabase& db, QWidget* parent = nullptr);
+
+public slots:
+    void addingItem();
     
 protected:
 
