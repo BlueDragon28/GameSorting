@@ -226,6 +226,67 @@ QVariant TableModel::headerData(int section, Qt::Orientation orientation, int ro
     return QVariant();
 }
 
+template<typename T>
+bool TableModel::updateField(QSqlQuery& query, const QString& columnName, int rowNB, T value)
+{
+    // Helper member function to help update field on SQLite side.
+    QString statement = QString(
+        "UPDATE %1\n"
+        "SET\n"
+        "   %2 = %3\n"
+        "WHERE\n"
+        "   GameID = %4;")
+            .arg(m_tableName, columnName)
+            .arg(value)
+            .arg(m_listData.at(rowNB).gameID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!query.exec(statement))
+    {
+        std::cout << QString("Failed to update field %1 of GameID: %2.\n\t%3")
+            .arg(columnName)
+            .arg(m_listData.at(rowNB).gameID)
+            .arg(query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+template<>
+bool TableModel::updateField(QSqlQuery& query, const QString& columnName, int rowNB, const QString& value)
+{
+    QString statement = QString(
+        "UPDATE %1\n"
+        "SET\n"
+        "   %2 = \"%3\"\n"
+        "WHERE\n"
+        "   GameID = %4;")
+            .arg(m_tableName, columnName)
+            .arg(value)
+            .arg(m_listData.at(rowNB).gameID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!query.exec(statement))
+    {
+        std::cout << QString("Failed to update field %1 of GameID : %2.\n\t%%3")
+            .arg(columnName)
+            .arg(m_listData.at(rowNB).gameID)
+            .arg(query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool TableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     // Setting field data.
@@ -368,37 +429,6 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
                 return false;
         } break;
         }
-    }
-
-    return true;
-}
-
-template<typename T>
-bool TableModel::updateField(QSqlQuery& query, const QString& columnName, int rowNB, T value)
-{
-    // Helper member function to help update field on SQLite side.
-    QString statement = QString(
-        "UPDATE %1\n"
-        "SET\n"
-        "   %2 = \"%3\"\n"
-        "WHERE\n"
-        "   GameID = %4;")
-            .arg(m_tableName, columnName)
-            .arg(value)
-            .arg(m_listData.at(rowNB).gameID);
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!query.exec(statement))
-    {
-        std::cout << QString("Failed to update field %1 of GameID: %2.\n\t%3")
-            .arg(columnName)
-            .arg(m_listData.at(rowNB).gameID)
-            .arg(query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-        return false;
     }
 
     return true;
