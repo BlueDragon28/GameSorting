@@ -32,6 +32,7 @@ class TableModel : public QAbstractTableModel
     Q_OBJECT
 public:
     explicit TableModel(const QString& tableName, GameSorting::ListType type, QSqlDatabase& db, QObject* parent = nullptr);
+    ~TableModel();
 
     // Data interface.
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -51,14 +52,24 @@ protected:
     void createTable();
 
 private:
+    // Games specific member functions.
+    void gameCreateTable();
+    int gameColumnCount() const;
+    int gameRowCount() const;
+    QVariant gameData(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    bool gameSetData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+    bool gameInsertRows(int row, int count, const QModelIndex& parent = QModelIndex());
+    bool gameRemoveRows(int row, int count, const QModelIndex& parent = QModelIndex());
+    QVariant gameHeaderData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     template<typename T>
-    bool updateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
+    bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
+    void gameUpdateQuery();
 
     QSqlDatabase& m_db;
     QSqlQuery m_query;
     QString m_tableName;
     GameSorting::ListType m_listType;
-    QList<GameItem> m_listData;
+    QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
     int m_listCount;
 };
