@@ -150,3 +150,11 @@ bool TableModel::removeRows(int row, int count, const QModelIndex& parent)
 
     return true;
 }
+
+bool TableModel::appendRows(int count)
+{
+    if (count > 0)
+        return insertRows(m_listCount, count);
+
+    return false;
+}

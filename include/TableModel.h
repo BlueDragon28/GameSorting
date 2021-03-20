@@ -42,6 +42,7 @@ public:
     virtual bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+    bool appendRows(int count = 1);
 
     // Headers column's name.
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
