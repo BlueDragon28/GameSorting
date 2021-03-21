@@ -357,8 +357,8 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                     do
                     {
                         GameItem game = {};
-                        game.gameID = query.value(0).toInt();
-                        game.gamePos = query.value(1).toInt();
+                        game.gameID = query.value(0).toLongLong();
+                        game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
                         game.categories = query.value(3).toInt();
                         game.developpers = query.value(4).toInt();
@@ -525,8 +525,8 @@ void TableModel::gameUpdateQuery()
         while (m_query.next())
         {
             GameItem game = {};
-            game.gameID = m_query.value(0).toInt();
-            game.gamePos = m_query.value(1).toInt();
+            game.gameID = m_query.value(0).toLongLong();
+            game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
             game.categories = m_query.value(3).toInt();
             game.developpers = m_query.value(4).toInt();

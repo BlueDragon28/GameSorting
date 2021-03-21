@@ -13,8 +13,8 @@ namespace GameSorting
 
 struct GameItem
 {
-    int gameID;
-    int gamePos;
+    long long int gameID;
+    long long int gamePos;
     QString name;
     int categories;
     int developpers;
