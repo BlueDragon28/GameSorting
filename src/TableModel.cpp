@@ -197,3 +197,8 @@ QString TableModel::checkingIfNameFree(const QString& name, int n) const
     // Otherwise, the name is free, we can use it.
     return cName;
 }
+
+QString TableModel::tableName() const
+{
+    return m_tableName;
+}

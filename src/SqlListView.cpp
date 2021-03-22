@@ -57,3 +57,8 @@ void SqlListView::addingItem()
 {
     m_model->appendRows();
 }
+
+QString SqlListView::tableName() const
+{
+    return m_model->tableName();
+}

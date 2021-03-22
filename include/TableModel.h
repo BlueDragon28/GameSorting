@@ -44,6 +44,7 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool appendRows(int count = 1);
     int size() const;
+    QString tableName() const;
 
     // Headers column's name.
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
