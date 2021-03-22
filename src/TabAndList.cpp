@@ -20,8 +20,12 @@
 #include "SqlListView.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QTabBar>
+#include <QIcon>
+#include <QPushButton>
 #include <QStackedLayout>
+#include <QInputDialog>
 
 TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
@@ -34,15 +38,50 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
 
 void TabAndList::setupView()
 {
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    // Creating the two layouts, on vertical, the other horizontal.
+    QVBoxLayout* vLayout = new QVBoxLayout(this);
+    QHBoxLayout* hBarLayout = new QHBoxLayout(this);
+
+    // Creating a pushButton, it'll be use to add new table.
+    // Adding the tabBar and the push button to the hBarLayout.
+    QIcon addIcon(":/Images/Add.svg");
+    QPushButton* addNewTableButton = new QPushButton(addIcon, QString(), this);
+    hBarLayout->addWidget(m_tabBar, 1);
+    hBarLayout->addWidget(addNewTableButton, 0);
+
+    // Adding the hBarLayout and the stacked widget to the vLayout.
     vLayout->setSpacing(0);
     vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(m_tabBar, 0);
+    vLayout->addLayout(hBarLayout);
     vLayout->addLayout(m_stackedViews, 1);
 
-    m_tabBar->addTab(tr("Hello World!"));
-    m_tabBar->addTab(tr("This is a test!"));
-
-    m_stackedViews->addWidget(new SqlListView("HelloWorld", ListType::GAMELIST, m_db, this));
+    connect(addNewTableButton, &QPushButton::clicked, this, &TabAndList::addTable);
+    connect(m_tabBar, &QTabBar::currentChanged, this, &TabAndList::tabChanged);
 }
 
+void TabAndList::tabChanged(int index)
+{
+    if (index >= 0 && index < m_stackedViews->count())
+        m_stackedViews->setCurrentIndex(index);
+}
+
+void TabAndList::addTable()
+{
+    // Adding a new list table.
+    // First, asking the user the new table name.
+    bool ok;
+    QString tableName = QInputDialog::getText(
+        this,
+        tr("New Table Name"),
+        tr("Table name:"),
+        QLineEdit::Normal,
+        QString(),
+        &ok);
+    if (ok && !tableName.isEmpty())
+    {
+        // Creating a new table using the tableName got from the user.
+        SqlListView* newList = new SqlListView(tableName, ListType::GAMELIST, m_db, this);
+        m_stackedViews->addWidget(newList);
+        m_tabBar->addTab(newList->tableName());
+    }
+}
