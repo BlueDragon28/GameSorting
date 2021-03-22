@@ -9,9 +9,9 @@ bool TableModel::gameUpdateField(QSqlQuery& query, const QString& columnName, in
 {
     // Helper member function to help update field on SQLite side.
     QString statement = QString(
-        "UPDATE %1\n"
+        "UPDATE \"%1\"\n"
         "SET\n"
-        "   %2 = %3\n"
+        "   \"%2\" = %3\n"
         "WHERE\n"
         "   GameID = %4;")
             .arg(m_tableName, columnName)
@@ -39,9 +39,9 @@ template<>
 bool TableModel::gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, const QString& value)
 {
     QString statement = QString(
-        "UPDATE %1\n"
+        "UPDATE \"%1\"\n"
         "SET\n"
-        "   %2 = \"%3\"\n"
+        "   \"%2\" = \"%3\"\n"
         "WHERE\n"
         "   GameID = %4;")
             .arg(m_tableName, columnName)
@@ -71,7 +71,7 @@ void TableModel::gameCreateTable()
     if (m_db.isOpen())
     {
         QString statement = QString(
-            "CREATE TABLE %1 (\n"
+            "CREATE TABLE \"%1\" (\n"
             "   GameID INTEGER PRIMARY KEY,\n"
             "   GamePos INTEGER,\n"
             "   Name TEXT DEFAULT \"New Game\",\n"
@@ -294,7 +294,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
         // Executing the sql statement for inserting new rows.
         QSqlQuery query(m_db);
         QString statement = QString(
-            "INSERT INTO %1 (\n"
+            "INSERT INTO \"%1\" (\n"
             "   GamePos,\n"
             "   Name,\n"
             "   Categories,\n"
@@ -336,7 +336,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                 "   Url,\n"
                 "   Rate\n"
                 "FROM\n"
-                "   %1;")
+                "   \"%1\";")
                     .arg(m_tableName);
                 
 #ifndef NDEBUG
@@ -510,7 +510,7 @@ void TableModel::gameUpdateQuery()
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
-        "   %1;")
+        "   \"%1\";")
             .arg(m_tableName);
     
 #ifndef NDEBUG
