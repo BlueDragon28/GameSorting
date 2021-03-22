@@ -5,7 +5,7 @@
 
 namespace GameSorting
 {
-    enum ListType
+    enum class ListType
     {
         GAMELIST
     };
