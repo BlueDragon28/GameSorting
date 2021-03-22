@@ -3,13 +3,10 @@
 
 #include <QString>
 
-namespace GameSorting
+enum class ListType
 {
-    enum class ListType
-    {
-        GAMELIST
-    };
-}
+    GAMELIST
+};
 
 struct GameItem
 {

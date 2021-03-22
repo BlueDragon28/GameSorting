@@ -31,7 +31,7 @@ class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit TableModel(const QString& tableName, GameSorting::ListType type, QSqlDatabase& db, QObject* parent = nullptr);
+    explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, QObject* parent = nullptr);
     ~TableModel();
 
     // Data interface.
@@ -43,6 +43,7 @@ public:
     virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool appendRows(int count = 1);
+    int size() const;
 
     // Headers column's name.
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -69,7 +70,7 @@ private:
     QSqlDatabase& m_db;
     QSqlQuery m_query;
     QString m_tableName;
-    GameSorting::ListType m_listType;
+    ListType m_listType;
     QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
     int m_listCount;

@@ -26,15 +26,18 @@
 
 #include <iostream>
 
-SqlListView::SqlListView(QSqlDatabase& db, QWidget* parent) :
+SqlListView::SqlListView(ListType type, QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
+    m_type(type),
     m_view(new QTableView(this)),
-    m_model(new TableModel("MyTable", GameSorting::GAMELIST, m_db, this))
+    m_model(new TableModel("MyTable", m_type, m_db, this))
 {
     setupWidget();
     setupView();
 
+    addingItem();
+    addingItem();
     addingItem();
 }
 
@@ -52,8 +55,5 @@ void SqlListView::setupView()
 
 void SqlListView::addingItem()
 {
-    m_model->insertRows(0, 5);
-    m_model->setData(m_model->index(2, 0), "Hello World!");
-    m_model->setData(m_model->index(4, 0), "Test!");
-    m_model->removeRows(0, 2);
+    m_model->appendRows();
 }

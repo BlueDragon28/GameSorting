@@ -19,6 +19,8 @@
 #ifndef GAMESORTING_SQLLISTVIEW_H
 #define GAMESORTING_SQLLISTVIEW_H
 
+#include "DataStruct.h"
+
 #include <QWidget>
 #include <QSqlDatabase>
 
@@ -29,7 +31,7 @@ class SqlListView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SqlListView(QSqlDatabase& db, QWidget* parent = nullptr);
+    explicit SqlListView(ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
 
 public slots:
     void addingItem();
@@ -41,6 +43,7 @@ private:
     void setupView();
 
     QSqlDatabase& m_db;
+    ListType m_type;
     QTableView* m_view;
     TableModel* m_model;
 };

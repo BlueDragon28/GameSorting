@@ -26,7 +26,7 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
     m_tabBar(nullptr),
-    m_view(new SqlListView(m_db, this))
+    m_view(new SqlListView(ListType::GAMELIST, m_db, this))
 {
     setupView();
 }

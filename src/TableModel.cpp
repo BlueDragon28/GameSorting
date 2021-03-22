@@ -20,7 +20,7 @@
 #include <QSqlError>
 #include <iostream>
 
-TableModel::TableModel(const QString& tableName, GameSorting::ListType type, QSqlDatabase& db, QObject* parent) :
+TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db, QObject* parent) :
     QAbstractTableModel(parent),
     m_db(db),
     m_query(m_db),
@@ -31,7 +31,7 @@ TableModel::TableModel(const QString& tableName, GameSorting::ListType type, QSq
     m_isTableChanged(false),
     m_listCount(0)
 {
-    if (m_listType == GameSorting::GAMELIST)
+    if (m_listType == ListType::GAMELIST)
         m_gameListData = new QList<GameItem>();
 
     createTable();
@@ -46,7 +46,7 @@ TableModel::~TableModel()
 void TableModel::createTable()
 {
     // Create the SQL table with all the columns.
-    if (m_listType == GameSorting::GAMELIST)
+    if (m_listType == ListType::GAMELIST)
         gameCreateTable();
 }
 
@@ -56,7 +56,7 @@ int TableModel::columnCount(const QModelIndex& parent) const
     // If the table is not created, returning 0.
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameColumnCount();
     }
     
@@ -68,7 +68,7 @@ int TableModel::rowCount(const QModelIndex& parent) const
     // Returning the number of items in the table.
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameRowCount();
     }
 
@@ -85,7 +85,7 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
     // Returning the table data into the view.
     if (m_isTableCreated && role == Qt::DisplayRole)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameData(index, role);
     }
 
@@ -98,7 +98,7 @@ void TableModel::updateQuery()
     // and put it into the view.
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             gameUpdateQuery();
     }
 }
@@ -108,7 +108,7 @@ QVariant TableModel::headerData(int section, Qt::Orientation orientation, int ro
     // Returning the name of the headers.
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameHeaderData(section, orientation, role);
     }
 
@@ -121,7 +121,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
     // Each column is different, so we working on each column independently.
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameSetData(index, value, role);
     }
 
@@ -132,7 +132,7 @@ bool TableModel::insertRows(int row, int count, const QModelIndex& parent)
 {
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameInsertRows(row, count, parent);
     }
 
@@ -144,7 +144,7 @@ bool TableModel::removeRows(int row, int count, const QModelIndex& parent)
     // Removing rows from the table.
     if (m_isTableCreated)
     {
-        if (m_listType == GameSorting::GAMELIST)
+        if (m_listType == ListType::GAMELIST)
             return gameRemoveRows(row, count, parent);
     }
 
@@ -157,4 +157,12 @@ bool TableModel::appendRows(int count)
         return insertRows(m_listCount, count);
 
     return false;
+}
+
+int TableModel::size() const
+{
+    if (m_isTableCreated)
+        return m_listCount;
+    
+    return 0;
 }
