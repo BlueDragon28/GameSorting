@@ -24,7 +24,6 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     QAbstractTableModel(parent),
     m_db(db),
     m_query(m_db),
-    m_tableName(tableName),
     m_listType(type),
     m_gameListData(nullptr),
     m_isTableCreated(false),
@@ -33,6 +32,8 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 {
     if (m_listType == ListType::GAMELIST)
         m_gameListData = new QList<GameItem>();
+
+    m_tableName = checkingIfNameFree(tableName);
 
     createTable();
 }
@@ -165,4 +166,34 @@ int TableModel::size() const
         return m_listCount;
     
     return 0;
+}
+
+QString TableModel::checkingIfNameFree(const QString& name, int n) const
+{
+    // String using for the comparison with the available tables name.
+    QString cName;
+    if (n < 0)
+        cName = name;
+    else
+        cName = QString("%1_%2").arg(name).arg(n);
+
+    // Then comparing the name with all the available name into the database.
+    QStringList tablesName = m_db.tables();
+    for (QStringList::const_iterator it = tablesName.cbegin();
+         it != tablesName.cend();
+         it++)
+    {
+        // If the name is already exist, testing the name with a number attached to it 
+        // using recursive function.
+        if ((*it).compare(cName, Qt::CaseInsensitive) == 0)
+        {
+            if (n < 0)
+                return checkingIfNameFree(name, 1);
+            else
+                return checkingIfNameFree(name, n+1);
+        }
+    }
+
+    // Otherwise, the name is free, we can use it.
+    return cName;
 }

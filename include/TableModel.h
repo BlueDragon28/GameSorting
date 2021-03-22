@@ -54,6 +54,8 @@ protected:
     void createTable();
 
 private:
+    QString checkingIfNameFree(const QString& name, int n = -1) const;
+
     // Games specific member functions.
     void gameCreateTable();
     int gameColumnCount() const;
