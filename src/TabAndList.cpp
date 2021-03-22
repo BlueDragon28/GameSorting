@@ -21,12 +21,13 @@
 
 #include <QVBoxLayout>
 #include <QTabBar>
+#include <QStackedLayout>
 
 TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
-    m_tabBar(nullptr),
-    m_view(new SqlListView(ListType::GAMELIST, m_db, this))
+    m_tabBar(new QTabBar(this)),
+    m_stackedViews(new QStackedLayout())
 {
     setupView();
 }
@@ -36,9 +37,12 @@ void TabAndList::setupView()
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setSpacing(0);
     vLayout->setContentsMargins(0, 0, 0, 0);
-    //vLayout->addWidget(m_tabBar);
-    vLayout->addWidget(m_view);
+    vLayout->addWidget(m_tabBar, 0);
+    vLayout->addLayout(m_stackedViews, 1);
 
-    /*m_tabBar->addTab(tr("Hello World!"));
-    m_tabBar->addTab(tr("This is a test!"));*/
+    m_tabBar->addTab(tr("Hello World!"));
+    m_tabBar->addTab(tr("This is a test!"));
+
+    m_stackedViews->addWidget(new SqlListView("HelloWorld", ListType::GAMELIST, m_db, this));
 }
+

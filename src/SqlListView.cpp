@@ -26,12 +26,12 @@
 
 #include <iostream>
 
-SqlListView::SqlListView(ListType type, QSqlDatabase& db, QWidget* parent) :
+SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
     m_type(type),
     m_view(new QTableView(this)),
-    m_model(new TableModel("MyTable", m_type, m_db, this))
+    m_model(new TableModel(tableName, m_type, m_db, this))
 {
     setupWidget();
     setupView();

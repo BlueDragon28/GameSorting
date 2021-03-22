@@ -31,7 +31,7 @@ class SqlListView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SqlListView(ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
+    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
 
 public slots:
     void addingItem();

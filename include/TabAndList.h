@@ -25,6 +25,7 @@
 
 class QTabBar;
 class SqlListView;
+class QStackedLayout;
 
 class TabAndList : public QWidget
 {
@@ -32,14 +33,12 @@ class TabAndList : public QWidget
 public:
     explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
 
-protected:
-
 private:
     void setupView();
 
     QSqlDatabase& m_db;
     QTabBar* m_tabBar;
-    SqlListView* m_view;
+    QStackedLayout* m_stackedViews;
 };
 
 #endif
