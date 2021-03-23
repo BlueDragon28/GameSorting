@@ -86,3 +86,14 @@ void TabAndList::addTable()
         m_tabBar->addTab(newList->tableName());
     }
 }
+#include <iostream>
+void TabAndList::addingItem()
+{
+    // Adding a new row into at the end of the list.
+    SqlListView* listView = reinterpret_cast<SqlListView*>(m_stackedViews->currentWidget());
+
+    if (listView)
+        listView->addingItem();
+
+    std::cout << "List view: " << listView << std::endl;
+}

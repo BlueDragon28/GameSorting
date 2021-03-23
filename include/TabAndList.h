@@ -33,6 +33,9 @@ class TabAndList : public QWidget
 public:
     explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
 
+public slots:
+    void addingItem();
+
 private slots:
     void tabChanged(int index);
     void addTable();

@@ -23,11 +23,14 @@
 #include <QVBoxLayout>
 #include <QScreen>
 #include <QMessageBox>
+#include <QToolBar>
+#include <QIcon>
+#include <QAction>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
-	m_tabAndList(nullptr),
-	m_db(QSqlDatabase::addDatabase("QSQLITE"))
+	m_db(QSqlDatabase::addDatabase("QSQLITE")),
+	m_tabAndList(new TabAndList(m_db, this))
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -50,10 +53,17 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::createMenu()
-{}
+{
+	QToolBar* editBar = addToolBar(tr("Edit"));
+
+	QIcon addIcon(":/Images/Add.svg");
+	QAction* addAct = new QAction(addIcon, tr("Add Item"), this);
+	addAct->setToolTip(tr("Adding a new item into the current listed view."));
+	connect(addAct, &QAction::triggered, m_tabAndList, &TabAndList::addingItem);
+	editBar->addAction(addAct);
+}
 
 void MainWindow::createCentralWidget()
 {
-	m_tabAndList = new TabAndList(m_db, this);
 	setCentralWidget(m_tabAndList);
 }
