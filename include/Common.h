@@ -21,9 +21,9 @@
 
 #include <QString>
 
-QString removeFirstsSpace(const QString& str);
-QString removeLastsSpace(const QString& str);
-QString removeFirtsAndLastsSpace(const QString& str);
+QString removeFirstSpaces(const QString& str);
+QString removeLastSpaces(const QString& str);
+QString removeFirtAndLastSpaces(const QString& str);
 QString replaceSpaceByUnderscore(const QString& str);
 QString replaceUnderscoreBySpace(const QString& str);
 QString replaceMultipleSpaceByOne(const QString& str);

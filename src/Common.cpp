@@ -18,35 +18,57 @@
 
 #include "Common.h"
 
-QString removeFirstsSpace(const QString& str)
+QString removeFirstSpaces(const QString& str)
 {
-	QString copyStr = str;
-	QChar cSpace(' ');
+	// Removing the first spaces in a string.
+	if (str.isEmpty()) return str;
 
-	while (!copyStr.isEmpty() && copyStr.at(0) == cSpace)
-		copyStr.remove(0, 1);
+	QString copyStr = str;
+	const QChar cSpace(' ');
+	int index(-1);
+	int count(0);
+
+	while (++index < copyStr.size() && copyStr.at(index) == cSpace)
+		count++;
+
+	if (count > 0)
+		copyStr.remove(0, count);
 
 	return copyStr;
 }
 
-QString removeLastsSpace(const QString& str)
+QString removeLastSpaces(const QString& str)
 {
-	QString copyStr = str;
-	QChar cSpace(' ');
+	// Removing the last spaces in a string.
+	if (str.isEmpty()) return str;
 
-	while (!copyStr.isEmpty() && copyStr.at(copyStr.size()-1) == cSpace)
-		copyStr.remove(copyStr.size()-1, 1);
+	QString copyStr = str;
+	const QChar cSpace(' ');
+	int index(copyStr.size());
+	int from(copyStr.size());
+	int count(0);
+
+	while (--index >= 0 && copyStr.at(index) == cSpace)
+	{
+		count++;
+		from--;
+	}
+
+	if (count > 0)
+		copyStr.remove(from, count);
 
 	return copyStr;
 }
 
-QString removeFirtsAndLastsSpace(const QString& str)
+QString removeFirtAndLastSpaces(const QString& str)
 {
-	return removeFirstsSpace(removeLastsSpace(str));
+	// Removing the first and last spaces in a string.
+	return removeFirstSpaces(removeLastSpaces(str));
 }
 
 QString replaceUnderscoreBySpace(const QString& str)
 {
+	// Replacing all the underscores in a string by spaces.
 	QString copyStr = str;
 	QChar cUnderscore('_');
 	QChar cSpace(' ');
@@ -62,6 +84,7 @@ QString replaceUnderscoreBySpace(const QString& str)
 
 QString replaceSpaceByUnderscore(const QString& str)
 {
+	// Replacing all the spaces in a string by underscores.
 	QString copyStr = str;
 	QChar cSpace(' ');
 	QChar cUnderscore('_');
@@ -77,6 +100,7 @@ QString replaceSpaceByUnderscore(const QString& str)
 
 QString replaceMultipleSpaceByOne(const QString& str)
 {
+	// Removing duplicate spaces in a string.
 	if (!str.isEmpty())
 	{
 		const QChar cSpace(' ');

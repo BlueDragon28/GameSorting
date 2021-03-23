@@ -34,7 +34,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     if (m_listType == ListType::GAMELIST)
         m_gameListData = new QList<GameItem>();
 
-    m_tableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtsAndLastsSpace(tableName))));
+    m_tableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtAndLastSpaces(tableName))));
 
     createTable();
 }
