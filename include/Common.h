@@ -16,6 +16,9 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef GAMESORTING_COMMON_H_
+#define GAMESORTING_COMMON_H_
+
 #include <QString>
 
 QString removeFirstsSpace(const QString& str);
@@ -24,3 +27,5 @@ QString removeFirtsAndLastsSpace(const QString& str);
 QString replaceSpaceByUnderscore(const QString& str);
 QString replaceUnderscoreBySpace(const QString& str);
 QString replaceMultipleSpaceByOne(const QString& str);
+
+#endif // GAMESORTING_COMMON_H_
