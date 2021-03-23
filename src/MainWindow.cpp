@@ -1,4 +1,4 @@
-﻿/*
+/*
 * MIT License
 *
 * This file is part of the GameSorting

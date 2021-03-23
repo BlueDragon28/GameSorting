@@ -17,6 +17,7 @@
 */
 
 #include "TableModel.h"
+#include "Common.h"
 #include <QSqlError>
 #include <iostream>
 
@@ -33,7 +34,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     if (m_listType == ListType::GAMELIST)
         m_gameListData = new QList<GameItem>();
 
-    m_tableName = checkingIfNameFree(tableName);
+    m_tableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtsAndLastsSpace(tableName))));
 
     createTable();
 }
@@ -199,6 +200,11 @@ QString TableModel::checkingIfNameFree(const QString& name, int n) const
 }
 
 QString TableModel::tableName() const
+{
+    return replaceUnderscoreBySpace(m_tableName);
+}
+
+QString TableModel::rowTableName() const
 {
     return m_tableName;
 }

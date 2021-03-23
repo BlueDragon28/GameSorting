@@ -1,1 +1,1 @@
-﻿# In development, it's not ready to be used.
+# In development, it's not ready to be used.

@@ -16,29 +16,11 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
-
-#include <QMainWindow>
-#include <QSqlDatabase>
 #include <QString>
 
-class TabAndList;
-class QTableView;
-
-class MainWindow : public QMainWindow
-{
-	Q_OBJECT
-public:
-	MainWindow(QWidget* parent = nullptr);
-	~MainWindow();
-
-private:
-	void createMenu();
-	void createCentralWidget();
-
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-};
-
-#endif // GAMESORTING_MAINWINDOW
+QString removeFirstsSpace(const QString& str);
+QString removeLastsSpace(const QString& str);
+QString removeFirtsAndLastsSpace(const QString& str);
+QString replaceSpaceByUnderscore(const QString& str);
+QString replaceUnderscoreBySpace(const QString& str);
+QString replaceMultipleSpaceByOne(const QString& str);

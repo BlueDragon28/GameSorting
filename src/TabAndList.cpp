@@ -18,6 +18,7 @@
 
 #include "TabAndList.h"
 #include "SqlListView.h"
+#include "Common.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

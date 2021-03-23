@@ -2,7 +2,7 @@
 //
 //#include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
-// Français (France) resources
+// FranÃ§ais (France) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
 //LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
@@ -42,7 +42,7 @@ END
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "Images\\GameSorting.ico"
 
-#endif    // Français (France) resources
+#endif    // FranÃ§ais (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
