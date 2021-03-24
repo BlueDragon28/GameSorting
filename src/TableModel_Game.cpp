@@ -406,7 +406,7 @@ bool TableModel::gameRemoveRows(int row, int count, const QModelIndex& parent)
         // Defining the SQL statement.
         QSqlQuery query(m_db);
         QString statement  = QString(
-            "DELETE FROM %1\n"
+            "DELETE FROM \"%1\"\n"
             "WHERE GameID ")
             .arg(m_tableName);
         

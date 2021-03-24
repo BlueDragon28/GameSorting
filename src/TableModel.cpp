@@ -20,6 +20,7 @@
 #include "Common.h"
 #include <QSqlError>
 #include <iostream>
+#include <algorithm>
 
 TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db, QObject* parent) :
     QAbstractTableModel(parent),
@@ -230,4 +231,20 @@ void TableModel::deleteSqlTable()
             << "\"\n\t"
             << m_query.lastError().text().toLocal8Bit().constData()
             << std::endl;
+}
+
+void TableModel::deleteRows(const QModelIndexList& indexList)
+{
+    // Used to delete selected rows in the view.
+    QModelIndexList indexListCopy(indexList);
+    std::sort(indexListCopy.begin(), indexListCopy.end(),
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() > index2.row();
+        });
+
+    for (QModelIndexList::const_iterator it = indexListCopy.cbegin();
+        it != indexListCopy.cend();
+        it++)
+        removeRow((*it).row(), QModelIndex());
 }

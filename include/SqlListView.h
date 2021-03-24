@@ -38,6 +38,7 @@ public:
 
 public slots:
     void addingItem();
+    void deletingItems();
     
 protected:
 

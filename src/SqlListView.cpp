@@ -19,6 +19,7 @@
 #include "SqlListView.h"
 #include "TableModel.h"
 #include <QTableView>
+#include <QItemSelectionModel>
 #include <QSqlQuery>
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -50,6 +51,10 @@ void SqlListView::setupWidget()
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->addWidget(m_view);
     createMenu(vLayout);
+
+    // Allow the user to only select all a row.
+    m_view->setSelectionBehavior(QTableView::SelectRows);
+    m_view->setSelectionMode(QTableView::ExtendedSelection);
 }
 
 void SqlListView::setupView()
@@ -80,6 +85,22 @@ void SqlListView::createMenu(QVBoxLayout* vLayout)
         connect(addAct, &QAction::triggered, this, &SqlListView::addingItem);
         menuBar->addAction(addAct);
 
+        QIcon delIcon(":/Images/Del.svg");
+        QAction* delAct = new QAction(delIcon, tr("Delete Games"), this);
+        delAct->setToolTip(tr("Deleting selected games in the current game list."));
+        connect(delAct, &QAction::triggered, this, &SqlListView::deletingItems);
+        menuBar->addAction(delAct);
+
         vLayout->setMenuBar(menuBar);
+    }
+}
+
+void SqlListView::deletingItems()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->deleteRows(indexList);
     }
 }

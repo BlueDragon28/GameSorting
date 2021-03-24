@@ -43,6 +43,7 @@ public:
     virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool appendRows(int count = 1);
+    void deleteRows(const QModelIndexList& indexList);
 
     // Data information.
     int size() const;
@@ -56,9 +57,7 @@ public:
 
 protected:
     void createTable();
-
-private:
-    QString checkingIfNameFree(const QString& name, int n = -1) const;
+    void deleteSqlTable();
 
     // Games specific member functions.
     void gameCreateTable();
@@ -73,7 +72,8 @@ private:
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
 
-    void deleteSqlTable();
+private:
+    QString checkingIfNameFree(const QString& name, int n = -1) const;
 
     QSqlDatabase& m_db;
     QSqlQuery m_query;
