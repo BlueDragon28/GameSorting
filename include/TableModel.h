@@ -73,6 +73,8 @@ private:
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
 
+    void deleteSqlTable();
+
     QSqlDatabase& m_db;
     QSqlQuery m_query;
     QString m_tableName;

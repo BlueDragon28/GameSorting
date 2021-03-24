@@ -41,6 +41,8 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 
 TableModel::~TableModel()
 {
+    deleteSqlTable();
+
     if (m_gameListData)
         delete m_gameListData;
 }
@@ -207,4 +209,25 @@ QString TableModel::tableName() const
 QString TableModel::rowTableName() const
 {
     return m_tableName;
+}
+
+void TableModel::deleteSqlTable()
+{
+    // Removing the SQL table when this object is destoyed.
+    m_query.clear();
+
+    QString statement = QString(
+        "DROP TABLE IF EXISTS \"%1\";"
+        ).arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << "Failed to delete the table \"" 
+            << m_tableName.toLocal8Bit().constData()
+            << "\"\n\t"
+            << m_query.lastError().text().toLocal8Bit().constData()
+            << std::endl;
 }

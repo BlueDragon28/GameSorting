@@ -39,6 +39,7 @@ public slots:
 private slots:
     void tabChanged(int index);
     void addTable();
+    void removeTable(int index);
 
 private:
     void setupView();

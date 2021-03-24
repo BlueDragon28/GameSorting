@@ -56,8 +56,12 @@ void TabAndList::setupView()
     vLayout->addLayout(hBarLayout);
     vLayout->addLayout(m_stackedViews, 1);
 
+    // Allow the user to close tabs of the tab bar.
+    m_tabBar->setTabsClosable(true);
+
     connect(addNewTableButton, &QPushButton::clicked, this, &TabAndList::addTable);
     connect(m_tabBar, &QTabBar::currentChanged, this, &TabAndList::tabChanged);
+    connect(m_tabBar, &QTabBar::tabCloseRequested, this, &TabAndList::removeTable);
 }
 
 void TabAndList::tabChanged(int index)
@@ -94,4 +98,16 @@ void TabAndList::addingItem()
 
     if (listView)
         listView->addingItem();
+}
+
+void TabAndList::removeTable(int index)
+{
+    // Removing a table when requested by the user.
+    if (index >= 0 && index < m_tabBar->count())
+    {
+        QWidget* widget = m_stackedViews->widget(index);
+        m_stackedViews->removeWidget(widget);
+        m_tabBar->removeTab(index);
+        delete widget;
+    }
 }
