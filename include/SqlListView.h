@@ -26,6 +26,7 @@
 
 class TableModel;
 class QTableView;
+class QVBoxLayout;
 
 class SqlListView : public QWidget
 {
@@ -43,6 +44,7 @@ protected:
 private:
     void setupWidget();
     void setupView();
+    void createMenu(QVBoxLayout* vLayout);
 
     QSqlDatabase& m_db;
     ListType m_type;

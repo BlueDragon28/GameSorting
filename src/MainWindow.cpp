@@ -54,13 +54,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenu()
 {
-	QToolBar* editBar = addToolBar(tr("Edit"));
-
-	QIcon addIcon(":/Images/Add.svg");
-	QAction* addAct = new QAction(addIcon, tr("Add Item"), this);
-	addAct->setToolTip(tr("Adding a new item into the current listed view."));
-	connect(addAct, &QAction::triggered, m_tabAndList, &TabAndList::addingItem);
-	editBar->addAction(addAct);
 }
 
 void MainWindow::createCentralWidget()

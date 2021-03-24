@@ -23,6 +23,9 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QIcon>
+#include <QAction>
+#include <QToolBar>
 
 #include <iostream>
 
@@ -46,6 +49,7 @@ void SqlListView::setupWidget()
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->addWidget(m_view);
+    createMenu(vLayout);
 }
 
 void SqlListView::setupView()
@@ -61,4 +65,21 @@ void SqlListView::addingItem()
 QString SqlListView::tableName() const
 {
     return m_model->tableName();
+}
+
+void SqlListView::createMenu(QVBoxLayout* vLayout)
+{
+    if (m_type == ListType::GAMELIST)
+    {
+        QToolBar* menuBar = new QToolBar(tr("Game Menu Bar"), this);
+        menuBar->setMovable(false);
+
+        QIcon addIcon(":/Images/Add.svg");
+        QAction* addAct = new QAction(addIcon, tr("Add New Game"), this);
+        addAct->setToolTip(tr("Adding a new game into the current game list."));
+        connect(addAct, &QAction::triggered, this, &SqlListView::addingItem);
+        menuBar->addAction(addAct);
+
+        vLayout->setMenuBar(menuBar);
+    }
 }
