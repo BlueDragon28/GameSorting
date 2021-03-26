@@ -16,42 +16,33 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_SQLLISTVIEW_H
-#define GAMESORTING_SQLLISTVIEW_H
+#include "ListViewDelegate.h"
 
-#include "DataStruct.h"
+ListViewDelegate::ListViewDelegate(QObject* parent) :
+	QStyledItemDelegate(parent)
+{}
 
-#include <QWidget>
-#include <QSqlDatabase>
-
-class TableModel;
-class QTableView;
-class QVBoxLayout;
-
-class SqlListView : public QWidget
+void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    Q_OBJECT
-public:
-    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
-    ~SqlListView();
+	return QStyledItemDelegate::paint(painter, option, index);
+}
 
-    QString tableName() const;
+QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+	return QStyledItemDelegate::sizeHint(option, index);
+}
 
-public slots:
-    void addingItem();
-    void deletingItems();
-    
-protected:
+QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+	return QStyledItemDelegate::createEditor(parent, option, index);
+}
 
-private:
-    void setupWidget();
-    void setupView();
-    void createMenu(QVBoxLayout* vLayout);
+void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+	return QStyledItemDelegate::setEditorData(editor, index);
+}
 
-    QSqlDatabase& m_db;
-    ListType m_type;
-    QTableView* m_view;
-    TableModel* m_model;
-};
-
-#endif
+void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+	return QStyledItemDelegate::setModelData(editor, model, index);
+}

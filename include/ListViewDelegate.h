@@ -16,42 +16,22 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_SQLLISTVIEW_H
-#define GAMESORTING_SQLLISTVIEW_H
+#ifndef GAMESORTING_LISTVIEWDELETAGE_H_
+#define GAMESORTING_LISTVIEWDELETAGE_H_
 
-#include "DataStruct.h"
+#include <QStyledItemDelegate>
 
-#include <QWidget>
-#include <QSqlDatabase>
-
-class TableModel;
-class QTableView;
-class QVBoxLayout;
-
-class SqlListView : public QWidget
+class ListViewDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
-    ~SqlListView();
+	ListViewDelegate(QObject* parent = nullptr);
 
-    QString tableName() const;
-
-public slots:
-    void addingItem();
-    void deletingItems();
-    
-protected:
-
-private:
-    void setupWidget();
-    void setupView();
-    void createMenu(QVBoxLayout* vLayout);
-
-    QSqlDatabase& m_db;
-    ListType m_type;
-    QTableView* m_view;
-    TableModel* m_model;
+	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void setEditorData(QWidget* editor, const QModelIndex& parent) const override;
+	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 };
 
-#endif
+#endif // GAMESORTING_LISTVIEWDELETAGE_H_

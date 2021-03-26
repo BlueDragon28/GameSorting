@@ -30,6 +30,8 @@
 
 #include <iostream>
 
+#include "ListViewDelegate.h"
+
 SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
@@ -45,6 +47,17 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
     addingItem();
 }
 
+SqlListView::~SqlListView()
+{
+    if (m_view)
+    {
+        // Deleting the item delegate of the view.
+        QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
+        if (itemDelegate)
+            delete itemDelegate;
+    }
+}
+
 void SqlListView::setupWidget()
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
@@ -55,6 +68,11 @@ void SqlListView::setupWidget()
     // Allow the user to only select all a row.
     m_view->setSelectionBehavior(QTableView::SelectRows);
     m_view->setSelectionMode(QTableView::ExtendedSelection);
+
+    // Setting the custom item delegate ListViewDelegate.
+    QAbstractItemDelegate* oldDelegate = m_view->itemDelegate();
+    m_view->setItemDelegate(new ListViewDelegate());
+    delete oldDelegate;
 }
 
 void SqlListView::setupView()
