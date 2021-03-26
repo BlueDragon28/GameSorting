@@ -91,6 +91,13 @@ void SqlListView::createMenu(QVBoxLayout* vLayout)
         connect(delAct, &QAction::triggered, this, &SqlListView::deletingItems);
         menuBar->addAction(delAct);
 
+        QIcon updateIcon(":/Images/Update.svg");
+        QAction* updateAct = new QAction(updateIcon, tr("Synchronize SQL data with view."), this);
+        updateAct->setToolTip(tr("Query all the rows from the list and update the entire view.\n"
+                                 "Use it to check if there is no error between the data in the view and the SQL data."));
+        connect(updateAct, &QAction::triggered, m_model, &TableModel::updateQuery);
+        menuBar->addAction(updateAct);
+
         vLayout->setMenuBar(menuBar);
     }
 }
