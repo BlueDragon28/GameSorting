@@ -88,7 +88,7 @@ Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
 QVariant TableModel::data(const QModelIndex& index, int role) const
 {
     // Returning the table data into the view.
-    if (m_isTableCreated && role == Qt::DisplayRole)
+    if (m_isTableCreated && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
         if (m_listType == ListType::GAMELIST)
             return gameData(index, role);
@@ -247,4 +247,9 @@ void TableModel::deleteRows(const QModelIndexList& indexList)
         it != indexListCopy.cend();
         it++)
         removeRow((*it).row(), QModelIndex());
+}
+
+ListType TableModel::listType() const
+{
+    return m_listType;
 }
