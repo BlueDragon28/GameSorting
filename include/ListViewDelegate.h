@@ -32,6 +32,9 @@ public:
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	void setEditorData(QWidget* editor, const QModelIndex& parent) const override;
 	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+
+private:
+	void commitAndCloseEditor(QWidget* editor);
 };
 
 #endif // GAMESORTING_LISTVIEWDELETAGE_H_

@@ -17,6 +17,10 @@
 */
 
 #include "ListViewDelegate.h"
+#include "Common.h"
+#include "TableModel.h"
+#include "StarEditor.h"
+#include <iostream>
 
 ListViewDelegate::ListViewDelegate(QObject* parent) :
 	QStyledItemDelegate(parent)
@@ -24,25 +28,96 @@ ListViewDelegate::ListViewDelegate(QObject* parent) :
 
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-	return QStyledItemDelegate::paint(painter, option, index);
+	// Painting the delegate.
+	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
+
+	if (model->listType() == ListType::GAMELIST)
+	{
+		if (index.column() == Game::RATE)
+		{
+			// Painting the stars.
+			StarEditor::paintStars(index.data().toInt(), painter, option.rect, option.palette);
+			return;
+		}
+	}
+
+	QStyledItemDelegate::paint(painter, option, index);
 }
 
 QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+	// Returning the recommanded size of the field.
+	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
+
+	if (model->listType() == ListType::GAMELIST)
+	{
+		if (index.column() == Game::RATE)
+		{
+			return StarEditor::sizeHint(5);
+		}
+	}
+
 	return QStyledItemDelegate::sizeHint(option, index);
 }
 
 QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+	// Creating the editor 
+	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
+
+	if (model->listType() == ListType::GAMELIST)
+	{
+		if (index.column() == Game::RATE)
+		{
+			StarEditor* editor = new StarEditor(parent);
+			connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
+			return editor;
+		}
+	}
+
 	return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
-void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 {
-	return QStyledItemDelegate::setEditorData(editor, index);
+	// Setting the fild data to the editor.
+	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
+
+	if (model->listType() == ListType::GAMELIST)
+	{
+		if (index.column() == Game::RATE)
+		{
+			StarEditor* editor = reinterpret_cast<StarEditor*>(e);
+			editor->setStars(index.data().toInt());
+		}
+	}
+
+	return QStyledItemDelegate::setEditorData(e, index);
 }
 
-void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QModelIndex& index) const
 {
-	return QStyledItemDelegate::setModelData(editor, model, index);
+	// When the edit is finished, apply the editor data to the field.
+	TableModel* model = reinterpret_cast<TableModel*>(m);
+
+	if (model->listType() == ListType::GAMELIST)
+	{
+		if (index.column() == Game::RATE)
+		{
+			StarEditor* editor = reinterpret_cast<StarEditor*>(e);
+			model->setData(index, editor->stars());
+		}
+	}
+
+	return QStyledItemDelegate::setModelData(e, m, index);
+}
+
+void ListViewDelegate::commitAndCloseEditor(QWidget* editor)
+{
+	// Commit the data of the editor and close it.
+	if (editor)
+	{
+		emit commitData(editor);
+		emit closeEditor(editor);
+	}
 }

@@ -82,7 +82,7 @@ void TableModel::gameCreateTable()
             "   Services INTEGER,\n"
             "   SensitiveContent INTEGER,\n"
             "   Url TEXT,\n"
-            "   Rate INTEGER);")
+            "   Rate INTEGER DEFAULT 5);")
                 .arg(m_tableName);
 
 #ifndef NDEBUG

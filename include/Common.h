@@ -28,4 +28,7 @@ QString replaceSpaceByUnderscore(const QString& str);
 QString replaceUnderscoreBySpace(const QString& str);
 QString replaceMultipleSpaceByOne(const QString& str);
 
+template<typename T>
+T inRange(T value, T min, T max);
+
 #endif // GAMESORTING_COMMON_H_

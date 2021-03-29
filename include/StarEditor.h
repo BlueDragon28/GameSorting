@@ -16,44 +16,44 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_DATASTRUCT_H_
-#define GAMESORTING_DATASTRUCT_H_
+#ifndef GAMESORTING_STAREDITOR_H_
+#define GAMESORTING_STAREDITOR_H_
 
-#include <QString>
+#include <QWidget>
 
-namespace Game
+class StarEditor : public QWidget
 {
-    enum GameColumnIndex
-    {
-        NAME = 0,
-        CATEGORIES = 1,
-        DEVELOPPERS = 2,
-        PUBLISHERS = 3,
-        PLATFORMS = 4,
-        SERVICES = 5,
-        SENSITIVE_CONTENT = 6,
-        RATE = 7
-    };
-}
+	Q_OBJECT
+public:
+	StarEditor(QWidget* parent = nullptr);
+	StarEditor(int maxStars, QWidget* parent = nullptr);
 
-enum class ListType
-{
-    GAMELIST
+	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false);
+	static QSize sizeHint(int maxStars);
+	static double paintFactor();
+
+	int stars() const;
+	int maxStars() const;
+	void setStars(int stars);
+	void setMaxStars(int maxStars);
+
+	virtual QSize sizeHint() const override;
+
+signals:
+	void editFinished(QWidget* editor);
+
+protected:
+	virtual void paintEvent(QPaintEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void mousePressEvent(QMouseEvent* event) override;
+
+private:
+	int m_stars;
+	int m_maxStars;
+	int m_cursorXPos;
+
+	static QPolygonF starPolygonData;
+	static double staticPaintFactor;
 };
 
-struct GameItem
-{
-    long long int gameID;
-    long long int gamePos;
-    QString name;
-    int categories;
-    int developpers;
-    int publishers;
-    int platform;
-    int services;
-    int sensitiveContent;
-    QString url;
-    int rate;
-};
-
-#endif // GAMESORTING_DATASTRUCT_H_
+#endif // GAMESORTING_STAREDITOR_H_

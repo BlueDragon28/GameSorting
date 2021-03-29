@@ -132,3 +132,16 @@ QString replaceMultipleSpaceByOne(const QString& str)
 
 	return QString();
 }
+
+template<typename T>
+T inRange(T value, T min, T max)
+{
+	// Lock the value between min and max.
+	if (value < min)
+		return min;
+	else if (value > max)
+		return max;
+	else
+		return value;
+}
+template int inRange(int value, int min, int max);
