@@ -53,6 +53,7 @@ StarEditor::StarEditor(int maxStars, QWidget* parent) :
 {
 	// Enable mouse tracking to force qt to call mouseMoveEvent every time the mouse move.
 	setMouseTracking(true);
+	setAutoFillBackground(true);
 }
 
 void StarEditor::paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode)
