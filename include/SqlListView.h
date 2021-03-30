@@ -20,6 +20,7 @@
 #define GAMESORTING_SQLLISTVIEW_H
 
 #include "DataStruct.h"
+#include "SqlUtilityTable.h"
 
 #include <QWidget>
 #include <QSqlDatabase>
@@ -32,7 +33,7 @@ class SqlListView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, QWidget* parent = nullptr);
+    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
     ~SqlListView();
 
     QString tableName() const;

@@ -19,6 +19,8 @@
 #ifndef GAMESORTING_TABANDLIST_H
 #define GAMESORTING_TABANDLIST_H
 
+#include "SqlListView.h"
+
 #include <QWidget>
 #include <QSqlDatabase>
 #include <QTabBar>
@@ -45,6 +47,7 @@ private:
     void setupView();
 
     QSqlDatabase& m_db;
+    SqlUtilityTable m_sqlUtilityTable;
     QTabBar* m_tabBar;
     QStackedLayout* m_stackedViews;
 };

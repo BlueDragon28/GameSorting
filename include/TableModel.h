@@ -26,12 +26,13 @@
 #include <QList>
 
 #include "DataStruct.h"
+#include "SqlUtilityTable.h"
 
 class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, QObject* parent = nullptr);
+    explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     ~TableModel();
 
     // Data interface.
@@ -77,6 +78,7 @@ private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;
 
     QSqlDatabase& m_db;
+    SqlUtilityTable& m_utilityTable;
     QSqlQuery m_query;
     QString m_tableName;
     ListType m_listType;

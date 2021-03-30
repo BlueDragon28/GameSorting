@@ -16,55 +16,44 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_DATASTRUCT_H_
-#define GAMESORTING_DATASTRUCT_H_
+#ifndef GAMESORTING_SQLUTILITYTABLE_H_
+#define GAMESORTING_SQLUTILITYTABLE_H_
 
+#include "DataStruct.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QString>
 
-namespace Game
+class SqlUtilityTable
 {
-    enum GameColumnIndex
-    {
-        NAME = 0,
-        CATEGORIES = 1,
-        DEVELOPPERS = 2,
-        PUBLISHERS = 3,
-        PLATFORMS = 4,
-        SERVICES = 5,
-        SENSITIVE_CONTENT = 6,
-        RATE = 7
-    };
-}
+	SqlUtilityTable(const SqlUtilityTable&) = delete;
+public:
+	SqlUtilityTable(ListType type, QSqlDatabase& db);
+	~SqlUtilityTable();
 
-enum class ListType
-{
-    GAMELIST
+	static QString tableName(UtilityTableName tableName);
+
+private:
+	void createTables();
+	void destroyTables();
+	void destroyTableByName(const QString& tableName);
+
+	// Games
+	void createGameTables();
+	void destroyGameTables();
+	void createCategoriesTable();
+	void createDeveloppersTable();
+	void createPublishersTable();
+	void createPlatformTable();
+	void createServicesTable();
+	void createSensitiveContentTable();
+
+	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
+
+	ListType m_type;
+	QSqlDatabase& m_db;
+	QSqlQuery m_query;
+	bool m_isTableReady;
 };
 
-struct GameItem
-{
-    long long int gameID;
-    long long int gamePos;
-    QString name;
-    int categories;
-    int developpers;
-    int publishers;
-    int platform;
-    int services;
-    int sensitiveContent;
-    QString url;
-    int rate;
-};
-
-enum class UtilityTableName
-{
-    // Game
-    CATEGORIES,
-    DEVELOPPERS,
-    PUBLISHERS,
-    PLATFORM,
-    SERVICES,
-    SENSITIVE_CONTENT
-};
-
-#endif // GAMESORTING_DATASTRUCT_H_
+#endif // GAMESORTING_SQLUTILITYTABLE_H_

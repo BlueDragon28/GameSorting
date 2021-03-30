@@ -22,9 +22,10 @@
 #include <iostream>
 #include <algorithm>
 
-TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db, QObject* parent) :
+TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     QAbstractTableModel(parent),
     m_db(db),
+    m_utilityTable(utilityTable),
     m_query(m_db),
     m_listType(type),
     m_gameListData(nullptr),

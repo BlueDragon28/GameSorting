@@ -32,7 +32,8 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
     m_tabBar(new QTabBar(this)),
-    m_stackedViews(new QStackedLayout())
+    m_stackedViews(new QStackedLayout()),
+    m_sqlUtilityTable(ListType::GAMELIST, m_db)
 {
     setupView();
 }
@@ -85,7 +86,7 @@ void TabAndList::addTable()
     if (ok && !tableName.isEmpty())
     {
         // Creating a new table using the tableName got from the user.
-        SqlListView* newList = new SqlListView(tableName, ListType::GAMELIST, m_db, this);
+        SqlListView* newList = new SqlListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
         m_stackedViews->addWidget(newList);
         m_tabBar->addTab(newList->tableName());
     }
