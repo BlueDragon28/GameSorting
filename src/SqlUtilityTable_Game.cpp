@@ -166,7 +166,10 @@ void SqlUtilityTable::createSensitiveContentTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	\"%1\" INTEGER PRIMARY KEY);\n").arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
+		"	\"%1\" INTEGER PRIMARY KEY,\n"
+		"	ExplicitContent INTEGER,\n"
+		"	ViolenceContent INTEGER,\n"
+		"	BadLanguage INTEGER);").arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
