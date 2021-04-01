@@ -17,6 +17,7 @@
 */
 
 #include "TableModel.h"
+#include "TableModel_UtilityInterface.h"
 #include "Common.h"
 #include <QSqlError>
 #include <iostream>
@@ -26,6 +27,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     QAbstractTableModel(parent),
     m_db(db),
     m_utilityTable(utilityTable),
+    m_utilityInterface(nullptr),
     m_query(m_db),
     m_listType(type),
     m_gameListData(nullptr),
@@ -39,10 +41,15 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     m_tableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtAndLastSpaces(tableName))));
 
     createTable();
+
+    m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
 }
 
 TableModel::~TableModel()
 {
+    if (m_utilityInterface)
+        delete m_utilityInterface;
+
     deleteSqlTable();
 
     if (m_gameListData)

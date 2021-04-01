@@ -28,6 +28,8 @@
 #include "DataStruct.h"
 #include "SqlUtilityTable.h"
 
+class TableModel_UtilityInterface;
+
 class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -79,6 +81,7 @@ private:
 
     QSqlDatabase& m_db;
     SqlUtilityTable& m_utilityTable;
+    TableModel_UtilityInterface* m_utilityInterface;
     QSqlQuery m_query;
     QString m_tableName;
     ListType m_listType;
