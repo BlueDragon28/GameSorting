@@ -179,3 +179,49 @@ void TableModel_UtilityInterface::createSensitiveContentTable()
 		m_isTableReady = false;
 	}
 }
+
+void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& itemsID)
+{
+	// Deleting any column of each utility tables referrencing to the gameID itemID.
+	if (!m_isTableReady || itemsID.size() == 0) return;
+
+	// Converting the list of itemsID into a string.
+	QString idList;
+	for (int i = 0; i < itemsID.size(); i++)
+	{
+		if (i > 0) 
+			idList += ", ";
+
+		idList += QString::number(itemsID.at(i));
+	}
+
+	// Deleting all the rows of Categories table where GameID is equal to itemsID.
+	QString statement = QString(
+		"DELETE FROM \"%1\"\n"
+		"WHERE %2;")
+			.arg(tableName(UtilityTableName::CATEGORIES));
+	
+	if (itemsID.size() == 1)
+		statement = statement.arg(QString(
+			"%1 = %2")
+				.arg("GameID")
+				.arg(itemsID.at(0)));
+	else
+		statement = statement.arg(QString(
+			"%1 IN (%2);")
+				.arg(tableName(UtilityTableName::CATEGORIES))
+				.arg(idList));
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	m_query.clear();
+	if (!m_query.exec(statement))
+		std::cerr << QString("Failed to delete rows where GameID is equal to %1 in the %2 table.\n\t%3.")
+			.arg(idList)
+			.arg(tableName(UtilityTableName::CATEGORIES))
+			.arg(m_query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+}

@@ -410,10 +410,14 @@ bool TableModel::gameRemoveRows(int row, int count, const QModelIndex& parent)
             "DELETE FROM \"%1\"\n"
             "WHERE GameID ")
             .arg(m_tableName);
+        QList<long long int> itemsID(count);
         
         if (count == 1)
+        {
             statement += QString("= %1;")
                 .arg(m_gameListData->at(row).gameID);
+                itemsID[0] = m_gameListData->at(row).gameID;
+        }
         else
         {
             statement += "IN (";
@@ -421,7 +425,8 @@ bool TableModel::gameRemoveRows(int row, int count, const QModelIndex& parent)
             {
                 if (i > 0)
                     statement += ", ";
-                statement += QString::number(m_gameListData->at(i).gameID);
+                statement += QString::number(m_gameListData->at(row+i).gameID);
+                itemsID[i] = m_gameListData->at(row+i).gameID;
             }
             statement += ");";
         }
@@ -442,6 +447,7 @@ bool TableModel::gameRemoveRows(int row, int count, const QModelIndex& parent)
                 beginRemoveRows(QModelIndex(), row, row + (count - 1));
             
             m_gameListData->remove(row, count);
+            m_utilityInterface->rowRemoved(itemsID);
 
             endRemoveRows();
         }

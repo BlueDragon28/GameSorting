@@ -95,3 +95,9 @@ void TableModel_UtilityInterface::destroyTableByName(const QString& tableName)
 			.toLocal8Bit().constData()
 			<< std::endl;
 }
+
+void TableModel_UtilityInterface::rowRemoved(const QList<long long int>& itemsID)
+{
+	if (m_listType == ListType::GAMELIST)
+		gameRowRemoved(itemsID);
+}

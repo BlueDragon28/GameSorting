@@ -34,6 +34,8 @@ public:
 
 	QString tableName(UtilityTableName tableName) const;
 
+	void rowRemoved(const QList<long long int>& itemsID);
+
 private:
 	void createTables();
 	void destroyTables();
@@ -48,6 +50,7 @@ private:
 	void createPlatformTable();
 	void createServicesTable();
 	void createSensitiveContentTable();
+	void gameRowRemoved(const QList<long long int>& itemsID);
 
 	static void printTableCreationError(const QString& tableName, const QString& messageError);
 
