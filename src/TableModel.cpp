@@ -43,6 +43,49 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     createTable();
 
     m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
+
+    QString statement = QString(
+        "INSERT INTO \"%1\" (Name, Description)\n"
+        "VALUES\n"
+        "   (\"Adventure\", \"Adventure Types\"),\n"
+        "   (\"FPS\", \"First person shooter\"),\n"
+        "   (\"MMO\", \"Massive Multiplayer Online\");")
+            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES));
+        
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    m_query.clear();
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+        
+    statement = QString(
+        "INSERT INTO \"%1\" (CategoriesUtilityID, GameID)\n"
+        "VALUES\n"
+        "   (1, 1),\n"
+        "   (2, 1),\n"
+        "   (3, 1),\n"
+        "   (2, 2),\n"
+        "   (3, 2),\n"
+        "   (1, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    m_query.clear();
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
 }
 
 TableModel::~TableModel()
