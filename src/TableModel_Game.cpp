@@ -94,7 +94,6 @@ void TableModel::gameCreateTable()
             "   GameID INTEGER PRIMARY KEY,\n"
             "   GamePos INTEGER,\n"
             "   Name TEXT DEFAULT \"New Game\",\n"
-            "   Categories INTEGER,\n"
             "   Developpers INTEGER,\n"
             "   Publishers INTEGER,\n"
             "   Platform INTEGER,\n"
@@ -176,23 +175,6 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
 
                 QSqlQuery query(m_db);
                 bool result = gameUpdateField<const QString&>(query, "Name", index.row(), gameName);
-                if (result)
-                    emit dataChanged(index, index, {Qt::EditRole});
-                return result;
-            }
-            else
-                return false;
-        } break;
-
-        case 1:
-        {
-            if (value.canConvert<QString>())
-            {
-                QString categories = value.toString();
-                (*m_gameListData)[index.row()].categories = categories;
-
-                QSqlQuery query(m_db);
-                bool result = gameUpdateField<QString>(query, "Categories", index.row(), categories);
                 if (result)
                     emit dataChanged(index, index, {Qt::EditRole});
                 return result;
@@ -316,7 +298,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
             "INSERT INTO \"%1\" (\n"
             "   GamePos,\n"
             "   Name,\n"
-            "   Categories,\n"
             "   Developpers,\n"
             "   Publishers,\n"
             "   Platform,\n"
@@ -330,7 +311,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
         for (int i = 0; i < count; i++)
         {
             statement += 
-                "\n   (NULL, \"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
+                "\n   (NULL, \"New Game\", NULL, NULL, NULL, NULL, NULL, NULL, NULL),";
         }
         statement[statement.size() - 1] = ';';
 
@@ -347,7 +328,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                 "   GameID,\n"
                 "   GamePos,\n"
                 "   Name,\n"
-                "   Categories,\n"
                 "   Publishers,\n"
                 "   Platform,\n"
                 "   Services,\n"
@@ -379,14 +359,13 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                         game.gameID = query.value(0).toLongLong();
                         game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
-                        game.categories = query.value(3).toString();
-                        game.developpers = query.value(4).toInt();
-                        game.publishers = query.value(5).toInt();
-                        game.platform = query.value(6).toInt();
-                        game.services = query.value(7).toInt();
-                        game.sensitiveContent = query.value(8).toInt();
-                        game.url = query.value(9).toString();
-                        game.rate = query.value(10).toInt();
+                        game.developpers = query.value(3).toInt();
+                        game.publishers = query.value(4).toInt();
+                        game.platform = query.value(5).toInt();
+                        game.services = query.value(6).toInt();
+                        game.sensitiveContent = query.value(7).toInt();
+                        game.url = query.value(8).toString();
+                        game.rate = query.value(9).toInt();
                         gameList.prepend(game);
                         i++;
                     } while (query.previous() && i < count);
@@ -520,7 +499,6 @@ void TableModel::gameUpdateQuery()
         "   GameID,\n"
         "   GamePos,\n"
         "   Name,\n"
-        "   Categories,\n"
         "   Developpers,\n"
         "   Publishers,\n"
         "   Platform,\n"
@@ -547,14 +525,13 @@ void TableModel::gameUpdateQuery()
             game.gameID = m_query.value(0).toLongLong();
             game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
-            game.categories = m_query.value(3).toString();
-            game.developpers = m_query.value(4).toInt();
-            game.publishers = m_query.value(5).toInt();
-            game.platform = m_query.value(6).toInt();
-            game.services = m_query.value(7).toInt();
-            game.sensitiveContent = m_query.value(8).toInt();
-            game.url = m_query.value(9).toString();
-            game.rate = m_query.value(10).toInt();
+            game.developpers = m_query.value(3).toInt();
+            game.publishers = m_query.value(4).toInt();
+            game.platform = m_query.value(5).toInt();
+            game.services = m_query.value(6).toInt();
+            game.sensitiveContent = m_query.value(7).toInt();
+            game.url = m_query.value(8).toString();
+            game.rate = m_query.value(9).toInt();
             m_gameListData->append(game);
         }
 
