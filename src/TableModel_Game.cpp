@@ -134,21 +134,21 @@ QVariant TableModel::gameData(const QModelIndex& index, int role) const
         // Returning to the tableView the data from the list.
         switch (index.column())
         {
-        case 0:
+        case Game::NAME:
             return m_gameListData->at(index.row()).name;
-        case 1:
+        case Game::CATEGORIES:
             return m_gameListData->at(index.row()).categories;
-        case 2:
+        case Game::DEVELOPPERS:
             return m_gameListData->at(index.row()).developpers;
-        case 3:
+        case Game::PUBLISHERS:
             return m_gameListData->at(index.row()).publishers;
-        case 4:
+        case Game::PLATFORMS:
             return m_gameListData->at(index.row()).platform;
-        case 5:
+        case Game::SERVICES:
             return m_gameListData->at(index.row()).services;
-        case 6:
+        case Game::SENSITIVE_CONTENT:
             return m_gameListData->at(index.row()).sensitiveContent;
-        case 7:
+        case Game::RATE:
             return m_gameListData->at(index.row()).rate;
         }
     }
@@ -166,7 +166,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
     {
         switch (index.column())
         {
-        case 0:
+        case Game::NAME:
         {
             if (value.canConvert<QString>())
             {
@@ -183,7 +183,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case 2:
+        case Game::DEVELOPPERS:
         {
             if (value.canConvert<int>())
             {
@@ -200,7 +200,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case 3:
+        case Game::PUBLISHERS:
         {
             if (value.canConvert<int>())
             {
@@ -217,7 +217,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case 4:
+        case Game::PLATFORMS:
         {
             if (value.canConvert<int>())
             {
@@ -234,7 +234,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case 5:
+        case Game::SERVICES:
         {
             if (value.canConvert<int>())
             {
@@ -250,7 +250,7 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case 6:
+        case Game::SENSITIVE_CONTENT:
         {
             if (value.canConvert<int>())
             {
@@ -261,10 +261,13 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 bool result = gameUpdateField<int>(query, "SensitiveContent", index.row(), sensitiveContent);
                 if (result)
                     emit dataChanged(index, index, {Qt::EditRole});
+                return result;
             }
+            else
+                return false;
         } break;
 
-        case 7:
+        case Game::RATE:
         {
             if (value.canConvert<int>())
             {
