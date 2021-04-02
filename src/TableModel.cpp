@@ -86,6 +86,48 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
+    
+    // Insert testing rows into the Developpers Utility Table.
+    statement = QString(
+        "INSERT INTO \"%1\" (Name)\n"
+        "VALUES\n"
+        "   (\"Developpers 1\"),\n"
+        "   (\"Developpers 2\"),\n"
+        "   (\"Developpers 3\");")
+            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS));
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    m_query.clear();
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    // Inserting testings rows into the Developpers Utility Interface Table.
+    statement = QString(
+        "INSERT INTO \"%1\" (DeveloppersUtilityID, GameID)\n"
+        "VALUES\n"
+        "   (1, 1),\n"
+        "   (3, 1),\n"
+        "   (2, 2),\n"
+        "   (2, 3),\n"
+        "   (3, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS));
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    m_query.clear();
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
 }
 
 TableModel::~TableModel()

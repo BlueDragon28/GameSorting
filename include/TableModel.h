@@ -76,6 +76,7 @@ protected:
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
     void gameQueryCategoriesField();
+    void gameQueryDeveloppersField();
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;
