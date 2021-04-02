@@ -88,6 +88,10 @@ void TableModel_UtilityInterface::destroyTableByName(const QString& tableName)
 	QString statement = QString(
 		"DROP TABLE IF EXISTS \"%1\";").arg(tableName);
 
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
 	if (!m_query.exec(statement))
 		std::cerr << QString("Failed to destroy the %1 table.\n\t%2")
 			.arg(tableName)
