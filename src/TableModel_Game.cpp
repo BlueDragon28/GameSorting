@@ -17,6 +17,7 @@
 */
 
 #include "TableModel.h"
+#include "TableModel_UtilityInterface.h"
 #include <QSqlError>
 #include <iostream>
 
@@ -185,13 +186,13 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
 
         case 1:
         {
-            if (value.canConvert<int>())
+            if (value.canConvert<QString>())
             {
-                int categories = value.toInt();
+                QString categories = value.toString();
                 (*m_gameListData)[index.row()].categories = categories;
 
                 QSqlQuery query(m_db);
-                bool result = gameUpdateField<int>(query, "Categories", index.row(), categories);
+                bool result = gameUpdateField<QString>(query, "Categories", index.row(), categories);
                 if (result)
                     emit dataChanged(index, index, {Qt::EditRole});
                 return result;
@@ -378,7 +379,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                         game.gameID = query.value(0).toLongLong();
                         game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
-                        game.categories = query.value(3).toInt();
+                        game.categories = query.value(3).toString();
                         game.developpers = query.value(4).toInt();
                         game.publishers = query.value(5).toInt();
                         game.platform = query.value(6).toInt();
@@ -546,7 +547,7 @@ void TableModel::gameUpdateQuery()
             game.gameID = m_query.value(0).toLongLong();
             game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
-            game.categories = m_query.value(3).toInt();
+            game.categories = m_query.value(3).toString();
             game.developpers = m_query.value(4).toInt();
             game.publishers = m_query.value(5).toInt();
             game.platform = m_query.value(6).toInt();
@@ -560,6 +561,10 @@ void TableModel::gameUpdateQuery()
         if (m_gameListData->size() > 0)
         {
             m_listCount = m_gameListData->size();
+
+            // Quering the Categories and set it into the specifics rows.
+            gameQueryCategoriesField();
+
             beginInsertRows(QModelIndex(), 0, m_gameListData->size()-1);
             endInsertRows();
             emit dataChanged(index(0, 0), index(0, 8), {Qt::EditRole});
@@ -571,4 +576,54 @@ void TableModel::gameUpdateQuery()
         std::cerr << "Failed to update cell values of table " << m_tableName.toLocal8Bit().constData() << "\n\t"
             << m_query.lastError().text().toLocal8Bit().constData() << std::endl;
 #endif
+}
+
+void TableModel::gameQueryCategoriesField()
+{
+    // Gettings all the categories of a game by concatenate all the field
+    // of Categories Utility table.
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".\"Name\", \",\")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID\n"
+        "ORDER BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
+            .arg("CategoriesUtilityID")
+            .arg("GameID");
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        while (m_query.next())
+        {
+            long long int gameID = m_query.value(0).toLongLong();
+            QString categories = m_query.value(1).toString();
+
+            for (int i = 0; i < m_listCount; i++)
+            {
+                if (m_gameListData->at(i).gameID == gameID)
+                    (*m_gameListData)[i].categories = categories;
+            }
+        }
+    }
+    else
+        std::cerr << QString("Failed to query Categories of the %1 table.\n\t%2")
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
 }

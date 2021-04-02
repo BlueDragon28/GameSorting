@@ -46,7 +46,7 @@ struct GameItem
     long long int gameID;
     long long int gamePos;
     QString name;
-    int categories;
+    QString categories;
     int developpers;
     int publishers;
     int platform;

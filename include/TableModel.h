@@ -75,6 +75,7 @@ protected:
     template<typename T>
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
+    void gameQueryCategoriesField();
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;
