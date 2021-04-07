@@ -98,7 +98,7 @@ void TableModel_UtilityInterface::createPublishersTable()
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	GameID INTEGER,\n"
-		"	DeveloppersUtilityID INTEGER);").arg(tableName(UtilityTableName::PUBLISHERS));
+		"	PublishersUtilityID INTEGER);").arg(tableName(UtilityTableName::PUBLISHERS));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
