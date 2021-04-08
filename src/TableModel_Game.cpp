@@ -560,7 +560,10 @@ void TableModel::gameQueryCategoriesField()
             for (int i = 0; i < m_listCount; i++)
             {
                 if (m_gameListData->at(i).gameID == gameID)
+                {
                     (*m_gameListData)[i].categories = categories;
+                    break;
+                }
             }
         }
     }
@@ -610,7 +613,10 @@ void TableModel::gameQueryDeveloppersField()
             for (int i = 0; i < m_listCount; i++)
             {
                 if (m_gameListData->at(i).gameID == gameID)
+                {
                     (*m_gameListData)[i].developpers = developpers;
+                    break;
+                }
             }
         }
     }
@@ -661,7 +667,10 @@ void TableModel::gameQueryPublishersField()
             for (int i = 0; i < m_listCount; i++)
             {
                 if (m_gameListData->at(i).gameID == gameID)
+                {
                     (*m_gameListData)[i].publishers = publishers;
+                    break;
+                }
             }
         }
     }
