@@ -48,7 +48,7 @@ struct GameItem
     QString name;
     QString categories;
     QString developpers;
-    int publishers;
+    QString publishers;
     int platform;
     int services;
     int sensitiveContent;

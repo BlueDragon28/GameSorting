@@ -44,6 +44,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 
     m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
 
+    // insert dummy Categories for testing purpose.
     QString statement = QString(
         "INSERT INTO \"%1\" (Name, Description)\n"
         "VALUES\n"
@@ -80,6 +81,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 
     m_query.clear();
 
+    // insert dummy categories for testing purpose.
     if (!m_query.exec(statement))
         std::cerr << QString("Failed to insert rows into %1.\n\t%2")
             .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
@@ -126,6 +128,49 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     if (!m_query.exec(statement))
         std::cerr << QString("Failed to insert rows into %1.\n\t%2")
             .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    // insert dummy values into Publishers for testing purpose.
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (Name)\n"
+        "VALUES\n"
+        "   (\"Publishers 1\"),\n"
+        "   (\"Publishers 2\"),\n"
+        "   (\"Publishers 3\");")
+            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (PublishersUtilityID, GameID)\n"
+        "VALUES\n"
+        "   (1, 1),\n"
+        "   (2, 1),\n"
+        "   (2, 2),\n"
+        "   (3, 3),\n"
+        "   (1, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS));
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if(!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
 }

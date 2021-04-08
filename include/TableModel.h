@@ -77,6 +77,7 @@ protected:
     void gameUpdateQuery();
     void gameQueryCategoriesField();
     void gameQueryDeveloppersField();
+    void gameQueryPublishersField();
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;
