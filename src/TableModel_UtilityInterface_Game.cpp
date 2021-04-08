@@ -166,8 +166,12 @@ void TableModel_UtilityInterface::createSensitiveContentTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	SensitiveContentUtilityID INTEGER);").arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
+		"	SensitiveContentID INTEGER PRIMARY KEY,\n"
+		"	GameID INTEGER\n"
+		"	ExplicitContent INTEGER,\n"
+		"	ViolenceContent INTEGER,\n"
+		"	BadLanguage INTEGER);")
+			.arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
