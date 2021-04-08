@@ -94,8 +94,6 @@ void TableModel::gameCreateTable()
             "   GameID INTEGER PRIMARY KEY,\n"
             "   GamePos INTEGER,\n"
             "   Name TEXT DEFAULT \"New Game\",\n"
-            "   Platform INTEGER,\n"
-            "   Services INTEGER,\n"
             "   SensitiveContent INTEGER,\n"
             "   Url TEXT,\n"
             "   Rate INTEGER DEFAULT 5);")
@@ -181,39 +179,6 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case Game::PLATFORMS:
-        {
-            if (value.canConvert<int>())
-            {
-                int platform = value.toInt();
-                (*m_gameListData)[index.row()].platform = platform;
-
-                QSqlQuery query(m_db);
-                bool result = gameUpdateField<int>(query, "Platform", index.row(), platform);
-                if (result)
-                    emit dataChanged(index, index, {Qt::EditRole});
-                return result;
-            }
-            else 
-                return false;
-        } break;
-
-        case Game::SERVICES:
-        {
-            if (value.canConvert<int>())
-            {
-                int services = value.toInt();
-                (*m_gameListData)[index.row()].services = services;
-
-                QSqlQuery query(m_db);
-                bool result = gameUpdateField<int>(query, "Services", index.row(), services);
-                if (result)
-                    emit dataChanged(index, index, {Qt::EditRole});
-                return result;            }
-            else
-                return false;
-        } break;
-
         case Game::SENSITIVE_CONTENT:
         {
             if (value.canConvert<int>())
@@ -265,8 +230,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
             "INSERT INTO \"%1\" (\n"
             "   GamePos,\n"
             "   Name,\n"
-            "   Platform,\n"
-            "   Services,\n"
             "   SensitiveContent,\n"
             "   Url,\n"
             "   Rate )\n"
@@ -276,7 +239,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
         for (int i = 0; i < count; i++)
         {
             statement += 
-                "\n   (NULL, \"New Game\", NULL, NULL, NULL, NULL, NULL),";
+                "\n   (NULL, \"New Game\", NULL, NULL, NULL),";
         }
         statement[statement.size() - 1] = ';';
 
@@ -293,8 +256,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                 "   GameID,\n"
                 "   GamePos,\n"
                 "   Name,\n"
-                "   Platform,\n"
-                "   Services,\n"
                 "   SensitiveContent,\n"
                 "   Url,\n"
                 "   Rate\n"
@@ -323,8 +284,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                         game.gameID = query.value(0).toLongLong();
                         game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
-                        game.platform = query.value(4).toInt();
-                        game.services = query.value(5).toInt();
                         game.sensitiveContent = query.value(6).toInt();
                         game.url = query.value(7).toString();
                         game.rate = query.value(8).toInt();
@@ -467,8 +426,6 @@ void TableModel::gameUpdateQuery()
         "   GameID,\n"
         "   GamePos,\n"
         "   Name,\n"
-        "   Platform,\n"
-        "   Services,\n"
         "   SensitiveContent,\n"
         "   Url,\n"
         "   Rate\n"
@@ -491,8 +448,6 @@ void TableModel::gameUpdateQuery()
             game.gameID = m_query.value(0).toLongLong();
             game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
-            game.platform = m_query.value(4).toInt();
-            game.services = m_query.value(5).toInt();
             game.sensitiveContent = m_query.value(6).toInt();
             game.url = m_query.value(7).toString();
             game.rate = m_query.value(8).toInt();
@@ -507,6 +462,8 @@ void TableModel::gameUpdateQuery()
             gameQueryCategoriesField();
             gameQueryDeveloppersField();
             gameQueryPublishersField();
+            gameQueryPlatformField();
+            gameQueryServicesField();
 
             beginInsertRows(QModelIndex(), 0, m_gameListData->size()-1);
             endInsertRows();
@@ -677,6 +634,114 @@ void TableModel::gameQueryPublishersField()
     else
         std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
             .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+}
+
+void TableModel::gameQueryPlatformField()
+{
+    // Gettings all the Platform of a game by concatenate all the field
+    // of Platform Utility table.
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID\n"
+        "ORDER BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PLATFORM)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
+            .arg("PlatformUtilityID")
+            .arg("GameID");
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        while (m_query.next())
+        {
+            long long int gameID = m_query.value(0).toLongLong();
+            QString platform = m_query.value(1).toString();
+
+            for (int i = 0; i < m_listCount; i++)
+            {
+                if (m_gameListData->at(i).gameID == gameID)
+                {
+                    (*m_gameListData)[i].platform = platform;
+                    break;
+                }
+            }
+        }
+    }
+    else
+        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+}
+
+void TableModel::gameQueryServicesField()
+{
+    // Gettings all the Platform of a game by concatenate all the field
+    // of Platform Utility table.
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID\n"
+        "ORDER BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::SERVICES)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
+            .arg("ServicesUtilityID")
+            .arg("GameID");
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        while (m_query.next())
+        {
+            long long int gameID = m_query.value(0).toLongLong();
+            QString services = m_query.value(1).toString();
+
+            for (int i = 0; i < m_listCount; i++)
+            {
+                if (m_gameListData->at(i).gameID == gameID)
+                {
+                    (*m_gameListData)[i].services = services;
+                    break;
+                }
+            }
+        }
+    }
+    else
+        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;

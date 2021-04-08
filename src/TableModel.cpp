@@ -173,6 +173,94 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
+    
+    // insert dummy values into Platform for testing purpose.
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (Name)\n"
+        "VALUES\n"
+        "   (\"Windows\"),\n"
+        "   (\"Linux\"),\n"
+        "   (\"MacOS\");")
+            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (PlatformUtilityID, GameID)\n"
+        "VALUES\n"
+        "   (1, 1),\n"
+        "   (3, 1),\n"
+        "   (1, 2),\n"
+        "   (2, 2),\n"
+        "   (1, 3),\n"
+        "   (3, 3),\n"
+        "   (2, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    // insert dummy values into Services for testing purpose.
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (Name)\n"
+        "VALUES\n"
+        "   (\"Service 1\"),\n"
+        "   (\"Service 2\"),\n"
+        "   (\"Service 3\");")
+            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+    
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (ServicesUtilityID, GameID)\n"
+        "VALUES\n"
+        "   (1, 1),\n"
+        "   (3, 1),\n"
+        "   (2, 2),\n"
+        "   (2, 3),\n"
+        "   (3, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
 }
 
 TableModel::~TableModel()
