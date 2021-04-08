@@ -28,7 +28,6 @@ void SqlUtilityTable::createGameTables()
 	createPublishersTable();
 	createPlatformTable();
 	createServicesTable();
-	createSensitiveContentTable();
 }
 
 void SqlUtilityTable::destroyGameTables()
@@ -38,7 +37,6 @@ void SqlUtilityTable::destroyGameTables()
 	destroyTableByName(tableName(UtilityTableName::PUBLISHERS));
 	destroyTableByName(tableName(UtilityTableName::PLATFORM));
 	destroyTableByName(tableName(UtilityTableName::SERVICES));
-	destroyTableByName(tableName(UtilityTableName::SENSITIVE_CONTENT));
 }
 
 void SqlUtilityTable::createCategoriesTable()
@@ -153,31 +151,6 @@ void SqlUtilityTable::createServicesTable()
 	if (!m_query.exec(statement))
 	{
 		errorMessageCreatingTable(tableName(UtilityTableName::SERVICES), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-}
-
-void SqlUtilityTable::createSensitiveContentTable()
-{
-	if (!m_isTableReady) return;
-
-	// Creating the sensitive content table.
-	m_query.clear();
-
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1\" INTEGER PRIMARY KEY,\n"
-		"	ExplicitContent INTEGER,\n"
-		"	ViolenceContent INTEGER,\n"
-		"	BadLanguage INTEGER);").arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
-
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::SENSITIVE_CONTENT), m_query.lastError().text());
 		m_isTableReady = false;
 	}
 }

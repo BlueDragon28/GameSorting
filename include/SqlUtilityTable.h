@@ -46,7 +46,6 @@ private:
 	void createPublishersTable();
 	void createPlatformTable();
 	void createServicesTable();
-	void createSensitiveContentTable();
 
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 

@@ -55,8 +55,6 @@ QString SqlUtilityTable::tableName(UtilityTableName tableName)
 		return "Platform";
 	case UtilityTableName::SERVICES:
 		return "Services";
-	case UtilityTableName::SENSITIVE_CONTENT:
-		return "SensitiveContent";
 	default:
 		return QString();
 	}
