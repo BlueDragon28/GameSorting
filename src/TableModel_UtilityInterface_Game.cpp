@@ -167,7 +167,7 @@ void TableModel_UtilityInterface::createSensitiveContentTable()
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	SensitiveContentID INTEGER PRIMARY KEY,\n"
-		"	GameID INTEGER\n"
+		"	GameID INTEGER,\n"
 		"	ExplicitContent INTEGER,\n"
 		"	ViolenceContent INTEGER,\n"
 		"	BadLanguage INTEGER);")

@@ -179,23 +179,6 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 return false;
         } break;
 
-        case Game::SENSITIVE_CONTENT:
-        {
-            if (value.canConvert<int>())
-            {
-                int sensitiveContent = value.toInt();
-                (*m_gameListData)[index.row()].sensitiveContent = sensitiveContent;
-
-                QSqlQuery query(m_db);
-                bool result = gameUpdateField<int>(query, "SensitiveContent", index.row(), sensitiveContent);
-                if (result)
-                    emit dataChanged(index, index, {Qt::EditRole});
-                return result;
-            }
-            else
-                return false;
-        } break;
-
         case Game::RATE:
         {
             if (value.canConvert<int>())
@@ -230,7 +213,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
             "INSERT INTO \"%1\" (\n"
             "   GamePos,\n"
             "   Name,\n"
-            "   SensitiveContent,\n"
             "   Url,\n"
             "   Rate )\n"
             "VALUES")
@@ -239,7 +221,7 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
         for (int i = 0; i < count; i++)
         {
             statement += 
-                "\n   (NULL, \"New Game\", NULL, NULL, NULL),";
+                "\n   (NULL, \"New Game\", NULL, NULL),";
         }
         statement[statement.size() - 1] = ';';
 
@@ -256,7 +238,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                 "   GameID,\n"
                 "   GamePos,\n"
                 "   Name,\n"
-                "   SensitiveContent,\n"
                 "   Url,\n"
                 "   Rate\n"
                 "FROM\n"
@@ -284,7 +265,6 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                         game.gameID = query.value(0).toLongLong();
                         game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
-                        game.sensitiveContent = query.value(6).toInt();
                         game.url = query.value(7).toString();
                         game.rate = query.value(8).toInt();
                         gameList.prepend(game);
@@ -426,7 +406,6 @@ void TableModel::gameUpdateQuery()
         "   GameID,\n"
         "   GamePos,\n"
         "   Name,\n"
-        "   SensitiveContent,\n"
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
@@ -448,7 +427,6 @@ void TableModel::gameUpdateQuery()
             game.gameID = m_query.value(0).toLongLong();
             game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
-            game.sensitiveContent = m_query.value(6).toInt();
             game.url = m_query.value(7).toString();
             game.rate = m_query.value(8).toInt();
             m_gameListData->append(game);
@@ -464,6 +442,7 @@ void TableModel::gameUpdateQuery()
             gameQueryPublishersField();
             gameQueryPlatformField();
             gameQueryServicesField();
+            gameQuerySensitiveContentField();
 
             beginInsertRows(QModelIndex(), 0, m_gameListData->size()-1);
             endInsertRows();
@@ -742,6 +721,56 @@ void TableModel::gameQueryServicesField()
     else
         std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
             .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+}
+
+void TableModel::gameQuerySensitiveContentField()
+{
+    // Getting the Sensitive Content Information for each game.
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   GameID,\n"
+        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\"\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   GameID;")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
+            .arg(tr("Explicit Content"))
+            .arg("ExplicitContent")
+            .arg(tr("Violence Content"))
+            .arg("ViolenceContent")
+            .arg(tr("Bad Language"))
+            .arg("BadLanguage");
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        while (m_query.next())
+        {
+            long long int gameID = m_query.value(0).toLongLong();
+            QString sensitiveContent = m_query.value(1).toString();
+
+            for (int i = 0; i < m_listCount; i++)
+            {
+                if (m_gameListData->at(i).gameID == gameID)
+                {
+                    (*m_gameListData)[i].sensitiveContent = sensitiveContent;
+                    break;
+                }
+            }
+        }
+    }
+    else
+        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;

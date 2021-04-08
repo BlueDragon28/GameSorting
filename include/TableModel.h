@@ -80,6 +80,7 @@ protected:
     void gameQueryPublishersField();
     void gameQueryPlatformField();
     void gameQueryServicesField();
+    void gameQuerySensitiveContentField();
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;

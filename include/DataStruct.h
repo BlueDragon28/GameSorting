@@ -51,7 +51,7 @@ struct GameItem
     QString publishers;
     QString platform;
     QString services;
-    int sensitiveContent;
+    QString sensitiveContent;
     QString url;
     int rate;
 };

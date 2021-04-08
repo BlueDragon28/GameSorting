@@ -261,6 +261,27 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
+    
+    // Inserting data into Sensitive Content for debugging purpose
+    m_query.clear();
+
+    statement = QString(
+        "INSERT INTO \"%1\" (GameID, ExplicitContent, ViolenceContent, BadLanguage)\n"
+        "VALUES\n"
+        "   (1, 3, 5, 2),\n"
+        "   (2, 0, 2, 3),\n"
+        "   (3, 5, 4, 3);")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT));
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (!m_query.exec(statement))
+        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
 }
 
 TableModel::~TableModel()
