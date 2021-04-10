@@ -199,63 +199,39 @@ void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& ite
 		idList += QString::number(itemsID.at(i));
 	}
 
-	// Deleting all the rows of Categories table where GameID is equal to itemsID.
-	QString statement = QString(
-		"DELETE FROM \"%1\"\n"
-		"WHERE %2;")
-			.arg(tableName(UtilityTableName::CATEGORIES));
-	
-	if (itemsID.size() == 1)
-		statement = statement.arg(QString(
-			"%1 = %2")
-				.arg("ItemID")
-				.arg(idList));
-	else
-		statement = statement.arg(QString(
-			"%1 IN (%2);")
-				.arg("ItemID")
-				.arg(idList));
+	// Deleting all the rows of all the utility table with itemID in it.
+	UtilityTableName tablesName[6] =
+	{
+		UtilityTableName::CATEGORIES,
+		UtilityTableName::DEVELOPPERS,
+		UtilityTableName::PUBLISHERS,
+		UtilityTableName::PLATFORM,
+		UtilityTableName::SERVICES,
+		UtilityTableName::SENSITIVE_CONTENT
+	};
 
+	for (int i = 0; i < 6; i++)
+	{
+		QString statement = QString(
+			"DELETE FROM \"%1\"\n"
+			"WHERE\n")
+				.arg(tableName(tablesName[i]));
+		
+		if (itemsID.size() == 1)
+			statement += QString("	ItemID = %1;").arg(idList);
+		else
+			statement += QString("	ItemID in (%1);").arg(idList);
+		
 #ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+		std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-	m_query.clear();
-	if (!m_query.exec(statement))
-		std::cerr << QString("Failed to delete rows where GameID is equal to %1 in the %2 table.\n\t%3.")
-			.arg(idList)
-			.arg(tableName(UtilityTableName::CATEGORIES))
-			.arg(m_query.lastError().text())
-			.toLocal8Bit().constData()
-			<< std::endl;
-	
-	// Deleting all the rows of Developpers table where GameID is equal to itemsID.
-	statement = QString(
-		"DELETE FROM \"%1\"\n"
-		"WHERE %2;")
-			.arg(tableName(UtilityTableName::DEVELOPPERS));
-	
-	if (itemsID.size() == 1)
-		statement = statement.arg(QString(
-			"%1 = %2")
-				.arg("ItemID")
-				.arg(idList));
-	else
-		statement = statement.arg(QString(
-			"%1 IN (%2);")
-				.arg("ItemID")
-				.arg(idList));
-	
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	m_query.clear();
-	if (!m_query.exec(statement))
-		std::cerr << QString("Failed to delete rows where GameID is equal to %1 in the %2 table.\n\t%3.")
-			.arg(idList)
-			.arg(tableName(UtilityTableName::DEVELOPPERS))
-			.arg(m_query.lastError().text())
-			.toLocal8Bit().constData()
-			<< std::endl;
+		if (!m_query.exec(statement))
+			std::cerr << QString("Failed to delete the utility interface rows where ItemID = %1 in the utility interface table %2.\n\t%3")
+				.arg(idList)
+				.arg(tableName(tablesName[i]))
+				.arg(m_query.lastError().text())
+				.toLocal8Bit().constData()
+				<< std::endl;
+	}
 }
