@@ -58,7 +58,7 @@ QVariant UtilityInterfaceEditorModel::data(const QModelIndex& index, int role) c
         if (role == Qt::DisplayRole || role == Qt::EditRole) 
             return m_utilityListData.at(index.row()).name;
         else if (role == Qt::CheckStateRole)
-            return m_utilityListData.at(index.row()).isChecked;
+            return isUtilityIDChecked(m_utilityListData.at(index.row()).utilityID);
     }
 
     return QVariant();
@@ -68,8 +68,19 @@ bool UtilityInterfaceEditorModel::setData(const QModelIndex& index, const QVaria
 {
     if (role == Qt::CheckStateRole)
     {
-        m_utilityListData[index.row()].isChecked = !m_utilityListData.at(index.row()).isChecked;
-        emit dataChanged(index, index, {role});
+        //m_utilityListData[index.row()].isChecked = !m_utilityListData.at(index.row()).isChecked;
+        if (isUtilityIDChecked(m_utilityListData.at(index.row()).utilityID))
+        {
+            removeCheckedUtilityID(m_utilityListData.at(index.row()).utilityID);
+            emit dataChanged(index, index, {role});
+            return false;
+        }
+        else
+        {
+            m_checkedIDList.append(m_utilityListData.at(index.row()).utilityID);
+            emit dataChanged(index, index, {role});
+            return true;
+        }
     }
     
     return true;
@@ -111,11 +122,30 @@ void UtilityInterfaceEditorModel::applyChange()
     m_query.clear();
 
     QList<long long int> interfaceData;
-    for (int i = 0; i < m_utilityListData.size(); i++)
-    {
-        if (m_utilityListData.at(i).isChecked)
-            interfaceData.append(m_utilityListData.at(i).utilityID);
-    }
+    for (int i = 0; i < m_checkedIDList.size(); i++)
+        interfaceData.append(m_checkedIDList.at(i));
     
     m_dataInterface->updateItemUtility(m_itemID, m_utilityTableName, interfaceData);
+}
+
+bool UtilityInterfaceEditorModel::isUtilityIDChecked(long long int utilityID) const
+{
+    // Check if utilityID is in the m_checkedIDList list.
+    /*QList<long long int>::const_iterator it;
+    for (it = m_checkedIDList.cbegin(); it != m_checkedIDList.cend(); it++)
+        if ((*it) == utilityID)
+            return true;
+    return false;*/
+    for (int i = 0; i < m_checkedIDList.size(); i++)
+        if (m_checkedIDList.at(i) == utilityID)
+            return true;
+    return false;
+}
+
+void UtilityInterfaceEditorModel::removeCheckedUtilityID(long long int utilityID)
+{
+    // Remove from the m_checkedIDList list all the element with utilityID.
+    for (int i = m_checkedIDList.size()-1; i >= 0; i--)
+        if (m_checkedIDList.at(i) == utilityID)
+            m_checkedIDList.remove(i, 1);
 }

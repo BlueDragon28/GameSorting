@@ -55,6 +55,8 @@ public:
 
 private:
     void retrieveUtilityData();
+    bool isUtilityIDChecked(long long int utilityID) const;
+    void removeCheckedUtilityID(long long int utilityID);
 
     QSqlDatabase& m_db;
     QSqlQuery m_query;
@@ -69,6 +71,7 @@ private:
 
     // Data
     QList<ItemUtilityEditorData> m_utilityListData;
+    QList<long long int> m_checkedIDList;
 };
 
 #endif
