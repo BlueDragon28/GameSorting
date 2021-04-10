@@ -70,7 +70,7 @@ private:
     SqlUtilityTable& m_utilityData;
 
     // Data
-    QList<ItemUtilityEditorData> m_utilityListData;
+    QList<ItemUtilityData> m_utilityListData;
     QList<long long int> m_checkedIDList;
 };
 

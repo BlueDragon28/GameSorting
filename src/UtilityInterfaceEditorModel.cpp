@@ -107,11 +107,7 @@ void UtilityInterfaceEditorModel::retrieveUtilityData()
         m_utilityListData.resize(utilityData.size());
         for (int i = 0; i < m_utilityListData.size(); i++)
         {
-            ItemUtilityEditorData utilityEditorData;
-            utilityEditorData.utilityID = utilityData.at(i).utilityID;
-            utilityEditorData.name = utilityData.at(i).name;
-            utilityEditorData.isChecked = false;
-            m_utilityListData[i] = utilityEditorData;
+            m_utilityListData[i] = utilityData.at(i);
         }
     }
 }
@@ -131,11 +127,6 @@ void UtilityInterfaceEditorModel::applyChange()
 bool UtilityInterfaceEditorModel::isUtilityIDChecked(long long int utilityID) const
 {
     // Check if utilityID is in the m_checkedIDList list.
-    /*QList<long long int>::const_iterator it;
-    for (it = m_checkedIDList.cbegin(); it != m_checkedIDList.cend(); it++)
-        if ((*it) == utilityID)
-            return true;
-    return false;*/
     for (int i = 0; i < m_checkedIDList.size(); i++)
         if (m_checkedIDList.at(i) == utilityID)
             return true;
