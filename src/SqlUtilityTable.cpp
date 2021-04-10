@@ -96,3 +96,41 @@ void SqlUtilityTable::destroyTableByName(const QString& tableName)
 			<< QString("\t%1").arg(m_query.lastError().text()).toLocal8Bit().constData() << std::endl << std::endl;
 	}
 }
+
+QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName) const
+{
+	// Retrive all the data containing in the table tableName.
+	QSqlQuery query(m_db);
+
+	QString statement = QString(
+		"SELECT\n"
+		"	\"%1ID\",\n"
+		"	\"Name\"\n"
+		"FROM\n"
+		"	\"%1\";")
+			.arg(this->tableName(tableName));
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (query.exec(statement))
+	{
+		QList<ItemUtilityData> tableData;
+		while (query.next())
+		{
+			long long int utilityID = query.value(0).toLongLong();
+			QString name = query.value(1).toString();
+			tableData.append({utilityID, name});
+		}
+		return tableData;
+	}
+	else
+		std::cerr << QString("Failed to retrieve data from %1 table.\n\t")
+			.arg(this->tableName(tableName))
+			.arg(query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+
+	return {};
+}

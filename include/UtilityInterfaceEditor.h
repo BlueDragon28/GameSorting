@@ -16,45 +16,45 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_SQLUTILITYTABLE_H_
-#define GAMESORTING_SQLUTILITYTABLE_H_
+#ifndef GAMESORTING_UTILITYINTERFACEEDITOR_H_
+#define GAMESORTING_UTILITYINTERFACEEDITOR_H_
+
+#include <QDialog>
+#include <QSqlDatabase>
 
 #include "DataStruct.h"
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QString>
-#include <QList>
+#include "UtilityInterfaceEditorModel.h"
 
-class SqlUtilityTable
+class TableModel;
+class TableModel_UtilityInterface;
+class SqlUtilityTable;
+class QTableView;
+
+class UtilityInterfaceEditor : public QDialog
 {
-	SqlUtilityTable(const SqlUtilityTable&) = delete;
+    Q_OBJECT
 public:
-	SqlUtilityTable(ListType type, QSqlDatabase& db);
-	~SqlUtilityTable();
-
-	static QString tableName(UtilityTableName tableName);
-	QList<ItemUtilityData> retrieveTableData(UtilityTableName tableName) const;
-
+    explicit UtilityInterfaceEditor(
+        UtilityTableName utilityTableName,
+        long long int itemID,
+        TableModel* dataModel,
+        TableModel_UtilityInterface* dataInterface,
+        SqlUtilityTable* utilityData,
+        QSqlDatabase& db,
+        QWidget* parent = nullptr);
+    
 private:
-	void createTables();
-	void destroyTables();
-	void destroyTableByName(const QString& tableName);
+    void createWidgets();
+    void applyChange();
 
-	// Games
-	void createGameTables();
-	void destroyGameTables();
-	void createCategoriesTable();
-	void createDeveloppersTable();
-	void createPublishersTable();
-	void createPlatformTable();
-	void createServicesTable();
+    UtilityTableName m_utilityTableName;
+    long long int m_itemID;
+    TableModel* m_dataModel;
+    TableModel_UtilityInterface* m_dataIterface;
+    SqlUtilityTable* m_utilityData;
 
-	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
-
-	ListType m_type;
-	QSqlDatabase& m_db;
-	QSqlQuery m_query;
-	bool m_isTableReady;
+    QTableView* m_tableView;
+    UtilityInterfaceEditorModel* m_model;
 };
 
-#endif // GAMESORTING_SQLUTILITYTABLE_H_
+#endif // GAMESORTING_UTILITYINTERFACEEDITOR_H_

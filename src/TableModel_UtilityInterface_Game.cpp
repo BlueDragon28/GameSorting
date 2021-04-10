@@ -51,8 +51,8 @@ void TableModel_UtilityInterface::createCategoriesTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	CategoriesUtilityID INTEGER);").arg(tableName(UtilityTableName::CATEGORIES));
+		"	ItemID INTEGER,\n"
+		"	UtilityID INTEGER);").arg(tableName(UtilityTableName::CATEGORIES));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -74,8 +74,8 @@ void TableModel_UtilityInterface::createDeveloppersTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	DeveloppersUtilityID INTEGER);").arg(tableName(UtilityTableName::DEVELOPPERS));
+		"	ItemID INTEGER,\n"
+		"	UtilityID INTEGER);").arg(tableName(UtilityTableName::DEVELOPPERS));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -97,8 +97,8 @@ void TableModel_UtilityInterface::createPublishersTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	PublishersUtilityID INTEGER);").arg(tableName(UtilityTableName::PUBLISHERS));
+		"	ItemID INTEGER,\n"
+		"	UtilityID INTEGER);").arg(tableName(UtilityTableName::PUBLISHERS));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -120,8 +120,8 @@ void TableModel_UtilityInterface::createPlatformTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	PlatformUtilityID INTEGER);").arg(tableName(UtilityTableName::PLATFORM));
+		"	ItemID INTEGER,\n"
+		"	UtilityID INTEGER);").arg(tableName(UtilityTableName::PLATFORM));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -143,8 +143,8 @@ void TableModel_UtilityInterface::createServicesTable()
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
-		"	GameID INTEGER,\n"
-		"	ServicesUtilityID INTEGER);").arg(tableName(UtilityTableName::SERVICES));
+		"	ItemID INTEGER,\n"
+		"	UtilityID INTEGER);").arg(tableName(UtilityTableName::SERVICES));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -167,7 +167,7 @@ void TableModel_UtilityInterface::createSensitiveContentTable()
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	SensitiveContentID INTEGER PRIMARY KEY,\n"
-		"	GameID INTEGER,\n"
+		"	ItemID INTEGER,\n"
 		"	ExplicitContent INTEGER,\n"
 		"	ViolenceContent INTEGER,\n"
 		"	BadLanguage INTEGER);")
@@ -208,12 +208,12 @@ void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& ite
 	if (itemsID.size() == 1)
 		statement = statement.arg(QString(
 			"%1 = %2")
-				.arg("GameID")
+				.arg("ItemID")
 				.arg(idList));
 	else
 		statement = statement.arg(QString(
 			"%1 IN (%2);")
-				.arg("GameID")
+				.arg("ItemID")
 				.arg(idList));
 
 #ifndef NDEBUG
@@ -238,12 +238,12 @@ void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& ite
 	if (itemsID.size() == 1)
 		statement = statement.arg(QString(
 			"%1 = %2")
-				.arg("GameID")
+				.arg("ItemID")
 				.arg(idList));
 	else
 		statement = statement.arg(QString(
 			"%1 IN (%2);")
-				.arg("GameID")
+				.arg("ItemID")
 				.arg(idList));
 	
 #ifndef NDEBUG

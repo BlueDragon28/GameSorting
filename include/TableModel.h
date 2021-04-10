@@ -29,6 +29,7 @@
 #include "SqlUtilityTable.h"
 
 class TableModel_UtilityInterface;
+class UtilityInterfaceEditor;
 
 class TableModel : public QAbstractTableModel
 {
@@ -94,6 +95,9 @@ private:
     QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
     int m_listCount;
+
+    // Debugging
+    UtilityInterfaceEditor* m_testEditor;
 };
 
 #endif // GAMESORTING_TABLEMODEL_H_

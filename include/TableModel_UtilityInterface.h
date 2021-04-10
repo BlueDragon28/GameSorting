@@ -33,8 +33,8 @@ public:
 	~TableModel_UtilityInterface();
 
 	QString tableName(UtilityTableName tableName) const;
-
 	void rowRemoved(const QList<long long int>& itemsID);
+	void updateItemUtility(long long int itemID, UtilityTableName tableName, const QList<long long int>& dataList);
 
 private:
 	void createTables();

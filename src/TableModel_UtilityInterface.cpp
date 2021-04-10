@@ -105,3 +105,68 @@ void TableModel_UtilityInterface::rowRemoved(const QList<long long int>& itemsID
 	if (m_listType == ListType::GAMELIST)
 		gameRowRemoved(itemsID);
 }
+
+void TableModel_UtilityInterface::updateItemUtility(long long int itemID, UtilityTableName tableName, const QList<long long int>& dataList)
+{
+	// Updating all the utility of a category of the SQL table TableModel.
+
+	// First, removing all the utility of the itemID.
+	m_query.clear();
+
+	QString statement = QString(
+		"DELETE FROM \"%1\"\n"
+		"WHERE\n"
+		"	ItemID = %2;")
+			.arg(this->tableName(tableName))
+			.arg(itemID);
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+	{
+		std::cerr << QString("Failed to remove all the utility of the table %1 where ItemID is equal to %2.\n\t%3")
+			.arg(this->tableName(tableName))
+			.arg(itemID)
+			.arg(m_query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+		return;
+	}
+
+	// Then, insert the data list into the utility table for the item itemID.
+	m_query.clear();
+
+	if (dataList.size() > 0)
+	{
+		statement = QString(
+			"INSERT INTO \"%1\" (ItemID, UtilityID)\n"
+			"VALUES\n")
+				.arg(this->tableName(tableName));
+		
+		bool first = true;
+
+		for (int i = 0; i < dataList.size(); i++)
+		{
+			if (!first)
+				statement += ",\n";
+			else
+				first = false;
+			
+			statement += QString("	(%1, %2)").arg(itemID).arg(dataList.at(i));
+		}
+		statement += ";";
+	}
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+		std::cerr << QString("failed to insert data innto %1.\n\t%2")
+			.arg(this->tableName(tableName))
+			.arg(m_query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+}

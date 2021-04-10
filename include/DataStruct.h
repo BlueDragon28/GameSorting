@@ -56,6 +56,19 @@ struct GameItem
     int rate;
 };
 
+struct ItemUtilityEditorData
+{
+    bool isChecked;
+    long long int utilityID;
+    QString name;
+};
+
+struct ItemUtilityData
+{
+    long long int utilityID;
+    QString name;
+};
+
 enum class UtilityTableName
 {
     // Game

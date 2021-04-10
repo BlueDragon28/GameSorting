@@ -18,6 +18,7 @@
 
 #include "TableModel.h"
 #include "TableModel_UtilityInterface.h"
+#include "UtilityInterfaceEditor.h"
 #include "Common.h"
 #include <QSqlError>
 #include <iostream>
@@ -65,7 +66,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             << std::endl;
         
     statement = QString(
-        "INSERT INTO \"%1\" (CategoriesUtilityID, GameID)\n"
+        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
         "VALUES\n"
         "   (1, 1),\n"
         "   (2, 1),\n"
@@ -111,7 +112,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     
     // Inserting testings rows into the Developpers Utility Interface Table.
     statement = QString(
-        "INSERT INTO \"%1\" (DeveloppersUtilityID, GameID)\n"
+        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
         "VALUES\n"
         "   (1, 1),\n"
         "   (3, 1),\n"
@@ -155,7 +156,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     m_query.clear();
 
     statement = QString(
-        "INSERT INTO \"%1\" (PublishersUtilityID, GameID)\n"
+        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
         "VALUES\n"
         "   (1, 1),\n"
         "   (2, 1),\n"
@@ -198,7 +199,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     m_query.clear();
 
     statement = QString(
-        "INSERT INTO \"%1\" (PlatformUtilityID, GameID)\n"
+        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
         "VALUES\n"
         "   (1, 1),\n"
         "   (3, 1),\n"
@@ -243,7 +244,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     m_query.clear();
 
     statement = QString(
-        "INSERT INTO \"%1\" (ServicesUtilityID, GameID)\n"
+        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
         "VALUES\n"
         "   (1, 1),\n"
         "   (3, 1),\n"
@@ -266,7 +267,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     m_query.clear();
 
     statement = QString(
-        "INSERT INTO \"%1\" (GameID, ExplicitContent, ViolenceContent, BadLanguage)\n"
+        "INSERT INTO \"%1\" (ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
         "VALUES\n"
         "   (1, 3, 5, 2),\n"
         "   (2, 0, 2, 3),\n"
@@ -282,6 +283,19 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
+    
+    // Testing the UtilityInterfaceEditor for debugging purpose.
+    m_testEditor = new UtilityInterfaceEditor(
+        UtilityTableName::CATEGORIES,
+        (long long int)(1),
+        this,
+        m_utilityInterface,
+        &m_utilityTable,
+        m_db);
+    connect(m_testEditor, &QObject::destroyed, [this](){this->m_testEditor = nullptr;});
+    m_testEditor->raise();
+    m_testEditor->activateWindow();
+    m_testEditor->show();
 }
 
 TableModel::~TableModel()
@@ -293,6 +307,9 @@ TableModel::~TableModel()
 
     if (m_gameListData)
         delete m_gameListData;
+    
+    if (m_testEditor)
+        delete m_testEditor;
 }
 
 void TableModel::createTable()

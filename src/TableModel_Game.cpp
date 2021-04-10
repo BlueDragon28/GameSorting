@@ -479,8 +479,8 @@ void TableModel::gameQueryCategoriesField()
             .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
             .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES)))
             .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
-            .arg("CategoriesUtilityID")
-            .arg("GameID");
+            .arg("UtilityID")
+            .arg("ItemID");
 
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -532,8 +532,8 @@ void TableModel::gameQueryDeveloppersField()
             .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
             .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS)))
             .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS))
-            .arg("DeveloppersUtilityID")
-            .arg("GameID");
+            .arg("UtilityID")
+            .arg("ItemID");
 
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -586,8 +586,8 @@ void TableModel::gameQueryPublishersField()
             .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
             .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS)))
             .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
-            .arg("PublishersUtilityID")
-            .arg("GameID");
+            .arg("UtilityID")
+            .arg("ItemID");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -640,8 +640,8 @@ void TableModel::gameQueryPlatformField()
             .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
             .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PLATFORM)))
             .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
-            .arg("PlatformUtilityID")
-            .arg("GameID");
+            .arg("UtilityID")
+            .arg("ItemID");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -694,8 +694,8 @@ void TableModel::gameQueryServicesField()
             .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
             .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::SERVICES)))
             .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
-            .arg("ServicesUtilityID")
-            .arg("GameID");
+            .arg("UtilityID")
+            .arg("ItemID");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -733,12 +733,12 @@ void TableModel::gameQuerySensitiveContentField()
 
     QString statement = QString(
         "SELECT\n"
-        "   GameID,\n"
+        "   ItemID,\n"
         "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\"\n"
         "FROM\n"
         "   \"%1\"\n"
         "ORDER BY\n"
-        "   GameID;")
+        "   ItemID;")
             .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(tr("Explicit Content"))
             .arg("ExplicitContent")
