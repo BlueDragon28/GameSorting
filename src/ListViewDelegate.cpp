@@ -17,21 +17,29 @@
 */
 
 #include "ListViewDelegate.h"
+#include "TableModel_UtilityInterface.h"
+#include "UtilityInterfaceEditor.h"
 #include "Common.h"
 #include "TableModel.h"
 #include "StarEditor.h"
 #include <iostream>
 
-ListViewDelegate::ListViewDelegate(QObject* parent) :
-	QStyledItemDelegate(parent)
+ListViewDelegate::ListViewDelegate(
+	TableModel* tableModel,
+	SqlUtilityTable& utilityTable,
+	QSqlDatabase& db,
+	QObject* parent) :
+		QStyledItemDelegate(parent),
+		m_tableModel(tableModel),
+		m_utilityTable(utilityTable),
+		m_utilityInterface(m_tableModel->utilityInterface()),
+		m_db(db)
 {}
 
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	// Painting the delegate.
-	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
-
-	if (model->listType() == ListType::GAMELIST)
+	if (m_tableModel->listType() == ListType::GAMELIST)
 	{
 		if (index.column() == Game::RATE)
 		{
@@ -47,9 +55,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	// Returning the recommanded size of the field.
-	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
-
-	if (model->listType() == ListType::GAMELIST)
+	if (m_tableModel->listType() == ListType::GAMELIST)
 	{
 		if (index.column() == Game::RATE)
 		{
@@ -63,15 +69,51 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	// Creating the editor 
-	const TableModel* model = reinterpret_cast<const TableModel*>(index.model());
-
-	if (model->listType() == ListType::GAMELIST)
+	if (m_tableModel->listType() == ListType::GAMELIST)
 	{
 		if (index.column() == Game::RATE)
 		{
+			// Creating the editor for the edition of the rate column.
 			StarEditor* editor = new StarEditor(parent);
 			connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
 			return editor;
+		}
+		else if (index.column() == Game::CATEGORIES ||
+				 index.column() == Game::DEVELOPPERS ||
+				 index.column() == Game::PUBLISHERS ||
+				 index.column() == Game::PLATFORMS ||
+				 index.column() == Game::SERVICES)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID < 0)
+				return nullptr;
+			
+			UtilityTableName tableName;
+
+			if (index.column() == Game::CATEGORIES)
+				tableName = UtilityTableName::CATEGORIES;
+			else if (index.column() == Game::DEVELOPPERS)
+				tableName = UtilityTableName::DEVELOPPERS;
+			else if (index.column() == Game::PUBLISHERS)
+				tableName = UtilityTableName::PUBLISHERS;
+			else if (index.column() == Game::PLATFORMS)
+				tableName = UtilityTableName::PLATFORM;
+			else if (index.column() == Game::SERVICES)
+				tableName = UtilityTableName::SERVICES;
+			
+			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityInterface,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 	}
 

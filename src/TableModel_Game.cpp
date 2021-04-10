@@ -388,6 +388,14 @@ QVariant TableModel::gameHeaderData(int section, Qt::Orientation orientation, in
     }
 }
 
+long long int TableModel::gameItemID(const QModelIndex& index) const
+{
+    if (index.isValid() && index.row() < m_listCount)
+        return m_gameListData->at(index.row()).gameID;
+    
+    return -1;
+}
+
 void TableModel::gameUpdateQuery()
 {
     // Retrieve the entrire game data of the table and 

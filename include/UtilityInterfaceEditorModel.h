@@ -25,10 +25,10 @@
 #include <QSqlDatabase>
 
 #include "DataStruct.h"
+#include "SqlUtilityTable.h"
 
 class TableModel;
 class TableModel_UtilityInterface;
-class SqlUtilityTable;
 
 class UtilityInterfaceEditorModel : public QAbstractListModel
 {
@@ -39,7 +39,7 @@ public:
         long long int itemID,
         TableModel* tableModel,
         TableModel_UtilityInterface* dataInterface,
-        SqlUtilityTable* utilityData,
+        SqlUtilityTable& utilityData,
         QSqlDatabase& db,
         QObject* parent = nullptr);
 
@@ -65,7 +65,7 @@ private:
     long long int m_itemID;
     TableModel* m_tableModel;
     TableModel_UtilityInterface* m_dataInterface;
-    SqlUtilityTable* m_utilityData;
+    SqlUtilityTable& m_utilityData;
 
     // Data
     QList<ItemUtilityEditorData> m_utilityListData;

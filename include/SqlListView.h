@@ -53,6 +53,7 @@ private:
     ListType m_type;
     QTableView* m_view;
     TableModel* m_model;
+    SqlUtilityTable& m_utilityTable;
 };
 
 #endif

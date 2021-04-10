@@ -55,6 +55,12 @@ public:
     QString rowTableName() const;
     ListType listType() const;
 
+    // Allow access to the user of the utilityInterface.
+    TableModel_UtilityInterface* utilityInterface();
+
+    // Getting the itemID from a index.
+    long long int itemID(const QModelIndex& index) const;
+
     // Headers column's name.
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -73,6 +79,7 @@ protected:
     bool gameInsertRows(int row, int count, const QModelIndex& parent = QModelIndex());
     bool gameRemoveRows(int row, int count, const QModelIndex& parent = QModelIndex());
     QVariant gameHeaderData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    long long int gameItemID(const QModelIndex& index) const;
     template<typename T>
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
@@ -95,9 +102,6 @@ private:
     QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
     int m_listCount;
-
-    // Debugging
-    UtilityInterfaceEditor* m_testEditor;
 };
 
 #endif // GAMESORTING_TABLEMODEL_H_

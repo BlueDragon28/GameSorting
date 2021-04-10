@@ -283,19 +283,6 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
-    
-    // Testing the UtilityInterfaceEditor for debugging purpose.
-    m_testEditor = new UtilityInterfaceEditor(
-        UtilityTableName::CATEGORIES,
-        (long long int)(1),
-        this,
-        m_utilityInterface,
-        &m_utilityTable,
-        m_db);
-    connect(m_testEditor, &QObject::destroyed, [this](){this->m_testEditor = nullptr;});
-    m_testEditor->raise();
-    m_testEditor->activateWindow();
-    m_testEditor->show();
 }
 
 TableModel::~TableModel()
@@ -307,9 +294,6 @@ TableModel::~TableModel()
 
     if (m_gameListData)
         delete m_gameListData;
-    
-    if (m_testEditor)
-        delete m_testEditor;
 }
 
 void TableModel::createTable()
@@ -317,6 +301,11 @@ void TableModel::createTable()
     // Create the SQL table with all the columns.
     if (m_listType == ListType::GAMELIST)
         gameCreateTable();
+}
+
+TableModel_UtilityInterface* TableModel::utilityInterface()
+{
+    return m_utilityInterface;
 }
 
 int TableModel::columnCount(const QModelIndex& parent) const
@@ -516,4 +505,12 @@ void TableModel::deleteRows(const QModelIndexList& indexList)
 ListType TableModel::listType() const
 {
     return m_listType;
+}
+
+long long int TableModel::itemID(const QModelIndex& index) const
+{
+    if (m_listType == ListType::GAMELIST)
+        return gameItemID(index);
+    
+    return -1;
 }

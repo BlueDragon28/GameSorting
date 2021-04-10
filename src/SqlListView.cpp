@@ -37,7 +37,8 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
     m_db(db),
     m_type(type),
     m_view(new QTableView(this)),
-    m_model(new TableModel(tableName, m_type, m_db, utilityTable, this))
+    m_model(new TableModel(tableName, m_type, m_db, utilityTable, this)),
+    m_utilityTable(utilityTable)
 {
     setupWidget();
     setupView();
@@ -71,7 +72,7 @@ void SqlListView::setupWidget()
 
     // Setting the custom item delegate ListViewDelegate.
     QAbstractItemDelegate* oldDelegate = m_view->itemDelegate();
-    m_view->setItemDelegate(new ListViewDelegate());
+    m_view->setItemDelegate(new ListViewDelegate(m_model, m_utilityTable, m_db));
     delete oldDelegate;
 }
 

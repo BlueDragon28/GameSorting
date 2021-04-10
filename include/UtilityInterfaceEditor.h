@@ -24,10 +24,10 @@
 
 #include "DataStruct.h"
 #include "UtilityInterfaceEditorModel.h"
+#include "SqlUtilityTable.h"
 
 class TableModel;
 class TableModel_UtilityInterface;
-class SqlUtilityTable;
 class QTableView;
 
 class UtilityInterfaceEditor : public QDialog
@@ -39,7 +39,7 @@ public:
         long long int itemID,
         TableModel* dataModel,
         TableModel_UtilityInterface* dataInterface,
-        SqlUtilityTable* utilityData,
+        SqlUtilityTable& utilityData,
         QSqlDatabase& db,
         QWidget* parent = nullptr);
     
@@ -51,7 +51,7 @@ private:
     long long int m_itemID;
     TableModel* m_dataModel;
     TableModel_UtilityInterface* m_dataIterface;
-    SqlUtilityTable* m_utilityData;
+    SqlUtilityTable& m_utilityData;
 
     QTableView* m_tableView;
     UtilityInterfaceEditorModel* m_model;

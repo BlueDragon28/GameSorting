@@ -20,7 +20,6 @@
 
 #include "TableModel.h"
 #include "TableModel_UtilityInterface.h"
-#include "SqlUtilityTable.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -33,7 +32,7 @@ UtilityInterfaceEditor::UtilityInterfaceEditor(
     long long int itemID,
     TableModel* dataModel,
     TableModel_UtilityInterface* dataInterface,
-    SqlUtilityTable* utilityData,
+    SqlUtilityTable& utilityData,
     QSqlDatabase& db,
     QWidget* parent) :
         QDialog(parent),
@@ -86,7 +85,7 @@ void UtilityInterfaceEditor::createWidgets()
     // Apply change when the user is clicking to the applyButton
     // and doing nothing when the user is cliking the cancel button.
     connect(applyButton, &QPushButton::clicked, this, &UtilityInterfaceEditor::applyChange);
-    connect(applyButton, &QPushButton::clicked, this, &UtilityInterfaceEditor::deleteLater);
+    connect(cancelButton, &QPushButton::clicked, this, &UtilityInterfaceEditor::deleteLater);
 }
 
 void UtilityInterfaceEditor::applyChange()

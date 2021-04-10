@@ -19,7 +19,6 @@
 #include "UtilityInterfaceEditorModel.h"
 #include "TableModel.h"
 #include "TableModel_UtilityInterface.h"
-#include "SqlUtilityTable.h"
 
 #include <iostream>
 #include <QSqlError>
@@ -30,7 +29,7 @@ UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
     long long int itemID,
     TableModel* tableModel,
     TableModel_UtilityInterface* dataInterface,
-    SqlUtilityTable* utilityData,
+    SqlUtilityTable& utilityData,
     QSqlDatabase& db,
     QObject* parent) :
         m_db(db),
@@ -91,7 +90,7 @@ Qt::ItemFlags UtilityInterfaceEditorModel::flags(const QModelIndex& index) const
 void UtilityInterfaceEditorModel::retrieveUtilityData()
 {
     // Retrieving all the data of the utility data for the editing.
-    QList<ItemUtilityData> utilityData = m_utilityData->retrieveTableData(m_utilityTableName);
+    QList<ItemUtilityData> utilityData = m_utilityData.retrieveTableData(m_utilityTableName);
     if (utilityData.size() > 0)
     {
         m_utilityListData.resize(utilityData.size());

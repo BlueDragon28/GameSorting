@@ -20,12 +20,21 @@
 #define GAMESORTING_LISTVIEWDELETAGE_H_
 
 #include <QStyledItemDelegate>
+#include <QSqlDatabase>
+#include "SqlUtilityTable.h"
+
+class TableModel;
+class TableModel_UtilityInterface;
 
 class ListViewDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 public:
-	ListViewDelegate(QObject* parent = nullptr);
+	ListViewDelegate(
+		TableModel* tableModel,
+		SqlUtilityTable& utilityTable,
+		QSqlDatabase& db,
+		QObject* parent = nullptr);
 
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
@@ -35,6 +44,11 @@ public:
 
 private:
 	void commitAndCloseEditor(QWidget* editor);
+
+	TableModel* m_tableModel;
+	SqlUtilityTable& m_utilityTable;
+	TableModel_UtilityInterface* m_utilityInterface;
+	QSqlDatabase& m_db;
 };
 
 #endif // GAMESORTING_LISTVIEWDELETAGE_H_
