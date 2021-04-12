@@ -265,8 +265,8 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
                         game.gameID = query.value(0).toLongLong();
                         game.gamePos = query.value(1).toLongLong();
                         game.name = query.value(2).toString();
-                        game.url = query.value(7).toString();
-                        game.rate = query.value(8).toInt();
+                        game.url = query.value(3).toString();
+                        game.rate = query.value(4).toInt();
                         gameList.prepend(game);
                         i++;
                     } while (query.previous() && i < count);
@@ -435,8 +435,8 @@ void TableModel::gameUpdateQuery()
             game.gameID = m_query.value(0).toLongLong();
             game.gamePos = m_query.value(1).toLongLong();
             game.name = m_query.value(2).toString();
-            game.url = m_query.value(7).toString();
-            game.rate = m_query.value(8).toInt();
+            game.url = m_query.value(3).toString();
+            game.rate = m_query.value(4).toInt();
             m_gameListData->append(game);
         }
 
