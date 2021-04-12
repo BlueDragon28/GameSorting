@@ -102,8 +102,6 @@ private:
     QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
     int m_listCount;
-
-    UtilitySensitiveContentEditor* m_sensitiveEditor;
 };
 
 #endif // GAMESORTING_TABLEMODEL_H_

@@ -284,13 +284,6 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
             .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
-    
-    // Debuging the utility sensitive content editor
-    m_sensitiveEditor = new UtilitySensitiveContentEditor(1, m_utilityInterface, m_db);
-    connect(m_sensitiveEditor, &QObject::destroyed, [this](){this->m_sensitiveEditor = nullptr;});
-    m_sensitiveEditor->raise();
-    m_sensitiveEditor->activateWindow();
-    m_sensitiveEditor->show();
 }
 
 TableModel::~TableModel()
@@ -302,9 +295,6 @@ TableModel::~TableModel()
 
     if (m_gameListData)
         delete m_gameListData;
-
-    if (m_sensitiveEditor)
-        delete m_sensitiveEditor;
 }
 
 void TableModel::createTable()

@@ -19,6 +19,7 @@
 #include "ListViewDelegate.h"
 #include "TableModel_UtilityInterface.h"
 #include "UtilityInterfaceEditor.h"
+#include "UtilitySensitiveContentEditor.h"
 #include "Common.h"
 #include "TableModel.h"
 #include "StarEditor.h"
@@ -86,7 +87,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 		{
 			long long int itemID = m_tableModel->itemID(index);
 
-			if (itemID < 0)
+			if (itemID <= 0)
 				return nullptr;
 			
 			UtilityTableName tableName;
@@ -110,6 +111,24 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				m_utilityTable,
 				m_db,
 				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
+		}
+		else if (index.column() == Game::SENSITIVE_CONTENT)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID <= 0)
+				return nullptr;
+			
+			UtilitySensitiveContentEditor* editor =
+				new UtilitySensitiveContentEditor(
+					itemID,
+					m_utilityInterface,
+					m_db,
+					parent);
 			editor->raise();
 			editor->activateWindow();
 			editor->show();
