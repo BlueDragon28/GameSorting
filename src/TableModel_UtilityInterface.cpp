@@ -164,9 +164,63 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 #endif
 
 	if (!m_query.exec(statement))
-		std::cerr << QString("failed to insert data innto %1.\n\t%2")
+		std::cerr << QString("failed to insert data into %1.\n\t%2")
 			.arg(this->tableName(tableName))
 			.arg(m_query.lastError().text())
 			.toLocal8Bit().constData()
 			<< std::endl;
+}
+
+void TableModel_UtilityInterface::updateItemUtility(long long int itemID, UtilityTableName tableName, int explicitContent, int violenceContent, int languageContent)
+{
+	// Update the caterogies Sensitive Content.
+
+	// First, removing all the utility of the itemID.
+	m_query.clear();
+
+	QString statement = QString(
+		"DELETE FROM \"%1\"\n"
+		"WHERE\n"
+		"	ItemID = %2;")
+			.arg(this->tableName(tableName))
+			.arg(itemID);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+	{
+		std::cerr << QString("Failed to remove all the utility of the table %1 where ItemID is equal to %2.\n\t%3")
+			.arg(this->tableName(tableName))
+			.arg(itemID)
+			.arg(m_query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+		return;
+	}
+
+	// Then, insert the Sensitive Content data into the Sensitive Content SQL table.
+	m_query.clear();
+
+	statement = QString(
+		"INSERT INTO \"%1\" (ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
+		"VALUES\n"
+		"	(%2, %3, %4, %5);")
+			.arg(this->tableName(tableName))
+			.arg(itemID)
+			.arg(explicitContent)
+			.arg(violenceContent)
+			.arg(languageContent);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+		std::cerr << QString("failed to insert data into %1.\n\t%2")
+					.arg(this->tableName(tableName))
+					.arg(m_query.lastError().text())
+					.toLocal8Bit().constData()
+					<< std::endl;
 }
