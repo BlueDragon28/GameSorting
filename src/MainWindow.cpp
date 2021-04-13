@@ -26,6 +26,9 @@
 #include <QToolBar>
 #include <QIcon>
 #include <QAction>
+#include <QMenuBar>
+#include <QMenu>
+#include <QToolBar>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
@@ -56,6 +59,55 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenu()
 {
+	// Creation of all the menus and the toolbar.
+
+	// Create the menu file.
+	QMenu* menuFile = menuBar()->addMenu(tr("&File"));
+
+	// Creating and adding the action.
+	// Creating a new list.
+	QMenu* newListMenu = new QMenu(tr("New"), this);
+	// Game list.
+	QAction* newGameListAct = new QAction(tr("Game list"), this);
+	newGameListAct->setToolTip(tr("Creating a game list."));
+	newListMenu->addAction(newGameListAct);
+	menuFile->addMenu(newListMenu);
+
+	// Opening a list file.
+	QIcon openListIcon = QIcon(":/Images/Open.svg");
+	QAction* openListAct = new QAction(openListIcon, tr("Open"), this);
+	openListAct->setShortcut(QKeySequence::Open);
+	openListAct->setToolTip(tr("Opening a list from a file"));
+	menuFile->addAction(openListAct);
+
+	// Save a list into a file.
+	QIcon saveListIcon = QIcon(":/Images/Save.svg");
+	QAction* saveListAct = new QAction(saveListIcon, tr("Save"), this);
+	saveListAct->setShortcut(QKeySequence::Save);
+	saveListAct->setToolTip(tr("Save a list into a file"));
+	menuFile->addAction(saveListAct);
+
+	// Save as a list into a file.
+	QAction* saveAsListAct = new QAction(tr("Save as"), this);
+#ifdef WIN32
+	saveAsListAct->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_S);
+#elif
+	saveAsListAct->setShortcut(QKeySequence::SaveAs);
+#endif
+	saveAsListAct->setToolTip(tr("Save a list into a new file."));
+	menuFile->addAction(saveAsListAct);
+
+	// Exitting the application.
+	QIcon quitIcon = QIcon(":/Images/Exit.svg");
+	QAction* quitAct = new QAction(quitIcon, tr("&Quit"), this);
+	quitAct->setToolTip(tr("Exiting the application."));
+#ifdef WIN32
+	quitAct->setShortcut(Qt::CTRL | Qt::Key_Q);
+#else
+	quitAct->setShortcuts(QKeySequence::Quit);
+#endif
+	connect(quitAct, &QAction::triggered, this, &MainWindow::close);
+	menuFile->addAction(quitAct);
 }
 
 void MainWindow::createCentralWidget()
