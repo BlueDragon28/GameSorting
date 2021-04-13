@@ -48,11 +48,11 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 
     // insert dummy Categories for testing purpose.
     QString statement = QString(
-        "INSERT INTO \"%1\" (Name, Description)\n"
+        "INSERT INTO \"%1\" (Name)\n"
         "VALUES\n"
-        "   (\"Adventure\", \"Adventure Types\"),\n"
-        "   (\"FPS\", \"First person shooter\"),\n"
-        "   (\"MMO\", \"Massive Multiplayer Online\");")
+        "   (\"Adventure\"),\n"
+        "   (\"FPS\"),\n"
+        "   (\"MMO\");")
             .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES));
         
 #ifndef NDEBUG

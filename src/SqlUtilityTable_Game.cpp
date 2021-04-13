@@ -49,8 +49,7 @@ void SqlUtilityTable::createCategoriesTable()
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT,\n"
-		"	Description TEXT);").arg(tableName(UtilityTableName::CATEGORIES));
+		"	Name TEXT);").arg(tableName(UtilityTableName::CATEGORIES));
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
