@@ -54,13 +54,16 @@ MainWindow::MainWindow(QWidget* parent) :
 MainWindow::~MainWindow()
 {
 }
-
+#include <QToolButton>
 void MainWindow::createMenu()
 {
 	// Creation of all the menus and the toolbar.
 
 	// Create the menu file.
 	QMenu* menuFile = menuBar()->addMenu(tr("&File"));
+	// Creating the toolbar
+	QToolBar* fileToolBar = addToolBar(tr("File"));
+	fileToolBar->setMovable(false);
 
 	// Creating and adding the action.
 	// Creating a new list.
@@ -71,12 +74,21 @@ void MainWindow::createMenu()
 	newListMenu->addAction(newGameListAct);
 	menuFile->addMenu(newListMenu);
 
+	// Adding the newListMenu into the toolbar
+	QIcon newIcon = QIcon(":/Images/New.svg");
+	QToolButton* newListButton = new QToolButton();
+	newListButton->setIcon(newIcon);
+	newListButton->setMenu(newListMenu);
+	newListButton->setPopupMode(QToolButton::InstantPopup);
+	fileToolBar->addWidget(newListButton);
+
 	// Opening a list file.
 	QIcon openListIcon = QIcon(":/Images/Open.svg");
 	QAction* openListAct = new QAction(openListIcon, tr("Open"), this);
 	openListAct->setShortcut(QKeySequence::Open);
 	openListAct->setToolTip(tr("Opening a list from a file"));
 	menuFile->addAction(openListAct);
+	fileToolBar->addAction(openListAct);
 
 	// Save a list into a file.
 	QIcon saveListIcon = QIcon(":/Images/Save.svg");
@@ -84,6 +96,7 @@ void MainWindow::createMenu()
 	saveListAct->setShortcut(QKeySequence::Save);
 	saveListAct->setToolTip(tr("Save a list into a file"));
 	menuFile->addAction(saveListAct);
+	fileToolBar->addAction(saveListAct);
 
 	// Save as a list into a file.
 	QAction* saveAsListAct = new QAction(tr("Save as"), this);
