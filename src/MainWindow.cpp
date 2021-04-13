@@ -43,12 +43,10 @@ MainWindow::MainWindow(QWidget* parent) :
 		std::exit(EXIT_FAILURE);
 	}
 
-	m_tabAndList = new TabAndList(m_db, this);
-
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
-	createMenu();
 	createCentralWidget();
+	createMenu();
 	resize(800, 600);
 	move((screen()->availableSize().width() - 800) / 2, (screen()->availableSize().height() - 600) / 2);
 }
@@ -112,5 +110,6 @@ void MainWindow::createMenu()
 
 void MainWindow::createCentralWidget()
 {
+	m_tabAndList = new TabAndList(m_db, this);
 	setCentralWidget(m_tabAndList);
 }
