@@ -40,6 +40,14 @@ SqlUtilityTable::~SqlUtilityTable()
 	destroyTables();
 }
 
+void SqlUtilityTable::newList(ListType type)
+{
+	// Destoying all the existing table and recreating them for the new list.
+	destroyTables();
+	m_type = type;
+	createTables();
+}
+
 QString SqlUtilityTable::tableName(UtilityTableName tableName)
 {
 	// Return the name of a table.

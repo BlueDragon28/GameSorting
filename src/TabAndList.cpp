@@ -112,3 +112,18 @@ void TabAndList::removeTable(int index)
         delete widget;
     }
 }
+
+void TabAndList::newGameList()
+{
+    // Deleting the existing list and creating a new list.
+    for (int i = m_tabBar->count()-1; i >= 0; i--)
+        m_tabBar->removeTab(i);
+    for (int i = m_stackedViews->count()-1; i >= 0; i--)
+    {
+        SqlListView* listView = reinterpret_cast<SqlListView*>(m_stackedViews->widget(i));
+        m_stackedViews->removeWidget(listView);
+        delete listView;
+    }
+    
+    m_sqlUtilityTable.newList(ListType::GAMELIST);
+}

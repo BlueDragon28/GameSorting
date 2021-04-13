@@ -32,6 +32,7 @@ public:
 	SqlUtilityTable(ListType type, QSqlDatabase& db);
 	~SqlUtilityTable();
 
+	void newList(ListType type);
 	static QString tableName(UtilityTableName tableName);
 	QList<ItemUtilityData> retrieveTableData(UtilityTableName tableName) const;
 

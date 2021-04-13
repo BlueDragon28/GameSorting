@@ -37,6 +37,7 @@ public:
 
 public slots:
     void addingItem();
+    void newGameList();
 
 private slots:
     void tabChanged(int index);

@@ -72,6 +72,7 @@ void MainWindow::createMenu()
 	QAction* newGameListAct = new QAction(tr("Game list"), this);
 	newGameListAct->setToolTip(tr("Creating a game list."));
 	newListMenu->addAction(newGameListAct);
+	connect(newGameListAct, &QAction::triggered, m_tabAndList, &TabAndList::newGameList);
 	menuFile->addMenu(newListMenu);
 
 	// Adding the newListMenu into the toolbar
