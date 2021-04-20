@@ -783,3 +783,117 @@ void TableModel::gameQuerySensitiveContentField()
             .toLocal8Bit().constData()
             << std::endl;
 }
+
+QVariant TableModel::gameRetrieveData() const
+{
+    // Return the data of the table (game list) and the utility interface data.
+    Game::SaveDataTable data = {};
+    data.tableName = m_tableName;
+
+    // Retrieve game data.
+    QSqlQuery query(m_db);
+
+    QString statement = QString(
+        "SELECT\n"
+        "   GameID,\n"
+        "   GamePos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   GameID ASC;")
+            .arg(m_tableName);
+    
+    if (!query.exec(statement))
+        return QVariant();
+    
+    while (query.next())
+    {
+        Game::SaveItem game = {};
+        game.gameID = query.value(0).toLongLong();
+        game.gamePos = query.value(1).toLongLong();
+        game.name = query.value(2).toString();
+        game.url = query.value(3).toString();
+        game.rate = query.value(4).toInt();
+        data.gameList.append(game);
+    }
+
+    QVariant utilityInterface = m_utilityInterface->data();
+    if (!utilityInterface.canConvert<Game::SaveUtilityInterfaceData>())
+        return QVariant();
+    
+    data.interface = qvariant_cast<Game::SaveUtilityInterfaceData>(utilityInterface);
+
+    return QVariant::fromValue(data);
+}
+
+bool TableModel::setGameItemsData(const QVariant& variant)
+{
+    // Set the data into the TableModel SQL Tables.
+    Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+
+    // Set the table name and create the SQL tables.
+    m_tableName = data.tableName;
+    if (m_tableName.isEmpty())
+        return false;
+    createTable();
+
+    // Set the game list.
+    QString statement = QString(
+        "INSERT INTO \"%1\" (GameID, GamePos, Name, Url, Rate)\n"
+        "VALUES")
+        .arg(m_tableName);
+    
+    for (long long int i = 0; i < data.gameList.size(); i+=10)
+    {
+        QString strData;
+        for (long long int j = i; j < i+10 && j < data.gameList.size(); j++)
+        {
+            strData +=
+                QString("\n\t(%1, %2, \"%3\", \"%4\", %5),")
+                    .arg(data.gameList.at(j).gameID)
+                    .arg(data.gameList.at(j).gamePos)
+                    .arg(data.gameList.at(j).name)
+                    .arg(data.gameList.at(j).url)
+                    .arg(data.gameList.at(j).rate);
+        }
+        if (strData.size() > 0)
+        {
+            strData[strData.size()-1] = ';';
+
+#ifndef NDEBUG
+            std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+            m_query.clear();
+            if (!m_query.exec(statement + strData))
+            {
+#ifndef NDEBUG
+                std::cerr << QString("Failed to exec statement for setting data into the table %1.\n\t%2")
+                    .arg(m_tableName)
+                    .arg(m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
+#endif
+
+                return false;
+            }
+        }
+    }
+    // Set the utility interface.
+    if (m_utilityInterface)
+    {
+        delete m_utilityInterface;
+        m_utilityInterface = nullptr;
+    }
+    m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db, QVariant::fromValue(data.interface));
+    if (!m_utilityInterface->isTableReady())
+    {
+        m_isTableCreated = false;
+        return false;
+    }
+
+    return true;
+}

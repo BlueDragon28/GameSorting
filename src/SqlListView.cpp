@@ -43,9 +43,20 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
     setupWidget();
     setupView();
 
-    addingItem();
-    addingItem();
-    addingItem();
+    m_model->appendRows(3);
+}
+
+SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
+    QWidget(parent),
+    m_db(db),
+    m_type(ListType::UNKNOWN),
+    m_view(new QTableView(this)),
+    m_model(new TableModel(data, db, utilityTable, parent)),
+    m_utilityTable(utilityTable)
+{
+    m_type = m_model->listType();
+    setupWidget();
+    setupView();
 }
 
 SqlListView::~SqlListView()
@@ -83,12 +94,16 @@ void SqlListView::setupView()
 
 void SqlListView::addingItem()
 {
-    m_model->appendRows();
+    if (m_model)
+        m_model->appendRows();
 }
 
 QString SqlListView::tableName() const
 {
-    return m_model->tableName();
+    if (m_model)
+        return m_model->tableName();
+    else
+        return QString();
 }
 
 void SqlListView::createMenu(QVBoxLayout* vLayout)
@@ -129,4 +144,20 @@ void SqlListView::deletingItems()
         QModelIndexList indexList = selectionModel->selectedRows(0);
         m_model->deleteRows(indexList);
     }
+}
+
+QVariant SqlListView::listData() const
+{
+    if (m_model)
+        return m_model->retrieveData();
+    else
+        return QVariant();
+}
+
+ListType SqlListView::listType() const
+{
+    if (m_model)
+        return m_model->listType();
+    else
+        return ListType::UNKNOWN;
 }

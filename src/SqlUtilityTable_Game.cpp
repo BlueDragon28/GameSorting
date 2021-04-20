@@ -153,3 +153,74 @@ void SqlUtilityTable::createServicesTable()
 		m_isTableReady = false;
 	}
 }
+
+QVariant SqlUtilityTable::queryGameData() const
+{
+	Game::SaveUtilityData data = {};
+	data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
+	data.developpers = retrieveTableData(UtilityTableName::DEVELOPPERS);
+	data.publishers = retrieveTableData(UtilityTableName::PUBLISHERS);
+	data.platform = retrieveTableData(UtilityTableName::PLATFORM);
+	data.services = retrieveTableData(UtilityTableName::SERVICES);
+
+	return QVariant::fromValue(data);
+}
+
+inline bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data)
+{
+	// Convenient member function to set the data into the SQL Table.
+	QString statement = QString(
+		"INSERT INTO \"%1\" (\"%1ID\", Name)\n"
+		"VALUES")
+		.arg(tableName(tName));
+	
+	for (long long int i = 0; i < data.size(); i+=10)
+	{
+		QString strData;
+		for (long long int j = i; j < i+10 && j < data.size(); j++)
+		{
+			strData +=
+				QString("\n\t(%1, \"%2\"),")
+					.arg(data.at(j).utilityID)
+					.arg(data.at(j).name);
+		}
+		if (strData.size() > 0)
+		{
+			strData[strData.size()-1] = ';';
+
+#ifndef NDEBUG
+			std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+			m_query.clear();
+			if (!m_query.exec(statement + strData))
+			{
+#ifndef NDEBUG
+				std::cerr << QString("Failed to insert data into %1.\n\t%2")
+					.arg(tableName(tName))
+					.arg(m_query.lastError().text())
+					.toLocal8Bit().constData()
+					<< std::endl;
+#endif
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool SqlUtilityTable::setGameData(const QVariant& variant)
+{
+	// Set the data into the SQL tables.
+	Game::SaveUtilityData data = qvariant_cast<Game::SaveUtilityData>(variant);
+
+	if (!setGameStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+		!setGameStandardData(UtilityTableName::DEVELOPPERS, data.developpers) ||
+		!setGameStandardData(UtilityTableName::PUBLISHERS, data.publishers) ||
+		!setGameStandardData(UtilityTableName::PLATFORM, data.platform) ||
+		!setGameStandardData(UtilityTableName::SERVICES, data.services))
+		return false;
+	
+	return true;
+}

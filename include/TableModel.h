@@ -36,6 +36,7 @@ class TableModel : public QAbstractTableModel
     Q_OBJECT
 public:
     explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
+    explicit TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     ~TableModel();
 
     // Data interface.
@@ -66,6 +67,9 @@ public:
 
     void updateQuery();
 
+    QVariant retrieveData() const;
+    bool setItemsData(const QVariant& data);
+
 protected:
     void createTable();
     void deleteSqlTable();
@@ -89,6 +93,8 @@ protected:
     void gameQueryPlatformField();
     void gameQueryServicesField();
     void gameQuerySensitiveContentField();
+    QVariant gameRetrieveData() const;
+    bool setGameItemsData(const QVariant& data);
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;

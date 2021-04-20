@@ -19,6 +19,7 @@
 #include "TabAndList.h"
 #include "SqlListView.h"
 #include "Common.h"
+#include "SaveInterface.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,13 +28,16 @@
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QMessageBox>
 
 TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
     m_db(db),
     m_tabBar(new QTabBar(this)),
     m_stackedViews(new QStackedLayout()),
-    m_sqlUtilityTable(ListType::GAMELIST, m_db)
+    m_listType(ListType::GAMELIST),
+    m_sqlUtilityTable(m_listType, m_db)
 {
     setupView();
 }
@@ -126,4 +130,134 @@ void TabAndList::newGameList()
     }
     
     m_sqlUtilityTable.newList(ListType::GAMELIST);
+}
+
+void TabAndList::open()
+{
+    // Opening a list from a file.
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Open list"),
+        QString(),
+        tr("List File (*.gld);;"
+           "All Files (*)"));
+        
+    if (!filePath.isEmpty())
+    {
+        if (!openFile(filePath))
+        {
+            QMessageBox::critical(
+                this,
+                tr("Failed to open list."),
+                tr("Failed to open file file %1.").arg(filePath),
+                QMessageBox::Ok,
+                QMessageBox::NoButton);
+            newGameList();
+            m_listType = ListType::UNKNOWN;
+        }
+    }
+}
+
+void TabAndList::saveAs()
+{
+    // Saving the file into a new file
+    // or by writing over an existing file.
+    // Game list.
+    if (m_listType == ListType::GAMELIST)
+    {
+        QString filePath = QFileDialog::getSaveFileName(
+            this,
+            tr("Save Game List"),
+            QString(),
+            tr("Game List Data (*.gld);;"
+               "All Files (*)"));
+        
+        if (!filePath.isEmpty())
+        {
+            if(saveFile(filePath))
+                m_filePath = filePath;
+            else
+                QMessageBox::critical(
+                    this,
+                    tr("Save Game List"),
+                    tr("Saving the game list into the file %1 failed.").arg(filePath),
+                    QMessageBox::Ok,
+                    QMessageBox::NoButton);
+        }
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Saving a list"),
+            tr("No list created."),
+            QMessageBox::Ok,
+            QMessageBox::NoButton);
+}
+
+bool TabAndList::saveFile(const QString& filePath) const
+{
+    // Saving the list into a file.
+    if (m_listType == ListType::GAMELIST)
+    {
+        // Saving the game list.
+        Game::SaveData data = {};
+
+        QVariant variant;
+
+        // Getting the game data.
+        for (int i = 0; i < m_tabBar->count(); i++)
+        {
+            SqlListView* view = reinterpret_cast<SqlListView*>(m_stackedViews->widget(i));
+            
+            variant = view->listData();
+            if (!variant.canConvert<Game::SaveDataTable>())
+                return false;
+            data.gameTables.append(qvariant_cast<Game::SaveDataTable>(variant));
+        }
+
+        // Getting the utility data.
+        variant = m_sqlUtilityTable.data();
+        if (!variant.canConvert<Game::SaveUtilityData>())
+            return false;
+        data.utilityData = qvariant_cast<Game::SaveUtilityData>(variant);
+
+        // Save to a file.
+        return SaveInterface::save(filePath, QVariant::fromValue(data));
+    }
+
+    return false;
+}
+
+bool TabAndList::openFile(const QString& filePath)
+{
+    // Opening file and apply everything into the view.
+    QVariant variant;
+    // Opening the file.
+    bool result = SaveInterface::open(filePath, variant);
+    if (!result)
+        return false;
+    
+    // Check if it's a game list data.
+    if (variant.canConvert<Game::SaveData>())
+    {
+        // Creating a new empty game list data.
+        newGameList();
+        Game::SaveData data = qvariant_cast<Game::SaveData>(variant);
+        result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
+        if (!result)
+            return false;
+        
+        for (int i = 0; i < data.gameTables.size(); i++)
+        {
+            SqlListView* view = new SqlListView(QVariant::fromValue(data.gameTables.at(i)), m_db, m_sqlUtilityTable, this);
+            if (view->listType() == ListType::UNKNOWN)
+                return false;
+            m_stackedViews->addWidget(view);
+            m_tabBar->addTab(view->tableName());
+        }
+
+        return true;
+    }
+
+    return false;
 }

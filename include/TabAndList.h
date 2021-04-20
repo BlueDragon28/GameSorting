@@ -38,6 +38,8 @@ public:
 public slots:
     void addingItem();
     void newGameList();
+    void open();
+    void saveAs();
 
 private slots:
     void tabChanged(int index);
@@ -46,11 +48,15 @@ private slots:
 
 private:
     void setupView();
+    bool saveFile(const QString& filePath) const;
+    bool openFile(const QString& filePath);
 
     QSqlDatabase& m_db;
+    ListType m_listType;
     SqlUtilityTable m_sqlUtilityTable;
     QTabBar* m_tabBar;
     QStackedLayout* m_stackedViews;
+    QString m_filePath;
 };
 
 #endif

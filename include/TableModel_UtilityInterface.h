@@ -24,18 +24,24 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QString>
+#include <QVariant>
 
 class TableModel_UtilityInterface
 {
 	TableModel_UtilityInterface(const TableModel_UtilityInterface&) = delete;
 public:
 	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db);
+	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db, const QVariant& data);
 	~TableModel_UtilityInterface();
 
 	QString tableName(UtilityTableName tableName) const;
+	bool isTableReady() const;
 	void rowRemoved(const QList<long long int>& itemsID);
 	void updateItemUtility(long long int itemID, UtilityTableName tableName, const QList<long long int>& dataList);
 	void updateItemUtility(long long int itemID, UtilityTableName tableName, int explicitContent, int violenceContent, int languageContent);
+
+	QVariant data() const;
+	bool setData(const QVariant& data);
 
 private:
 	void createTables();
@@ -52,6 +58,9 @@ private:
 	void createServicesTable();
 	void createSensitiveContentTable();
 	void gameRowRemoved(const QList<long long int>& itemsID);
+	QVariant gameData() const;
+	bool setGameData(const QVariant& data);
+	inline bool setGameStandardData(UtilityTableName tName, const QList<Game::SaveUtilityInterfaceItem>& data);
 
 	static void printTableCreationError(const QString& tableName, const QString& messageError);
 

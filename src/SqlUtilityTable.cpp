@@ -45,7 +45,10 @@ void SqlUtilityTable::newList(ListType type)
 	// Destoying all the existing table and recreating them for the new list.
 	destroyTables();
 	m_type = type;
-	createTables();
+	if (type != ListType::UNKNOWN)
+		createTables();
+	else
+		m_isTableReady = false;
 }
 
 QString SqlUtilityTable::tableName(UtilityTableName tableName)
@@ -141,4 +144,27 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 			<< std::endl;
 
 	return {};
+}
+
+QVariant SqlUtilityTable::data() const
+{
+	if (m_isTableReady)
+	{
+		if (m_type == ListType::GAMELIST)
+			return queryGameData();
+	}
+	return QVariant();
+}
+
+bool SqlUtilityTable::setData(const QVariant& variant)
+{
+	// Set data into the utility tables.
+	if (variant.canConvert<Game::SaveUtilityData>())
+	{
+		newList(ListType::GAMELIST);
+		return setGameData(variant);
+	}
+	
+	newList(ListType::UNKNOWN);
+	return false;
 }

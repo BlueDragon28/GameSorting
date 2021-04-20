@@ -89,6 +89,7 @@ void MainWindow::createMenu()
 	openListAct->setShortcut(QKeySequence::Open);
 	openListAct->setToolTip(tr("Opening a list from a file"));
 	menuFile->addAction(openListAct);
+	connect(openListAct, &QAction::triggered, m_tabAndList, &TabAndList::open);
 	fileToolBar->addAction(openListAct);
 
 	// Save a list into a file.
@@ -107,6 +108,7 @@ void MainWindow::createMenu()
 	saveAsListAct->setShortcut(QKeySequence::SaveAs);
 #endif
 	saveAsListAct->setToolTip(tr("Save a list into a new file."));
+	connect(saveAsListAct, &QAction::triggered, m_tabAndList, &TabAndList::saveAs);
 	menuFile->addAction(saveAsListAct);
 
 	// Exitting the application.

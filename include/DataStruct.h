@@ -20,24 +20,18 @@
 #define GAMESORTING_DATASTRUCT_H_
 
 #include <QString>
+#include <QList>
+#include <QMetaType>
 
-namespace Game
+struct ItemUtilityData
 {
-    enum GameColumnIndex
-    {
-        NAME = 0,
-        CATEGORIES = 1,
-        DEVELOPPERS = 2,
-        PUBLISHERS = 3,
-        PLATFORMS = 4,
-        SERVICES = 5,
-        SENSITIVE_CONTENT = 6,
-        RATE = 7
-    };
-}
+    long long int utilityID;
+    QString name;
+};
 
 enum class ListType
 {
+    UNKNOWN,
     GAMELIST
 };
 
@@ -56,12 +50,6 @@ struct GameItem
     int rate;
 };
 
-struct ItemUtilityData
-{
-    long long int utilityID;
-    QString name;
-};
-
 enum class UtilityTableName
 {
     // Game
@@ -72,5 +60,80 @@ enum class UtilityTableName
     SERVICES,
     SENSITIVE_CONTENT
 };
+
+namespace Game
+{
+    enum ColumnIndex
+    {
+        NAME = 0,
+        CATEGORIES = 1,
+        DEVELOPPERS = 2,
+        PUBLISHERS = 3,
+        PLATFORMS = 4,
+        SERVICES = 5,
+        SENSITIVE_CONTENT = 6,
+        RATE = 7
+    };
+
+    struct SaveUtilityData
+    {
+        QList<ItemUtilityData> categories;
+        QList<ItemUtilityData> developpers;
+        QList<ItemUtilityData> publishers;
+        QList<ItemUtilityData> platform;
+        QList<ItemUtilityData> services;
+    };
+
+    struct SaveItem
+    {
+        long long int gameID;
+        long long int gamePos;
+        QString name;
+        QString url;
+        int rate;
+    };
+
+    struct SaveUtilityInterfaceItem
+    {
+        long long int gameID;
+        long long int utilityID;
+    };
+
+    struct SaveUtilitySensitiveContentItem
+    {
+        long long int SensitiveContentID;
+        long long int gameID;
+        int explicitContent;
+        int violenceContent;
+        int badLanguageContent;
+    };
+
+    struct SaveUtilityInterfaceData
+    {
+        QList<SaveUtilityInterfaceItem> categories;
+        QList<SaveUtilityInterfaceItem> developpers;
+        QList<SaveUtilityInterfaceItem> pubishers;
+        QList<SaveUtilityInterfaceItem> platform;
+        QList<SaveUtilityInterfaceItem> services;
+        QList<SaveUtilitySensitiveContentItem> sensitiveContent;
+    };
+
+    struct SaveDataTable
+    {
+        QString tableName;
+        QList<SaveItem> gameList;
+        SaveUtilityInterfaceData interface;
+    };
+
+    struct SaveData
+    {
+        QList<SaveDataTable> gameTables;
+        SaveUtilityData utilityData;
+    };
+}
+Q_DECLARE_METATYPE(Game::SaveUtilityInterfaceData);
+Q_DECLARE_METATYPE(Game::SaveUtilityData);
+Q_DECLARE_METATYPE(Game::SaveDataTable);
+Q_DECLARE_METATYPE(Game::SaveData);
 
 #endif // GAMESORTING_DATASTRUCT_H_

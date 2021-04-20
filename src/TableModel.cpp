@@ -45,245 +45,21 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     createTable();
 
     m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
+}
 
-    // insert dummy Categories for testing purpose.
-    QString statement = QString(
-        "INSERT INTO \"%1\" (Name)\n"
-        "VALUES\n"
-        "   (\"Adventure\"),\n"
-        "   (\"FPS\"),\n"
-        "   (\"MMO\");")
-            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES));
-        
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    m_query.clear();
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-        
-    statement = QString(
-        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
-        "VALUES\n"
-        "   (1, 1),\n"
-        "   (2, 1),\n"
-        "   (3, 1),\n"
-        "   (2, 2),\n"
-        "   (3, 2),\n"
-        "   (1, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    m_query.clear();
-
-    // insert dummy categories for testing purpose.
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
-            .arg(m_query.lastError().text())
-            .toLocal8Bit().constData()
-            << std::endl;
-    
-    // Insert testing rows into the Developpers Utility Table.
-    statement = QString(
-        "INSERT INTO \"%1\" (Name)\n"
-        "VALUES\n"
-        "   (\"Developpers 1\"),\n"
-        "   (\"Developpers 2\"),\n"
-        "   (\"Developpers 3\");")
-            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS));
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    m_query.clear();
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    // Inserting testings rows into the Developpers Utility Interface Table.
-    statement = QString(
-        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
-        "VALUES\n"
-        "   (1, 1),\n"
-        "   (3, 1),\n"
-        "   (2, 2),\n"
-        "   (2, 3),\n"
-        "   (3, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS));
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    m_query.clear();
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    // insert dummy values into Publishers for testing purpose.
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (Name)\n"
-        "VALUES\n"
-        "   (\"Publishers 1\"),\n"
-        "   (\"Publishers 2\"),\n"
-        "   (\"Publishers 3\");")
-            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
-        "VALUES\n"
-        "   (1, 1),\n"
-        "   (2, 1),\n"
-        "   (2, 2),\n"
-        "   (3, 3),\n"
-        "   (1, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS));
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if(!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    // insert dummy values into Platform for testing purpose.
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (Name)\n"
-        "VALUES\n"
-        "   (\"Windows\"),\n"
-        "   (\"Linux\"),\n"
-        "   (\"MacOS\");")
-            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
-        "VALUES\n"
-        "   (1, 1),\n"
-        "   (3, 1),\n"
-        "   (1, 2),\n"
-        "   (2, 2),\n"
-        "   (1, 3),\n"
-        "   (3, 3),\n"
-        "   (2, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    // insert dummy values into Services for testing purpose.
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (Name)\n"
-        "VALUES\n"
-        "   (\"Service 1\"),\n"
-        "   (\"Service 2\"),\n"
-        "   (\"Service 3\");")
-            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (UtilityID, ItemID)\n"
-        "VALUES\n"
-        "   (1, 1),\n"
-        "   (3, 1),\n"
-        "   (2, 2),\n"
-        "   (2, 3),\n"
-        "   (3, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-    
-    // Inserting data into Sensitive Content for debugging purpose
-    m_query.clear();
-
-    statement = QString(
-        "INSERT INTO \"%1\" (ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
-        "VALUES\n"
-        "   (1, 3, 5, 2),\n"
-        "   (2, 0, 2, 3),\n"
-        "   (3, 5, 4, 3);")
-            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT));
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (!m_query.exec(statement))
-        std::cerr << QString("Failed to insert rows into %1.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
+TableModel::TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
+    QAbstractTableModel(parent),
+    m_db(db),
+    m_utilityTable(utilityTable),
+    m_utilityInterface(nullptr),
+    m_query(m_db),
+    m_listType(ListType::UNKNOWN),
+    m_gameListData(nullptr),
+    m_isTableCreated(false),
+    m_isTableChanged(false),
+    m_listCount(0)
+{
+    setItemsData(data);
 }
 
 TableModel::~TableModel()
@@ -469,6 +245,8 @@ QString TableModel::rowTableName() const
 void TableModel::deleteSqlTable()
 {
     // Removing the SQL table when this object is destoyed.
+    if (!m_isTableCreated) return;
+
     m_query.clear();
 
     QString statement = QString(
@@ -485,6 +263,14 @@ void TableModel::deleteSqlTable()
             << "\"\n\t"
             << m_query.lastError().text().toLocal8Bit().constData()
             << std::endl;
+    
+    m_isTableCreated = false;
+
+    if (m_listType == ListType::GAMELIST)
+    {
+        delete m_gameListData;
+        m_gameListData = nullptr;
+    }
 }
 
 void TableModel::deleteRows(const QModelIndexList& indexList)
@@ -514,4 +300,28 @@ long long int TableModel::itemID(const QModelIndex& index) const
         return gameItemID(index);
     
     return -1;
+}
+
+QVariant TableModel::retrieveData() const
+{
+    if (m_isTableCreated)
+    {
+        if (m_listType == ListType::GAMELIST)
+            return gameRetrieveData();
+    }
+    return QVariant();
+}
+
+bool TableModel::setItemsData(const QVariant& data)
+{
+    deleteSqlTable();
+    if (data.canConvert<Game::SaveDataTable>())
+    {
+        m_listType = ListType::GAMELIST;
+        m_gameListData = new QList<GameItem>();
+        return setGameItemsData(data);
+    }
+
+    m_listType = ListType::UNKNOWN;
+    return false;
 }

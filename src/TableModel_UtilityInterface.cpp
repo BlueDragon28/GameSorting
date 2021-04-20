@@ -22,6 +22,16 @@
 
 #include <QSqlError>
 
+TableModel_UtilityInterface::TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db, const QVariant& variant) :
+	m_parentTableName(parentTableName),
+	m_listType(type),
+	m_db(db),
+	m_query(m_db),
+	m_isTableReady(true)
+{
+	setData(variant);
+}
+
 TableModel_UtilityInterface::TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db) :
 	m_parentTableName(parentTableName),
 	m_listType(type),
@@ -60,6 +70,11 @@ QString TableModel_UtilityInterface::tableName(UtilityTableName tableName) const
 	}
 }
 
+bool TableModel_UtilityInterface::isTableReady() const
+{
+	return m_isTableReady;
+}
+
 void TableModel_UtilityInterface::createTables()
 {
 	if (m_listType == ListType::GAMELIST)
@@ -70,6 +85,7 @@ void TableModel_UtilityInterface::destroyTables()
 {
 	if (m_listType == ListType::GAMELIST)
 		destroyGameTables();
+	m_isTableReady = false;
 }
 
 void TableModel_UtilityInterface::printTableCreationError(const QString& tableName, const QString& messageError)
@@ -223,4 +239,36 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 					.arg(m_query.lastError().text())
 					.toLocal8Bit().constData()
 					<< std::endl;
+}
+
+QVariant TableModel_UtilityInterface::data() const
+{
+	if (m_isTableReady)
+	{
+		if (m_listType == ListType::GAMELIST)
+			return gameData();
+	}
+
+	return QVariant();
+}
+
+bool TableModel_UtilityInterface::setData(const QVariant& variant)
+{
+	// Set the data into the utility interface tables.
+	// Check if the data is a game list.
+	if (variant.canConvert<Game::SaveUtilityInterfaceData>())
+	{
+		m_listType = ListType::GAMELIST;
+		createTables();
+		bool result = setGameData(variant);
+		if (result)
+		{
+			m_isTableReady = true;
+			return true;
+		}
+	}
+
+	m_listType = ListType::UNKNOWN;
+	destroyTables();
+	return false;
 }

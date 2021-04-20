@@ -24,6 +24,7 @@
 #include <QSqlQuery>
 #include <QString>
 #include <QList>
+#include <QVariant>
 
 class SqlUtilityTable
 {
@@ -35,6 +36,9 @@ public:
 	void newList(ListType type);
 	static QString tableName(UtilityTableName tableName);
 	QList<ItemUtilityData> retrieveTableData(UtilityTableName tableName) const;
+
+	QVariant data() const;
+	bool setData(const QVariant& data);
 
 private:
 	void createTables();
@@ -49,6 +53,9 @@ private:
 	void createPublishersTable();
 	void createPlatformTable();
 	void createServicesTable();
+	QVariant queryGameData() const;
+	bool setGameData(const QVariant& data);
+	inline bool setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data);
 
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 

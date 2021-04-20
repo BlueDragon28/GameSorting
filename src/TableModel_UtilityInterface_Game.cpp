@@ -235,3 +235,215 @@ void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& ite
 				<< std::endl;
 	}
 }
+
+QVariant TableModel_UtilityInterface::gameData() const
+{
+	// Query all the game utility interface.
+	Game::SaveUtilityInterfaceData data = {};
+
+	QSqlQuery query(m_db);
+	QString statement = QString(
+		"SELECT\n"
+		"	ItemID,\n"
+		"	UtilityID\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"ORDER BY\n"
+		"	ItemID;");
+	
+	// Categories
+	if (!query.exec(statement.arg(tableName(UtilityTableName::CATEGORIES))))
+		return QVariant();
+	
+	while (query.next())
+	{
+		Game::SaveUtilityInterfaceItem item = {};
+		item.gameID = query.value(0).toLongLong();
+		item.utilityID = query.value(1).toLongLong();
+		data.categories.append(item);
+	}
+	query.clear();
+
+	// Developpers
+	if (!query.exec(statement.arg(tableName(UtilityTableName::DEVELOPPERS))))
+		return QVariant();
+
+	while (query.next())
+	{
+		Game::SaveUtilityInterfaceItem item = {};
+		item.gameID = query.value(0).toLongLong();
+		item.utilityID = query.value(1).toLongLong();
+		data.developpers.append(item);
+	}
+	query.clear();
+
+	// Publishers
+	if (!query.exec(statement.arg(tableName(UtilityTableName::DEVELOPPERS))))
+		return QVariant();
+	
+	while (query.next())
+	{
+		Game::SaveUtilityInterfaceItem item = {};
+		item.gameID = query.value(0).toLongLong();
+		item.utilityID = query.value(1).toLongLong();
+		data.pubishers.append(item);
+	}
+	query.clear();
+
+	// Platform
+	if (!query.exec(statement.arg(tableName(UtilityTableName::PLATFORM))))
+		return QVariant();
+	
+	while (query.next())
+	{
+		Game::SaveUtilityInterfaceItem item = {};
+		item.gameID = query.value(0).toLongLong();
+		item.utilityID = query.value(1).toLongLong();
+		data.platform.append(item);
+	}
+	query.clear();
+
+	// Services
+	if (!query.exec(statement.arg(tableName(UtilityTableName::SERVICES))))
+		return QVariant();
+	
+	while (query.next())
+	{
+		Game::SaveUtilityInterfaceItem item = {};
+		item.gameID = query.value(0).toLongLong();
+		item.utilityID = query.value(1).toLongLong();
+		data.services.append(item);
+	}
+	query.clear();
+
+	// Sensitive Content
+	statement = QString(
+		"SELECT\n"
+		"	SensitiveContentID,\n"
+		"	ItemID,\n"
+		"	ExplicitContent,\n"
+		"	ViolenceContent,\n"
+		"	BadLanguage\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"ORDER BY\n"
+		"	SensitiveContentID;")
+			.arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
+	
+	if (!query.exec(statement))
+		return QVariant();
+	
+	while (query.next())
+	{
+		Game::SaveUtilitySensitiveContentItem item = {};
+		item.SensitiveContentID = query.value(0).toLongLong();
+		item.gameID = query.value(1).toLongLong();
+		item.explicitContent = query.value(2).toInt();
+		item.violenceContent = query.value(3).toInt();
+		item.badLanguageContent = query.value(4).toInt();
+		data.sensitiveContent.append(item);
+	}
+
+	return QVariant::fromValue(data);
+}
+
+inline bool TableModel_UtilityInterface::setGameStandardData(UtilityTableName tName, const QList<Game::SaveUtilityInterfaceItem>& data)
+{
+	// Convenient member function to set the Categories, Developpers, Publishers, Platform and Services data.
+	QString statement = QString(
+		"INSERT INTO \"%1\" (ItemID, UtilityID)\n"
+		"VALUES")
+			.arg(tableName(tName));
+	
+	for (long long int i = 0; i < data.size(); i+=10)
+	{
+		QString strData;
+		for (long long int j = i; j < i+10 && j < data.size(); j++)
+		{
+			strData +=
+				QString("\n\t(%1, %2),")
+					.arg(data.at(j).gameID)
+					.arg(data.at(j).utilityID);
+		}
+		if (strData.size() > 0)
+		{
+			strData[strData.size()-1] = ';';
+
+#ifndef NDEBUG
+			std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+			m_query.clear();
+			if (!m_query.exec(statement + strData))
+			{
+#ifndef NDEBUG
+				std::cerr << QString("Failed to set data into %1.\n\t%2")
+					.arg(tableName(tName))
+					.arg(m_query.lastError().text())
+					.toLocal8Bit().constData()
+					<< std::endl;
+#endif
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool TableModel_UtilityInterface::setGameData(const QVariant& variant)
+{
+	// Apply the data into the SQL table.
+	Game::SaveUtilityInterfaceData data = qvariant_cast<Game::SaveUtilityInterfaceData>(variant);
+
+	if (!setGameStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+		!setGameStandardData(UtilityTableName::DEVELOPPERS, data.developpers) ||
+		!setGameStandardData(UtilityTableName::PUBLISHERS, data.pubishers) ||
+		!setGameStandardData(UtilityTableName::PLATFORM, data.platform) ||
+		!setGameStandardData(UtilityTableName::SERVICES, data.services))
+		return false;
+
+	// Sensitive Content
+	QString sensitiveContentStatement = QString(
+		"INSERT INTO \"%1\" (SensitiveContentID, ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
+		"VALUES")
+		.arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
+	
+	for (long long int i = 0; i < data.sensitiveContent.size(); i+=10)
+	{
+		QString strData;
+		for (long long int j = i; j < i+10 && j < data.sensitiveContent.size(); j++)
+		{
+			strData +=
+				QString("\n\t(%1, %2, %3, %4, %5),")
+					.arg(data.sensitiveContent.at(j).SensitiveContentID)
+					.arg(data.sensitiveContent.at(j).gameID)
+					.arg(data.sensitiveContent.at(j).explicitContent)
+					.arg(data.sensitiveContent.at(j).violenceContent)
+					.arg(data.sensitiveContent.at(j).badLanguageContent);
+		}
+		if (strData.size() > 0)
+		{
+			strData[strData.size()-1] = ';';
+
+#ifndef NDEBUG
+			std::cout << (sensitiveContentStatement + strData).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+		
+			m_query.clear();
+			if (!m_query.exec(sensitiveContentStatement + strData))
+			{
+#ifndef NDEBUG
+				std::cerr << QString("Failed to set data into %1.\n\t%2")
+					.arg(tableName(UtilityTableName::SENSITIVE_CONTENT))
+					.arg(m_query.lastError().text())
+					.toLocal8Bit().constData()
+					<< std::endl;
+#endif
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
