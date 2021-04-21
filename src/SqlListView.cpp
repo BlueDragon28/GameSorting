@@ -42,8 +42,6 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
 {
     setupWidget();
     setupView();
-
-    m_model->appendRows(3);
 }
 
 SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
@@ -57,6 +55,7 @@ SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable
     m_type = m_model->listType();
     setupWidget();
     setupView();
+    setColumnsSize(data);
 }
 
 SqlListView::~SqlListView()
@@ -148,10 +147,34 @@ void SqlListView::deletingItems()
 
 QVariant SqlListView::listData() const
 {
+    // Return the data inside the model.
     if (m_model)
-        return m_model->retrieveData();
-    else
-        return QVariant();
+    {
+        // Retrieve the data of the model.
+        QVariant variant = m_model->retrieveData();
+        // If the list is a game list.
+        if (m_type == ListType::GAMELIST)
+        {
+            if (variant.canConvert<Game::SaveDataTable>() && m_view)
+            {
+                // Retrieve the size of the column.
+                Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+                data.viewColumnsSize.name = m_view->columnWidth(Game::NAME);
+                data.viewColumnsSize.categories = m_view->columnWidth(Game::CATEGORIES);
+                data.viewColumnsSize.developpers = m_view->columnWidth(Game::DEVELOPPERS);
+                data.viewColumnsSize.publishers = m_view->columnWidth(Game::PUBLISHERS);
+                data.viewColumnsSize.platform = m_view->columnWidth(Game::PLATFORMS);
+                data.viewColumnsSize.services = m_view->columnWidth(Game::SERVICES);
+                data.viewColumnsSize.sensitiveContent = m_view->columnWidth(Game::SENSITIVE_CONTENT);
+                data.viewColumnsSize.rate = m_view->columnWidth(Game::RATE);
+                return QVariant::fromValue(data);
+            }
+            else
+                return QVariant();
+        }
+    }
+    
+    return QVariant();
 }
 
 ListType SqlListView::listType() const
@@ -160,4 +183,24 @@ ListType SqlListView::listType() const
         return m_model->listType();
     else
         return ListType::UNKNOWN;
+}
+
+void SqlListView::setColumnsSize(const QVariant& variant)
+{
+    // Set the size of the columns inside the table view.
+    if (m_type == ListType::GAMELIST)
+    {
+        if (variant.canConvert<Game::SaveDataTable>() && m_view)
+        {
+            Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+            m_view->setColumnWidth(Game::NAME, data.viewColumnsSize.name);
+            m_view->setColumnWidth(Game::CATEGORIES, data.viewColumnsSize.categories);
+            m_view->setColumnWidth(Game::DEVELOPPERS, data.viewColumnsSize.developpers);
+            m_view->setColumnWidth(Game::PUBLISHERS, data.viewColumnsSize.publishers);
+            m_view->setColumnWidth(Game::PLATFORMS, data.viewColumnsSize.platform);
+            m_view->setColumnWidth(Game::SERVICES, data.viewColumnsSize.services);
+            m_view->setColumnWidth(Game::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);
+            m_view->setColumnWidth(Game::RATE, data.viewColumnsSize.rate);
+        }
+    }
 }

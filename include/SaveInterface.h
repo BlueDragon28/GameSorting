@@ -60,5 +60,7 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveUtilityInterfaceItem& 
 QDataStream& operator>>(QDataStream& in, Game::SaveUtilityInterfaceItem& data);
 QDataStream& operator<<(QDataStream& out, const Game::SaveUtilitySensitiveContentItem& data);
 QDataStream& operator>>(QDataStream& in, Game::SaveUtilitySensitiveContentItem& data);
+QDataStream& operator<<(QDataStream& out, const Game::ColumnsSize& data);
+QDataStream& operator>>(QDataStream& in, Game::ColumnsSize& data);
 
 #endif // GAMESORTING_SAVEINTERFACE_H_

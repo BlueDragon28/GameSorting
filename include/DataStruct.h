@@ -118,11 +118,24 @@ namespace Game
         QList<SaveUtilitySensitiveContentItem> sensitiveContent;
     };
 
+    struct ColumnsSize
+    {
+        int name;
+        int categories;
+        int developpers;
+        int publishers;
+        int platform;
+        int services;
+        int sensitiveContent;
+        int rate;
+    };
+
     struct SaveDataTable
     {
         QString tableName;
         QList<SaveItem> gameList;
         SaveUtilityInterfaceData interface;
+        ColumnsSize viewColumnsSize;
     };
 
     struct SaveData

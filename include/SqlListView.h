@@ -51,6 +51,7 @@ private:
     void setupWidget();
     void setupView();
     void createMenu(QVBoxLayout* vLayout);
+    void setColumnsSize(const QVariant& data);
 
     QSqlDatabase& m_db;
     ListType m_type;

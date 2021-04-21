@@ -355,6 +355,9 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveDataTable& data)
     // Writing the utility interface data.
     out << data.interface;
 
+    // Writing the size of the columns of the table view.
+    out << data.viewColumnsSize;
+
     return out;
 }
 
@@ -378,6 +381,9 @@ QDataStream& operator>>(QDataStream& in, Game::SaveDataTable& data)
 
     // Reading the utility interface data.
     in >> data.interface;
+
+    // Reading the size of the columns of the table view.
+    in >> data.viewColumnsSize;
 
     return in;
 }
@@ -442,5 +448,35 @@ QDataStream& operator>>(QDataStream& in, Game::SaveUtilitySensitiveContentItem& 
     in >> data.explicitContent;
     in >> data.violenceContent;
     in >> data.badLanguageContent;
+    return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const Game::ColumnsSize& data)
+{
+    // Writing the size of the columns of the table view.
+    out << data.name;
+    out << data.categories;
+    out << data.developpers;
+    out << data.publishers;
+    out << data.platform;
+    out << data.services;
+    out << data.sensitiveContent;
+    out << data.rate;
+
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, Game::ColumnsSize& data)
+{
+    // Reading the size of the columns of the table view.
+    in >> data.name;
+    in >> data.categories;
+    in >> data.developpers;
+    in >> data.publishers;
+    in >> data.platform;
+    in >> data.services;
+    in >> data.sensitiveContent;
+    in >> data.rate;
+
     return in;
 }
