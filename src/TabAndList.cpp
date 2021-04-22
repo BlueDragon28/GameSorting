@@ -17,7 +17,7 @@
 */
 
 #include "TabAndList.h"
-#include "SqlListView.h"
+#include "GameListView.h"
 #include "Common.h"
 #include "SaveInterface.h"
 
@@ -90,20 +90,11 @@ void TabAndList::addTable()
     if (ok && !tableName.isEmpty())
     {
         // Creating a new table using the tableName got from the user.
-        SqlListView* newList = new SqlListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
+        GameListView* newList = new GameListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
         m_stackedViews->addWidget(newList);
         m_tabBar->addTab(newList->tableName());
     }
 }
-
-/*void TabAndList::addingItem()
-{
-    // Adding a new row into at the end of the list.
-    SqlListView* listView = reinterpret_cast<SqlListView*>(m_stackedViews->currentWidget());
-
-    if (listView)
-        listView->addingItem();
-}*/
 
 void TabAndList::removeTable(int index)
 {
@@ -211,7 +202,7 @@ bool TabAndList::saveFile(const QString& filePath) const
             
             if (view->viewType() == ViewType::GAME)
             {
-                SqlListView* gameView = reinterpret_cast<SqlListView*>(view);
+                GameListView* gameView = reinterpret_cast<GameListView*>(view);
                 variant = gameView->listData();
                 if (!variant.canConvert<Game::SaveDataTable>())
                     return false;
@@ -253,7 +244,7 @@ bool TabAndList::openFile(const QString& filePath)
         
         for (int i = 0; i < data.gameTables.size(); i++)
         {
-            SqlListView* view = new SqlListView(QVariant::fromValue(data.gameTables.at(i)), m_db, m_sqlUtilityTable, this);
+            GameListView* view = new GameListView(QVariant::fromValue(data.gameTables.at(i)), m_db, m_sqlUtilityTable, this);
             if (view->listType() == ListType::UNKNOWN)
                 return false;
             m_stackedViews->addWidget(view);

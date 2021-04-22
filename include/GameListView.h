@@ -16,8 +16,8 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_SQLLISTVIEW_H
-#define GAMESORTING_SQLLISTVIEW_H
+#ifndef GAMESORTING_GAMELISTVIEW_H
+#define GAMESORTING_GAMELISTVIEW_H
 
 #include "AbstractListView.h"
 #include "DataStruct.h"
@@ -30,13 +30,13 @@ class TableModel;
 class QTableView;
 class QVBoxLayout;
 
-class SqlListView : public AbstractListView
+class GameListView : public AbstractListView
 {
     Q_OBJECT
 public:
-    explicit SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
-    explicit SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
-    ~SqlListView();
+    explicit GameListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
+    explicit GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
+    ~GameListView();
 
     QString tableName() const;
     ListType listType() const;
@@ -62,4 +62,4 @@ private:
     SqlUtilityTable& m_utilityTable;
 };
 
-#endif
+#endif // GAMESORTING_GAMELISTVIEW_H

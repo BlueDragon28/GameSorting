@@ -19,7 +19,8 @@
 #ifndef GAMESORTING_TABANDLIST_H
 #define GAMESORTING_TABANDLIST_H
 
-#include "SqlListView.h"
+#include "DataStruct.h"
+#include "SqlUtilityTable.h"
 
 #include <QWidget>
 #include <QSqlDatabase>
@@ -36,7 +37,6 @@ public:
     explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
 
 public slots:
-    //void addingItem();
     void newGameList();
     void open();
     void saveAs();

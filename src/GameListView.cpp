@@ -16,7 +16,7 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "SqlListView.h"
+#include "GameListView.h"
 #include "TableModel.h"
 #include <QTableView>
 #include <QItemSelectionModel>
@@ -32,7 +32,7 @@
 
 #include "ListViewDelegate.h"
 
-SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
+GameListView::GameListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
     AbstractListView(parent),
     m_db(db),
     m_type(type),
@@ -44,7 +44,7 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
     setupView();
 }
 
-SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
+GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
     AbstractListView(parent),
     m_db(db),
     m_type(ListType::UNKNOWN),
@@ -58,7 +58,7 @@ SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable
     setColumnsSize(data);
 }
 
-SqlListView::~SqlListView()
+GameListView::~GameListView()
 {
     if (m_view)
     {
@@ -69,7 +69,7 @@ SqlListView::~SqlListView()
     }
 }
 
-void SqlListView::setupWidget()
+void GameListView::setupWidget()
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
@@ -86,18 +86,18 @@ void SqlListView::setupWidget()
     delete oldDelegate;
 }
 
-void SqlListView::setupView()
+void GameListView::setupView()
 {
     m_view->setModel(m_model);
 }
 
-void SqlListView::addingItem()
+void GameListView::addingItem()
 {
     if (m_model)
         m_model->appendRows();
 }
 
-QString SqlListView::tableName() const
+QString GameListView::tableName() const
 {
     if (m_model)
         return m_model->tableName();
@@ -105,7 +105,7 @@ QString SqlListView::tableName() const
         return QString();
 }
 
-void SqlListView::createMenu(QVBoxLayout* vLayout)
+void GameListView::createMenu(QVBoxLayout* vLayout)
 {
     if (m_type == ListType::GAMELIST)
     {
@@ -115,13 +115,13 @@ void SqlListView::createMenu(QVBoxLayout* vLayout)
         QIcon addIcon(":/Images/Add.svg");
         QAction* addAct = new QAction(addIcon, tr("Add New Game"), this);
         addAct->setToolTip(tr("Adding a new game into the current game list."));
-        connect(addAct, &QAction::triggered, this, &SqlListView::addingItem);
+        connect(addAct, &QAction::triggered, this, &GameListView::addingItem);
         menuBar->addAction(addAct);
 
         QIcon delIcon(":/Images/Del.svg");
         QAction* delAct = new QAction(delIcon, tr("Delete Games"), this);
         delAct->setToolTip(tr("Deleting selected games in the current game list."));
-        connect(delAct, &QAction::triggered, this, &SqlListView::deletingItems);
+        connect(delAct, &QAction::triggered, this, &GameListView::deletingItems);
         menuBar->addAction(delAct);
 
         QIcon updateIcon(":/Images/Update.svg");
@@ -135,7 +135,7 @@ void SqlListView::createMenu(QVBoxLayout* vLayout)
     }
 }
 
-void SqlListView::deletingItems()
+void GameListView::deletingItems()
 {
     QItemSelectionModel* selectionModel = m_view->selectionModel();
     if (selectionModel->hasSelection())
@@ -145,7 +145,7 @@ void SqlListView::deletingItems()
     }
 }
 
-QVariant SqlListView::listData() const
+QVariant GameListView::listData() const
 {
     // Return the data inside the model.
     if (m_model)
@@ -177,7 +177,7 @@ QVariant SqlListView::listData() const
     return QVariant();
 }
 
-ListType SqlListView::listType() const
+ListType GameListView::listType() const
 {
     if (m_model)
         return m_model->listType();
@@ -185,7 +185,7 @@ ListType SqlListView::listType() const
         return ListType::UNKNOWN;
 }
 
-void SqlListView::setColumnsSize(const QVariant& variant)
+void GameListView::setColumnsSize(const QVariant& variant)
 {
     // Set the size of the columns inside the table view.
     if (m_type == ListType::GAMELIST)
@@ -205,7 +205,7 @@ void SqlListView::setColumnsSize(const QVariant& variant)
     }
 }
 
-ViewType SqlListView::viewType() const
+ViewType GameListView::viewType() const
 {
     return ViewType::GAME;
 }
