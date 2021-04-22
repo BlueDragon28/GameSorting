@@ -19,6 +19,7 @@
 #ifndef GAMESORTING_SQLLISTVIEW_H
 #define GAMESORTING_SQLLISTVIEW_H
 
+#include "AbstractListView.h"
 #include "DataStruct.h"
 #include "SqlUtilityTable.h"
 
@@ -29,7 +30,7 @@ class TableModel;
 class QTableView;
 class QVBoxLayout;
 
-class SqlListView : public QWidget
+class SqlListView : public AbstractListView
 {
     Q_OBJECT
 public:
@@ -40,6 +41,7 @@ public:
     QString tableName() const;
     ListType listType() const;
     QVariant listData() const;
+    virtual ViewType viewType() const override;
 
 public slots:
     void addingItem();

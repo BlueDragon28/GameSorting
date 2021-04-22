@@ -33,7 +33,7 @@
 #include "ListViewDelegate.h"
 
 SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
-    QWidget(parent),
+    AbstractListView(parent),
     m_db(db),
     m_type(type),
     m_view(new QTableView(this)),
@@ -45,7 +45,7 @@ SqlListView::SqlListView(const QString& tableName, ListType type, QSqlDatabase& 
 }
 
 SqlListView::SqlListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
-    QWidget(parent),
+    AbstractListView(parent),
     m_db(db),
     m_type(ListType::UNKNOWN),
     m_view(new QTableView(this)),
@@ -203,4 +203,9 @@ void SqlListView::setColumnsSize(const QVariant& variant)
             m_view->setColumnWidth(Game::RATE, data.viewColumnsSize.rate);
         }
     }
+}
+
+ViewType SqlListView::viewType() const
+{
+    return ViewType::GAME;
 }

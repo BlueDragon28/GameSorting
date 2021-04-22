@@ -96,14 +96,14 @@ void TabAndList::addTable()
     }
 }
 
-void TabAndList::addingItem()
+/*void TabAndList::addingItem()
 {
     // Adding a new row into at the end of the list.
     SqlListView* listView = reinterpret_cast<SqlListView*>(m_stackedViews->currentWidget());
 
     if (listView)
         listView->addingItem();
-}
+}*/
 
 void TabAndList::removeTable(int index)
 {
@@ -124,7 +124,7 @@ void TabAndList::newGameList()
         m_tabBar->removeTab(i);
     for (int i = m_stackedViews->count()-1; i >= 0; i--)
     {
-        SqlListView* listView = reinterpret_cast<SqlListView*>(m_stackedViews->widget(i));
+        AbstractListView* listView = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
         m_stackedViews->removeWidget(listView);
         delete listView;
     }
@@ -207,12 +207,16 @@ bool TabAndList::saveFile(const QString& filePath) const
         // Getting the game data.
         for (int i = 0; i < m_tabBar->count(); i++)
         {
-            SqlListView* view = reinterpret_cast<SqlListView*>(m_stackedViews->widget(i));
+            AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
             
-            variant = view->listData();
-            if (!variant.canConvert<Game::SaveDataTable>())
-                return false;
-            data.gameTables.append(qvariant_cast<Game::SaveDataTable>(variant));
+            if (view->viewType() == ViewType::GAME)
+            {
+                SqlListView* gameView = reinterpret_cast<SqlListView*>(view);
+                variant = gameView->listData();
+                if (!variant.canConvert<Game::SaveDataTable>())
+                    return false;
+                data.gameTables.append(qvariant_cast<Game::SaveDataTable>(variant));
+            }
         }
 
         // Getting the utility data.

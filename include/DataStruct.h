@@ -35,6 +35,11 @@ enum class ListType
     GAMELIST
 };
 
+enum class ViewType
+{
+    GAME
+};
+
 struct GameItem
 {
     long long int gameID;

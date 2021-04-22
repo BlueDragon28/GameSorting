@@ -16,47 +16,19 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_TABANDLIST_H
-#define GAMESORTING_TABANDLIST_H
-
-#include "SqlListView.h"
+#ifndef GAMESORTING_ABSTRACTLISTVIEW_H_
+#define GAMESORTING_ABSTRACTLISTVIEW_H_
 
 #include <QWidget>
-#include <QSqlDatabase>
-#include <QTabBar>
+#include "DataStruct.h"
 
-class QTabBar;
-class SqlListView;
-class QStackedLayout;
-
-class TabAndList : public QWidget
+class AbstractListView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
+    explicit AbstractListView(QWidget* parent = nullptr);
 
-public slots:
-    //void addingItem();
-    void newGameList();
-    void open();
-    void saveAs();
-
-private slots:
-    void tabChanged(int index);
-    void addTable();
-    void removeTable(int index);
-
-private:
-    void setupView();
-    bool saveFile(const QString& filePath) const;
-    bool openFile(const QString& filePath);
-
-    QSqlDatabase& m_db;
-    ListType m_listType;
-    SqlUtilityTable m_sqlUtilityTable;
-    QTabBar* m_tabBar;
-    QStackedLayout* m_stackedViews;
-    QString m_filePath;
+    virtual ViewType viewType() const = 0;
 };
 
-#endif
+#endif // GAMESORTING_ABSTRACTLISTVIEW_H_
