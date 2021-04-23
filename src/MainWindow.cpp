@@ -100,6 +100,11 @@ void MainWindow::createMenu()
 	menuFile->addAction(saveListAct);
 	fileToolBar->addAction(saveListAct);
 
+	QAction* newCat = new QAction(tr("New cat"), this);
+	newCat->setToolTip(tr("New categories."));
+	connect(newCat, &QAction::triggered, m_tabAndList, &TabAndList::openCat);
+	fileToolBar->addAction(newCat);
+
 	// Save as a list into a file.
 	QAction* saveAsListAct = new QAction(tr("Save as"), this);
 #ifdef WIN32

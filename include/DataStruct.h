@@ -37,7 +37,8 @@ enum class ListType
 
 enum class ViewType
 {
-    GAME
+    GAME,
+    UTILITY,
 };
 
 struct GameItem

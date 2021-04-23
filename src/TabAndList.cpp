@@ -20,6 +20,7 @@
 #include "GameListView.h"
 #include "Common.h"
 #include "SaveInterface.h"
+#include "UtilityListView.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -255,4 +256,26 @@ bool TabAndList::openFile(const QString& filePath)
     }
 
     return false;
+}
+
+void TabAndList::openCat()
+{
+    bool isCatOpen = false;
+
+    for (int i = 0; i < m_stackedViews->count(); i++)
+    {
+        AbstractListView* widget = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+        if (widget->viewType() == ViewType::UTILITY)
+        {
+            isCatOpen = true;
+            break;
+        }
+    }
+
+    if (!isCatOpen)
+    {
+        UtilityListView* view = new UtilityListView(UtilityTableName::CATEGORIES, m_db, this);
+        m_stackedViews->addWidget(view);
+        m_tabBar->addTab(SqlUtilityTable::tableName(UtilityTableName::CATEGORIES));
+    }
 }

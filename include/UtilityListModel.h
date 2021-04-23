@@ -16,62 +16,40 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_UTILITYINTERFACEEDITOR_MODEL_H_
-#define GAMESORTING_UTILITYINTERFACEEDITOR_MODEL_H_
+#ifndef GAMESORTING_UTILITYLISTMODEL_H_
+#define GAMESORTING_UTILITYLISTMODEL_H_
 
+#include "DataStruct.h"
 #include <QAbstractListModel>
 #include <QList>
+#include <QString>
+#include <QVariant>
 #include <QSqlQuery>
 #include <QSqlDatabase>
 
-#include "DataStruct.h"
-#include "SqlUtilityTable.h"
-
-class TableModel;
-class TableModel_UtilityInterface;
-
-class UtilityInterfaceEditorModel : public QAbstractListModel
+class UtilityListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit UtilityInterfaceEditorModel(
-        UtilityTableName utilityTableName,
-        long long int itemID,
-        TableModel* tableModel,
-        TableModel_UtilityInterface* dataInterface,
-        SqlUtilityTable& utilityData,
-        QSqlDatabase& db,
-        QObject* parent = nullptr);
+    explicit UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent = nullptr);
 
-    // Interface between the view and the model.
+    // Interface between the view and the model
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+    virtual bool setData(const QModelIndex& index, const QVariant& data, int role = Qt::EditRole) override;
+    virtual bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+    virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    // Apply the change made in the model into the utilityInterfaceTable.
-    void applyChange();
+    void queryTable();
+    void appendRow();
 
 private:
-    void retrieveUtilityData();
-    bool isUtilityIDChecked(long long int utilityID) const;
-    void removeCheckedUtilityID(long long int utilityID);
-
-    QSqlDatabase& m_db;
+    UtilityTableName m_tableName;
+    QList<ItemUtilityData> m_data;
+    QSqlDatabase m_db;
     QSqlQuery m_query;
-
-    // Variables to communicate with the data.
-    // It's used to retrive all the utility (categories, platform, etc).
-    UtilityTableName m_utilityTableName;
-    long long int m_itemID;
-    TableModel* m_tableModel;
-    TableModel_UtilityInterface* m_dataInterface;
-    SqlUtilityTable& m_utilityData;
-
-    // Data
-    QList<ItemUtilityData> m_utilityListData;
-    QList<long long int> m_checkedIDList;
 };
 
-#endif
+#endif // GAMESORTING_UTILITYLISTMODEL_H_
