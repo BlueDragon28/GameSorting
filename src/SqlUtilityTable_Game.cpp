@@ -37,6 +37,8 @@ void SqlUtilityTable::destroyGameTables()
 	destroyTableByName(tableName(UtilityTableName::PUBLISHERS));
 	destroyTableByName(tableName(UtilityTableName::PLATFORM));
 	destroyTableByName(tableName(UtilityTableName::SERVICES));
+	m_type = ListType::UNKNOWN;
+	m_isTableReady = false;
 }
 
 void SqlUtilityTable::createCategoriesTable()

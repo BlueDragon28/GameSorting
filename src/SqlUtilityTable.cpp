@@ -26,7 +26,7 @@ SqlUtilityTable::SqlUtilityTable(ListType type, QSqlDatabase& db) :
 	m_query(m_db),
 	m_isTableReady(true)
 {
-	if (!m_db.isOpen())
+	if (!m_db.isOpen() || m_type == ListType::UNKNOWN)
 	{
 		m_isTableReady = false;
 		return;
@@ -74,7 +74,12 @@ QString SqlUtilityTable::tableName(UtilityTableName tableName)
 void SqlUtilityTable::createTables()
 {
 	if (m_type == ListType::GAMELIST)
+	{
+		m_isTableReady = true;
 		createGameTables();
+	}
+	else
+		m_isTableReady = false;
 }
 
 void SqlUtilityTable::destroyTables()

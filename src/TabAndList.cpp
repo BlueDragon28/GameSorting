@@ -37,7 +37,7 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     m_db(db),
     m_tabBar(new QTabBar(this)),
     m_stackedViews(new QStackedLayout()),
-    m_listType(ListType::GAMELIST),
+    m_listType(ListType::UNKNOWN),
     m_sqlUtilityTable(m_listType, m_db)
 {
     setupView();
@@ -79,7 +79,11 @@ void TabAndList::tabChanged(int index)
 void TabAndList::addTable()
 {
     // Adding a new list table.
-    // First, asking the user the new table name.
+    // First, check if the table is initialized.
+    if (m_listType == ListType::UNKNOWN)
+        return;
+
+    // Asking the user the new table name.
     bool ok;
     QString tableName = QInputDialog::getText(
         this,
@@ -122,6 +126,7 @@ void TabAndList::newGameList()
     }
     
     m_sqlUtilityTable.newList(ListType::GAMELIST);
+    m_listType = ListType::GAMELIST;
 }
 
 void TabAndList::open()
