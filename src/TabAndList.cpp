@@ -127,6 +127,7 @@ void TabAndList::newGameList()
     
     m_sqlUtilityTable.newList(ListType::GAMELIST);
     m_listType = ListType::GAMELIST;
+    emit newList(ListType::GAMELIST);
 }
 
 void TabAndList::open()
@@ -263,24 +264,29 @@ bool TabAndList::openFile(const QString& filePath)
     return false;
 }
 
-void TabAndList::openCat()
+void TabAndList::openUtility(UtilityTableName tableName)
 {
-    bool isCatOpen = false;
+    // Opening the utility editor where table is tableName.
+    // But first, check if the editor is not already open.
+    bool isUtilityOpen = false;
 
     for (int i = 0; i < m_stackedViews->count(); i++)
     {
-        AbstractListView* widget = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
-        if (widget->viewType() == ViewType::UTILITY)
+        if (reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i))->viewType() == ViewType::UTILITY)
         {
-            isCatOpen = true;
-            break;
+            if (reinterpret_cast<UtilityListView*>(m_stackedViews->widget(i))->tableName() == tableName)
+            {
+                isUtilityOpen = true;
+                break;
+            }
         }
     }
 
-    if (!isCatOpen)
+    // If not, let's opening the editor.
+    if (!isUtilityOpen)
     {
-        UtilityListView* view = new UtilityListView(UtilityTableName::CATEGORIES, m_db, this);
+        UtilityListView* view = new UtilityListView(tableName, m_db, this);
         m_stackedViews->addWidget(view);
-        m_tabBar->addTab(SqlUtilityTable::tableName(UtilityTableName::CATEGORIES));
+        m_tabBar->addTab(SqlUtilityTable::tableName(tableName));
     }
 }

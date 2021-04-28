@@ -40,7 +40,10 @@ public slots:
     void newGameList();
     void open();
     void saveAs();
-    void openCat();
+    void openUtility(UtilityTableName tableName);
+
+signals:
+    void newList(ListType listType);
 
 private slots:
     void tabChanged(int index);

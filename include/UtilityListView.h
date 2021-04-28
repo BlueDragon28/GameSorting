@@ -33,6 +33,7 @@ public:
     UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent = nullptr);
 
     virtual ViewType viewType() const override;
+    UtilityTableName tableName() const;
 
 private:
     void createMenu();

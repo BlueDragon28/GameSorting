@@ -19,12 +19,14 @@
 #ifndef GAMESORTING_MAINWINDOW
 #define GAMESORTING_MAINWINDOW
 
+#include "DataStruct.h"
 #include <QMainWindow>
 #include <QSqlDatabase>
 #include <QString>
 
 class TabAndList;
 class QTableView;
+class QToolBar;
 
 class MainWindow : public QMainWindow
 {
@@ -36,9 +38,12 @@ public:
 private:
 	void createMenu();
 	void createCentralWidget();
+	void newListCreated(ListType type);
+	void createGameToolBar();
 
 	TabAndList* m_tabAndList;
 	QSqlDatabase m_db;
+	QToolBar* m_listToolBar;
 };
 
 #endif // GAMESORTING_MAINWINDOW

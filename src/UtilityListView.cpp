@@ -72,3 +72,8 @@ void UtilityListView::createView()
     m_view = new QTableView(this);
     m_view->setModel(m_model);
 }
+
+UtilityTableName UtilityListView::tableName() const
+{
+    return m_uName;
+}

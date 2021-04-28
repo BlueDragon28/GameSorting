@@ -33,7 +33,8 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	m_db(QSqlDatabase::addDatabase("QSQLITE")),
-	m_tabAndList(nullptr)
+	m_tabAndList(nullptr),
+	m_listToolBar(nullptr)
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -100,11 +101,6 @@ void MainWindow::createMenu()
 	menuFile->addAction(saveListAct);
 	fileToolBar->addAction(saveListAct);
 
-	QAction* newCat = new QAction(tr("New cat"), this);
-	newCat->setToolTip(tr("New categories."));
-	connect(newCat, &QAction::triggered, m_tabAndList, &TabAndList::openCat);
-	fileToolBar->addAction(newCat);
-
 	// Save as a list into a file.
 	QAction* saveAsListAct = new QAction(tr("Save as"), this);
 #ifdef WIN32
@@ -132,5 +128,62 @@ void MainWindow::createMenu()
 void MainWindow::createCentralWidget()
 {
 	m_tabAndList = new TabAndList(m_db, this);
+	connect(m_tabAndList, &TabAndList::newList, this, &MainWindow::newListCreated);
 	setCentralWidget(m_tabAndList);
+}
+
+void MainWindow::createGameToolBar()
+{
+	// Creating the toolbar next to the file toolbar.
+	// This toolbar is used to open the utility editor.
+	m_listToolBar = addToolBar(tr("Game ToolBar"));
+	m_listToolBar->setMovable(false);
+
+	// Create the utility menu.
+	QMenu* utilityMenu = new QMenu(tr("Game Utility"), m_listToolBar);
+	menuBar()->addMenu(utilityMenu);
+	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
+	catAct->setToolTip(tr("Open the categories editor."));
+	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
+	utilityMenu->addAction(catAct);
+
+	QAction* devAct = new QAction(tr("Developpers"), m_listToolBar);
+	devAct->setToolTip(tr("Open the developpers editor."));
+	connect(devAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::DEVELOPPERS);});
+	utilityMenu->addAction(devAct);
+
+	QAction* pbAct = new QAction(tr("Publishers"), m_listToolBar);
+	pbAct->setToolTip(tr("Open the publishers editor."));
+	connect(pbAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PUBLISHERS);});
+	utilityMenu->addAction(pbAct);
+
+	QAction* platAct = new QAction(tr("Platforms"), m_listToolBar);
+	platAct->setToolTip(tr("Open the platform editor."));
+	connect(platAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PLATFORM);});
+	utilityMenu->addAction(platAct);
+
+	QAction* servAct = new QAction(tr("Services"), m_listToolBar);
+	servAct->setToolTip(tr("Open the services editor."));
+	connect(servAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
+	utilityMenu->addAction(servAct);
+
+	// Creating the toolButton used to open the utilityMenu.
+	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
+	utilityToolButton->setText(tr("Game Utility"));
+	utilityToolButton->setMenu(utilityMenu);
+	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_listToolBar->addWidget(utilityToolButton);
+}
+
+void MainWindow::newListCreated(ListType type)
+{
+	// Recreating the menu when a new list is created.
+	if (m_listToolBar)
+	{
+		delete m_listToolBar;
+		m_listToolBar = nullptr;
+	}
+
+	if (type == ListType::GAMELIST)
+		createGameToolBar();
 }
