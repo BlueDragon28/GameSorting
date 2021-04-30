@@ -22,6 +22,7 @@
 #include <QAction>
 #include <QIcon>
 #include <QItemSelectionModel>
+#include <QHeaderView>
 
 UtilityListView::UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent) :
     AbstractListView(parent),
@@ -41,6 +42,7 @@ void UtilityListView::createMenu()
 {
     // Create the main layout and the menus.
     QVBoxLayout* vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
 
     QToolBar* menuBar = new QToolBar(this);
 
@@ -73,6 +75,7 @@ void UtilityListView::createView()
     // Create the view and set the model to the view.
     m_view = new QTableView(this);
     m_view->setModel(m_model);
+    m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 UtilityTableName UtilityListView::tableName() const

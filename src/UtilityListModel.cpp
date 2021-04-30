@@ -21,7 +21,6 @@
 #include <QSqlError>
 
 #include <iostream>
-#include <algorithm>
 
 UtilityListModel::UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent) :
     QAbstractListModel(parent),
@@ -40,8 +39,13 @@ int UtilityListModel::rowCount(const QModelIndex& parent) const
 QVariant UtilityListModel::data(const QModelIndex& index, int role) const
 {
     // Return the data of the specific index.
-    if (index.isValid() && index.row() < m_data.size() && (role == Qt::DisplayRole || role == Qt::EditRole))
-        return m_data.at(index.row()).name;
+    if (index.isValid() && index.row() < m_data.size())
+    {
+        if (role == Qt::DisplayRole || role == Qt::EditRole)
+            return m_data.at(index.row()).name;
+        else if (role == Qt::TextAlignmentRole)
+            return Qt::AlignCenter;
+    }
     return QVariant();
 }
 
