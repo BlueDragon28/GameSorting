@@ -168,9 +168,12 @@ void MainWindow::createGameToolBar()
 	utilityMenu->addAction(servAct);
 
 	// Creating the toolButton used to open the utilityMenu.
+	QIcon utilityIcon(":/Images/Utility.svg");
 	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
 	utilityToolButton->setText(tr("Game Utility"));
+	utilityToolButton->setIcon(utilityIcon);
 	utilityToolButton->setMenu(utilityMenu);
+	utilityToolButton->setToolTip(tr("Set the Categories, Developpers, Publishers, Platforms and Services of the game list."));
 	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
 	m_listToolBar->addWidget(utilityToolButton);
 }
