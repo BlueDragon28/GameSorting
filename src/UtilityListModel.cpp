@@ -21,6 +21,7 @@
 #include <QSqlError>
 
 #include <iostream>
+#include <algorithm>
 
 UtilityListModel::UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent) :
     QAbstractListModel(parent),
@@ -300,4 +301,20 @@ void UtilityListModel::queryTable()
 void UtilityListModel::appendRow()
 {
     insertRow(rowCount());
+}
+
+void UtilityListModel::deleteIndexs(const QModelIndexList& indexList)
+{
+    // Removing the rows from the indexs (indexList).
+    // First, create a copy of the indexs list (indexList).
+    QModelIndexList cpyIndexList(indexList);
+    std::sort(cpyIndexList.begin(), cpyIndexList.end(),
+        [] (const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() > index2.row();
+        });
+
+    // Then, delete the rows.
+    for (int i = 0; i < cpyIndexList.size(); i++)
+        removeRow(cpyIndexList.at(i).row());
 }

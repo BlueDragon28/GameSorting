@@ -21,6 +21,7 @@
 #include <QToolBar>
 #include <QAction>
 #include <QIcon>
+#include <QItemSelectionModel>
 
 UtilityListView::UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent) :
     AbstractListView(parent),
@@ -52,6 +53,7 @@ void UtilityListView::createMenu()
     QIcon delIcon(":/Images/Del.svg");
     QAction* delAct = new QAction(delIcon, tr("Removing an item"), this);
     delAct->setToolTip(tr("Removing an item from the list."));
+    connect(delAct, &QAction::triggered, this, &UtilityListView::deleteSelectedRows);
     menuBar->addAction(delAct);
 
     QIcon updateIcon(":/Images/Update.svg");
@@ -76,4 +78,18 @@ void UtilityListView::createView()
 UtilityTableName UtilityListView::tableName() const
 {
     return m_uName;
+}
+
+void UtilityListView::deleteSelectedRows()
+{
+    // Delete the selected rows.
+    // Retrieve the selection model from the view.
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        // If the there is item selected, delete them.
+        QModelIndexList indexList = selectionModel->selectedRows();
+        // Send the list to the model.
+        m_model->deleteIndexs(indexList);
+    }
 }

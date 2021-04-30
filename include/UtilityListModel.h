@@ -44,6 +44,7 @@ public:
 
     void queryTable();
     void appendRow();
+    void deleteIndexs(const QModelIndexList& indexList);
 
 private:
     UtilityTableName m_tableName;

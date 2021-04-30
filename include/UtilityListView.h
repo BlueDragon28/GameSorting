@@ -38,6 +38,7 @@ public:
 private:
     void createMenu();
     void createView();
+    void deleteSelectedRows();
 
     UtilityTableName m_uName;
     QTableView* m_view;
