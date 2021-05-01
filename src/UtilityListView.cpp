@@ -33,6 +33,9 @@ UtilityListView::UtilityListView(UtilityTableName tableName, QSqlDatabase& db, Q
     createMenu();
 }
 
+UtilityListView::~UtilityListView()
+{}
+
 ViewType UtilityListView::viewType() const
 {
     return ViewType::UTILITY;

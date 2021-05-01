@@ -41,6 +41,8 @@ UtilitySensitiveContentEditor::UtilitySensitiveContentEditor(
     createWidgets();
 }
 
+UtilitySensitiveContentEditor::~UtilitySensitiveContentEditor()
+{}
 
 void UtilitySensitiveContentEditor::createWidgets()
 {

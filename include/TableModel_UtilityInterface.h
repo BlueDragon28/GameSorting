@@ -32,7 +32,7 @@ class TableModel_UtilityInterface
 public:
 	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db);
 	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db, const QVariant& data);
-	~TableModel_UtilityInterface();
+	virtual ~TableModel_UtilityInterface();
 
 	QString tableName(UtilityTableName tableName) const;
 	bool isTableReady() const;

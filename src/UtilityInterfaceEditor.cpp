@@ -54,6 +54,9 @@ UtilityInterfaceEditor::UtilityInterfaceEditor(
     setModal(false);
 }
 
+UtilityInterfaceEditor::~UtilityInterfaceEditor()
+{}
+
 void UtilityInterfaceEditor::createWidgets()
 {
     // Create the widget inside the dialog.

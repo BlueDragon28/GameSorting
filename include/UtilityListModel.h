@@ -32,6 +32,7 @@ class UtilityListModel : public QAbstractListModel
     Q_OBJECT
 public:
     explicit UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent = nullptr);
+    virtual ~UtilityListModel();
 
     // Interface between the view and the model
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;

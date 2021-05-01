@@ -27,6 +27,7 @@ class StarEditor : public QWidget
 public:
 	StarEditor(QWidget* parent = nullptr);
 	StarEditor(int maxStars, QWidget* parent = nullptr);
+	virtual ~StarEditor();
 
 	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false);
 	static QSize sizeHint(int maxStars);

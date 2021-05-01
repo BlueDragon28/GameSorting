@@ -43,6 +43,9 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     setupView();
 }
 
+TabAndList::~TabAndList()
+{}
+
 void TabAndList::setupView()
 {
     // Creating the two layouts, on vertical, the other horizontal.

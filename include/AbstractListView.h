@@ -27,6 +27,7 @@ class AbstractListView : public QWidget
     Q_OBJECT
 public:
     explicit AbstractListView(QWidget* parent = nullptr);
+    virtual ~AbstractListView();
 
     virtual ViewType viewType() const = 0;
 };

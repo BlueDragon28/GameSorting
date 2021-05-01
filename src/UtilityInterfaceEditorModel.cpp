@@ -44,6 +44,9 @@ UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
     retrieveUtilityData();
 }
 
+UtilityInterfaceEditorModel::~UtilityInterfaceEditorModel()
+{}
+
 int UtilityInterfaceEditorModel::rowCount(const QModelIndex& parent) const
 {
     // Return the number of row in the model.

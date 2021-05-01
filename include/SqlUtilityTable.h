@@ -31,7 +31,7 @@ class SqlUtilityTable
 	SqlUtilityTable(const SqlUtilityTable&) = delete;
 public:
 	SqlUtilityTable(ListType type, QSqlDatabase& db);
-	~SqlUtilityTable();
+	virtual ~SqlUtilityTable();
 
 	void newList(ListType type);
 	static QString tableName(UtilityTableName tableName);

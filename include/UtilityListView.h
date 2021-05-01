@@ -30,7 +30,8 @@ class UtilityListView : public AbstractListView
 {
     Q_OBJECT
 public:
-    UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent = nullptr);
+    explicit UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent = nullptr);
+    virtual ~UtilityListView();
 
     virtual ViewType viewType() const override;
     UtilityTableName tableName() const;

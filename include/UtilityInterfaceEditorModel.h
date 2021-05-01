@@ -42,6 +42,7 @@ public:
         SqlUtilityTable& utilityData,
         QSqlDatabase& db,
         QObject* parent = nullptr);
+    virtual ~UtilityInterfaceEditorModel();
 
     // Interface between the view and the model.
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;

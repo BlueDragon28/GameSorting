@@ -56,6 +56,9 @@ StarEditor::StarEditor(int maxStars, QWidget* parent) :
 	setAutoFillBackground(true);
 }
 
+StarEditor::~StarEditor()
+{}
+
 void StarEditor::paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode)
 {
 	// Painting the stars.

@@ -37,6 +37,9 @@ ListViewDelegate::ListViewDelegate(
 		m_db(db)
 {}
 
+ListViewDelegate::~ListViewDelegate()
+{}
+
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	// Painting the delegate.

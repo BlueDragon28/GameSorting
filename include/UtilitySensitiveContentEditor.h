@@ -33,6 +33,7 @@ public:
         TableModel_UtilityInterface* dataInterface,
         QSqlDatabase& db,
         QWidget* parent = nullptr);
+    virtual ~UtilitySensitiveContentEditor();
 
 private:
     void createWidgets();

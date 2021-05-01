@@ -37,7 +37,7 @@ class TableModel : public QAbstractTableModel
 public:
     explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     explicit TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
-    ~TableModel();
+    virtual ~TableModel();
 
     // Data interface.
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;

@@ -35,6 +35,7 @@ class TabAndList : public QWidget
     Q_OBJECT
 public:
     explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
+    virtual ~TabAndList();
 
 public slots:
     void newGameList();

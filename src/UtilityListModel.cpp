@@ -31,6 +31,9 @@ UtilityListModel::UtilityListModel(UtilityTableName tableName, QSqlDatabase& db,
     queryTable();
 }
 
+UtilityListModel::~UtilityListModel()
+{}
+
 int UtilityListModel::rowCount(const QModelIndex& parent) const
 {
     return m_data.size();

@@ -21,3 +21,6 @@
 AbstractListView::AbstractListView(QWidget* parent) :
     QWidget(parent)
 {}
+
+AbstractListView::~AbstractListView()
+{}

@@ -42,6 +42,7 @@ public:
         SqlUtilityTable& utilityData,
         QSqlDatabase& db,
         QWidget* parent = nullptr);
+    virtual ~UtilityInterfaceEditor();
     
 private:
     void createWidgets();

@@ -36,7 +36,7 @@ class GameListView : public AbstractListView
 public:
     explicit GameListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
     explicit GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
-    ~GameListView();
+    virtual ~GameListView();
 
     QString tableName() const;
     ListType listType() const;
