@@ -278,7 +278,7 @@ QVariant TableModel_UtilityInterface::gameData() const
 	query.clear();
 
 	// Publishers
-	if (!query.exec(statement.arg(tableName(UtilityTableName::DEVELOPPERS))))
+	if (!query.exec(statement.arg(tableName(UtilityTableName::PUBLISHERS))))
 		return QVariant();
 	
 	while (query.next())
