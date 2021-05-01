@@ -41,6 +41,10 @@ bool SaveInterface::saveGame(const QString& filePath, const QVariant& variant)
         QDataStream out(&file);
 
         // Writing the headers.
+        // Write the primary identifier
+        const char primaryIdentifier[PRIMARY_IDENTIFIER_SIZE] = PRIMARY_IDENTIFIER;
+        out.writeRawData(primaryIdentifier, PRIMARY_IDENTIFIER_SIZE-1);
+
         // Writing the identifier
         const char* fileIdentifier = GLD_IDENTIFIER;
         out.writeRawData(fileIdentifier, 3);

@@ -24,7 +24,13 @@
 #include <QVariant>
 #include <QString>
 
-// Identifier and version of a GLD file.
+// The primary identifier is used to identify the file of the program.
+// It is place at the beginning of the file and it is followed by the type identifier.
+#define PRIMARY_IDENTIFIER \
+    { 0x41, 0x56, 0x45, 0x20, 0x4D, 0x41, 0x52, 0x49, 0x41, 0x00 }
+#define PRIMARY_IDENTIFIER_SIZE (int)(10)
+
+// Type identifier and version of a GLD file.
 #define GLD_IDENTIFIER "GLD"
 #define GLD_VERSION (int)(400)
 

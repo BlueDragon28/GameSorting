@@ -50,6 +50,18 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
     {
         // Streaming from the file.
         QDataStream in(&file);
+
+        // Read the primary identifier
+        char primaryIdentifier[PRIMARY_IDENTIFIER_SIZE];
+        for (int i = 0; i < PRIMARY_IDENTIFIER_SIZE; i++)
+            primaryIdentifier[i] = 0x00; // Initialize to null
+        in.readRawData(primaryIdentifier, PRIMARY_IDENTIFIER_SIZE-1);
+
+        // Check if the primary identifier is a valid.
+        char validPrimaryIdentifier[PRIMARY_IDENTIFIER_SIZE] = PRIMARY_IDENTIFIER;
+        if (strcmp(primaryIdentifier, validPrimaryIdentifier) != 0)
+            return false;
+
         // Reading the identifier
         char fileIdentifier[4] = {0,0,0,0};
         in.readRawData(fileIdentifier, 3);
