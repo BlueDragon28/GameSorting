@@ -49,7 +49,7 @@ GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTab
     m_db(db),
     m_type(ListType::UNKNOWN),
     m_view(new QTableView(this)),
-    m_model(new TableModel(data, db, utilityTable, parent)),
+    m_model(new TableModel(data, db, utilityTable, this)),
     m_utilityTable(utilityTable)
 {
     m_type = m_model->listType();
