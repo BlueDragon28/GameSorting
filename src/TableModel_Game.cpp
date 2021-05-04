@@ -518,6 +518,58 @@ void TableModel::gameQueryCategoriesField()
             << std::endl;
 }
 
+void TableModel::gameQueryCategoriesField(long long int gameID)
+{
+    // Updating the field category of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "WHERE\n"
+        "   \"%1\".GameID = %7\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
+            .arg("UtilityID")
+            .arg("ItemID")
+            .arg(gameID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount())
+        {
+            if (m_query.next())
+                (*m_gameListData)[pos].categories = m_query.value(1).toString();
+            else
+                (*m_gameListData)[pos].categories.clear();
+            emit dataChanged(index(pos, Game::CATEGORIES), index(pos, Game::CATEGORIES));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Categories of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
+}
+
 void TableModel::gameQueryDeveloppersField()
 {
     // Gettings all the Developpers of a game by concatenate all the field
@@ -570,6 +622,58 @@ void TableModel::gameQueryDeveloppersField()
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
+}
+
+void TableModel::gameQueryDeveloppersField(long long int gameID)
+{
+    // Updating the field developpers of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "WHERE\n"
+        "   \"%1\".GameID = %7\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS))
+            .arg("UtilityID")
+            .arg("ItemID")
+            .arg(gameID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount())
+        {
+            if (m_query.next())
+                (*m_gameListData)[pos].developpers = m_query.value(1).toString();
+            else
+                (*m_gameListData)[pos].developpers.clear();
+            emit dataChanged(index(pos, Game::DEVELOPPERS), index(pos, Game::DEVELOPPERS));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Developpers of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
 }
 
 void TableModel::gameQueryPublishersField()
@@ -626,6 +730,58 @@ void TableModel::gameQueryPublishersField()
             << std::endl;
 }
 
+void TableModel::gameQueryPublishersField(long long int gameID)
+{
+    // Updating the field publishers of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "WHERE\n"
+        "   \"%1\".GameID = %7\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
+            .arg("UtilityID")
+            .arg("ItemID")
+            .arg(gameID);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount())
+        {
+            if (m_query.next())
+                (*m_gameListData)[pos].publishers = m_query.value(1).toString();
+            else
+                (*m_gameListData)[pos].publishers.clear();
+            emit dataChanged(index(pos, Game::PUBLISHERS), index(pos, Game::PUBLISHERS));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Publishers of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
+}
+
 void TableModel::gameQueryPlatformField()
 {
     // Gettings all the Platform of a game by concatenate all the field
@@ -678,6 +834,58 @@ void TableModel::gameQueryPlatformField()
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
+}
+
+void TableModel::gameQueryPlatformField(long long int gameID)
+{
+    // Updating the field platform of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "WHERE\n"
+        "   \"%1\".GameID = %7\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PLATFORM)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
+            .arg("UtilityID")
+            .arg("ItemID")
+            .arg(gameID);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount())
+        {
+            if (m_query.next())
+                (*m_gameListData)[pos].platform = m_query.value(1).toString();
+            else
+                (*m_gameListData)[pos].platform.clear();
+            emit dataChanged(index(pos, Game::PLATFORMS), index(pos, Game::PLATFORMS));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Platform of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
 }
 
 void TableModel::gameQueryServicesField()
@@ -734,6 +942,58 @@ void TableModel::gameQueryServicesField()
             << std::endl;
 }
 
+void TableModel::gameQueryServicesField(long long int gameID)
+{
+    // Updating the field platform of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
+        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "WHERE\n"
+        "   \"%1\".GameID = %7\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
+            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::SERVICES)))
+            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
+            .arg("UtilityID")
+            .arg("ItemID")
+            .arg(gameID);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount())
+        {
+            if (m_query.next())
+                (*m_gameListData)[pos].services = m_query.value(1).toString();
+            else
+                (*m_gameListData)[pos].services.clear();
+            emit dataChanged(index(pos, Game::SERVICES), index(pos, Game::SERVICES));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Services of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
+}
+
 void TableModel::gameQuerySensitiveContentField()
 {
     // Getting the Sensitive Content Information for each game.
@@ -782,6 +1042,52 @@ void TableModel::gameQuerySensitiveContentField()
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
+}
+
+void TableModel::gameQuerySensitiveContentField(long long int gameID)
+{
+    // Updating the field sensitive content of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   ItemID,\n"
+        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\"\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "WHERE\n"
+        "   ItemID = %8;")
+            .arg(m_utilityInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
+            .arg(tr("Explicit Content"))
+            .arg("ExplicitContent")
+            .arg(tr("Violence Content"))
+            .arg("ViolenceContent")
+            .arg(tr("Bad Language"))
+            .arg("BadLanguage")
+            .arg(gameID);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Then, apply the retrieved field into the view.
+        int pos = findGamePos(gameID);
+        if (pos >= 0 && pos < rowCount() && m_query.next())
+        {
+            (*m_gameListData)[pos].sensitiveContent = m_query.value(1).toString();
+            emit dataChanged(index(pos, Game::SENSITIVE_CONTENT), index(pos, Game::SENSITIVE_CONTENT));
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Sensitive Content of the game %1 in the table %2.\n\t%3")
+            .arg(gameID)
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
 }
 
 QVariant TableModel::gameRetrieveData() const
@@ -894,9 +1200,41 @@ bool TableModel::setGameItemsData(const QVariant& variant)
         m_isTableCreated = false;
         return false;
     }
+    connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::utilityChanged);
 
     // Then, query the whole table.
     gameUpdateQuery();
 
     return true;
+}
+
+void TableModel::gameUtilityChanged(long long int gameID, UtilityTableName tableName)
+{
+    std::cout << QString("GameID: %1, rowCount(): %2.").arg(gameID).arg(rowCount()).toLocal8Bit().constData() << std::endl;
+    // Update an utility interface (tableName) of a specific game (gameID).
+    if (gameID >= 0 && gameID <= rowCount() && rowCount() > 0)
+    {
+        if (tableName == UtilityTableName::CATEGORIES)
+            gameQueryCategoriesField(gameID);
+        else if (tableName == UtilityTableName::DEVELOPPERS)
+            gameQueryDeveloppersField(gameID);
+        else if (tableName == UtilityTableName::PUBLISHERS)
+            gameQueryPublishersField(gameID);
+        else if (tableName == UtilityTableName::PLATFORM)
+            gameQueryPlatformField(gameID);
+        else if (tableName == UtilityTableName::SERVICES)
+            gameQueryServicesField(gameID);
+        else if (tableName == UtilityTableName::SENSITIVE_CONTENT)
+            gameQuerySensitiveContentField(gameID);
+    }
+}
+
+int TableModel::findGamePos(long long int gameID) const
+{
+    for (int i = 0; i < m_gameListData->size(); i++)
+    {
+        if (m_gameListData->at(i).gameID == gameID)
+            return i;
+    }
+    return -1;
 }

@@ -21,14 +21,15 @@
 
 #include "DataStruct.h"
 
+#include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QString>
 #include <QVariant>
 
-class TableModel_UtilityInterface
+class TableModel_UtilityInterface : public QObject
 {
-	TableModel_UtilityInterface(const TableModel_UtilityInterface&) = delete;
+	Q_OBJECT
 public:
 	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db);
 	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db, const QVariant& data);
@@ -42,6 +43,9 @@ public:
 
 	QVariant data() const;
 	bool setData(const QVariant& data);
+
+signals:
+	void interfaceChanged(long long int itemID, UtilityTableName tableName);
 
 private:
 	void createTables();

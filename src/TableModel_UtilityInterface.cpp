@@ -179,7 +179,11 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-	if (!m_query.exec(statement))
+	// Execute the statement, if it's executed sucessfully,
+	// update the designated field of TableModel.
+	if (m_query.exec(statement))
+		emit interfaceChanged(itemID, tableName);
+	else
 		std::cerr << QString("failed to insert data into %1.\n\t%2")
 			.arg(this->tableName(tableName))
 			.arg(m_query.lastError().text())
@@ -233,7 +237,11 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-	if (!m_query.exec(statement))
+	// Execute the statement, if it's executed sucessfully,
+	// update the designated field of TableModel.
+	if (m_query.exec(statement))
+		emit interfaceChanged(itemID, tableName);
+	else
 		std::cerr << QString("failed to insert data into %1.\n\t%2")
 					.arg(this->tableName(tableName))
 					.arg(m_query.lastError().text())

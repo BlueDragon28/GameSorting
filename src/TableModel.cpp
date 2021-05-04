@@ -45,6 +45,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
     createTable();
 
     m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
+    connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::utilityChanged);
 }
 
 TableModel::TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
@@ -324,4 +325,12 @@ bool TableModel::setItemsData(const QVariant& data)
 
     m_listType = ListType::UNKNOWN;
     return false;
+}
+
+void TableModel::utilityChanged(long long int itemID, UtilityTableName tableName)
+{
+    std::cout << "Update utility! " << std::endl;
+    // Update and utility interface (tableName) of a specific field (itemID).
+    if (m_listType == ListType::GAMELIST)
+        gameUtilityChanged(itemID, tableName);
 }

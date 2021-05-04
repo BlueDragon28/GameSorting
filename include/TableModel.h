@@ -73,6 +73,7 @@ public:
 protected:
     void createTable();
     void deleteSqlTable();
+    void utilityChanged(long long int itemID, UtilityTableName tableName);
 
     // Games specific member functions.
     void gameCreateTable();
@@ -88,13 +89,21 @@ protected:
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
     void gameQueryCategoriesField();
+    void gameQueryCategoriesField(long long int gameID);
     void gameQueryDeveloppersField();
+    void gameQueryDeveloppersField(long long int gameID);
     void gameQueryPublishersField();
+    void gameQueryPublishersField(long long int gameID);
     void gameQueryPlatformField();
+    void gameQueryPlatformField(long long int gameID);
     void gameQueryServicesField();
+    void gameQueryServicesField(long long int gameID);
     void gameQuerySensitiveContentField();
+    void gameQuerySensitiveContentField(long long int gameID);
     QVariant gameRetrieveData() const;
     bool setGameItemsData(const QVariant& data);
+    void gameUtilityChanged(long long int gameID, UtilityTableName tableName);
+    int findGamePos(long long int gameID) const;
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;
