@@ -136,7 +136,7 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveUtilityData& data)
     count = data.platform.size();
     out << count;
     for (long long int i = 0; i < count; i++)
-        out << data.publishers.at(i);
+        out << data.platform.at(i);
     
     // Services
     count = data.services.size();
