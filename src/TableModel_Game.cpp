@@ -465,62 +465,9 @@ void TableModel::gameUpdateQuery()
 #endif
 }
 
-void TableModel::gameQueryCategoriesField()
+void TableModel::gameQueryUtilityField(UtilityTableName tableName)
 {
-    // Gettings all the categories of a game by concatenate all the field
-    // of Categories Utility table.
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".\"Name\", \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID\n"
-        "ORDER BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
-            .arg("UtilityID")
-            .arg("ItemID");
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        while (m_query.next())
-        {
-            long long int gameID = m_query.value(0).toLongLong();
-            QString categories = m_query.value(1).toString();
-
-            for (int i = 0; i < m_listCount; i++)
-            {
-                if (m_gameListData->at(i).gameID == gameID)
-                {
-                    (*m_gameListData)[i].categories = categories;
-                    break;
-                }
-            }
-        }
-    }
-    else
-        std::cerr << QString("Failed to query Categories of the %1 table.\n\t%2")
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-}
-
-void TableModel::gameQueryCategoriesField(long long int gameID)
-{
-    // Updating the field category of the game (gameID).
+    // Standard interface to query the utility data except the sensitive data.
     m_query.clear();
 
     QString statement = QString(
@@ -529,18 +476,76 @@ void TableModel::gameQueryCategoriesField(long long int gameID)
         "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".\"UtilityID\"\n"
+        "INNER JOIN \"%3\" ON \"%3\".\"ItemID\" = \"%1\".GameID\n"
+        "GROUP BY\n"
+        "   \"%1\".GameID\n"
+        "ORDER BY\n"
+        "   \"%1\".GameID;")
+            .arg(m_tableName)
+            .arg(m_utilityTable.tableName(tableName))
+            .arg(m_utilityInterface->tableName(tableName));
+        
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        // Apply the queried data into model data.
+        while (m_query.next())
+        {
+            long long int gameID = m_query.value(0).toLongLong();
+            QString utilityName = m_query.value(1).toString();
+
+            for (int i = 0; i < rowCount(); i++)
+            {
+                if (m_gameListData->at(i).gameID == gameID)
+                {
+                    if (tableName == UtilityTableName::CATEGORIES)
+                        (*m_gameListData)[i].categories = utilityName;
+                    else if (tableName == UtilityTableName::DEVELOPPERS)
+                        (*m_gameListData)[i].developpers = utilityName;
+                    else if (tableName == UtilityTableName::PUBLISHERS)
+                        (*m_gameListData)[i].publishers = utilityName;
+                    else if (tableName == UtilityTableName::PLATFORM)
+                        (*m_gameListData)[i].platform = utilityName;
+                    else if (tableName == UtilityTableName::SERVICES)
+                        (*m_gameListData)[i].services = utilityName;
+                    break;
+                }
+            }
+        }
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to query Categories of the %1 table.\n\t%2")
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            << std::endl;
+#endif
+}
+
+void TableModel::gameQueryUtilityField(long long int gameID, UtilityTableName tableName)
+{
+    // Stardard interface to update the utility field of the game (gameID).
+    m_query.clear();
+
+    QString statement = QString(
+        "SELECT\n"
+        "   \"%1\".GameID,\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
+        "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
         "WHERE\n"
-        "   \"%1\".GameID = %7\n"
+        "   \"%1\".GameID = %4\n"
         "GROUP BY\n"
         "   \"%1\".GameID;")
             .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::CATEGORIES)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::CATEGORIES))
-            .arg("UtilityID")
-            .arg("ItemID")
+            .arg(m_utilityTable.tableName(tableName))
+            .arg(m_utilityInterface->tableName(tableName))
             .arg(gameID);
     
 #ifndef NDEBUG
@@ -551,13 +556,22 @@ void TableModel::gameQueryCategoriesField(long long int gameID)
     {
         // Then, apply the retrieved field into the view.
         int pos = findGamePos(gameID);
-        if (pos >= 0 && pos < rowCount())
+        if (pos >= 0 && pos <= rowCount())
         {
+            QString utilityName;
             if (m_query.next())
-                (*m_gameListData)[pos].categories = m_query.value(1).toString();
-            else
-                (*m_gameListData)[pos].categories.clear();
-            emit dataChanged(index(pos, Game::CATEGORIES), index(pos, Game::CATEGORIES));
+                utilityName = m_query.value(1).toString();
+
+            if (tableName == UtilityTableName::CATEGORIES)
+                (*m_gameListData)[pos].categories = utilityName;
+            else if (tableName == UtilityTableName::DEVELOPPERS)
+                (*m_gameListData)[pos].developpers = utilityName;
+            else if (tableName == UtilityTableName::PUBLISHERS)
+                (*m_gameListData)[pos].publishers = utilityName;
+            else if (tableName == UtilityTableName::PLATFORM)
+                (*m_gameListData)[pos].platform = utilityName;
+            else if (tableName == UtilityTableName::SERVICES)
+                (*m_gameListData)[pos].services = utilityName;
         }
     }
 #ifndef NDEBUG
@@ -570,428 +584,69 @@ void TableModel::gameQueryCategoriesField(long long int gameID)
 #endif
 }
 
+void TableModel::gameQueryCategoriesField()
+{
+    // Gettings all the categories of a game by concatenate all the field
+    // of Categories Utility table.
+    gameQueryUtilityField(UtilityTableName::CATEGORIES);
+}
+
+void TableModel::gameQueryCategoriesField(long long int gameID)
+{
+    // Updating the field category of the game (gameID).
+    gameQueryUtilityField(gameID, UtilityTableName::CATEGORIES);
+}
+
 void TableModel::gameQueryDeveloppersField()
 {
     // Gettings all the Developpers of a game by concatenate all the field
     // of Developpers Utility table.
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID\n"
-        "ORDER BY\n"
-        "   \"%1\".GameID;\n")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS))
-            .arg("UtilityID")
-            .arg("ItemID");
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        while (m_query.next())
-        {
-            long long int gameID = m_query.value(0).toLongLong();
-            QString developpers = m_query.value(1).toString();
-
-            for (int i = 0; i < m_listCount; i++)
-            {
-                if (m_gameListData->at(i).gameID == gameID)
-                {
-                    (*m_gameListData)[i].developpers = developpers;
-                    break;
-                }
-            }
-        }
-    }
-    else
-        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS))
-            .arg(m_query.lastError().text())
-            .toLocal8Bit().constData()
-            << std::endl;
+    gameQueryUtilityField(UtilityTableName::DEVELOPPERS);
 }
 
 void TableModel::gameQueryDeveloppersField(long long int gameID)
 {
     // Updating the field developpers of the game (gameID).
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "WHERE\n"
-        "   \"%1\".GameID = %7\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::DEVELOPPERS)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::DEVELOPPERS))
-            .arg("UtilityID")
-            .arg("ItemID")
-            .arg(gameID);
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
-        if (pos >= 0 && pos < rowCount())
-        {
-            if (m_query.next())
-                (*m_gameListData)[pos].developpers = m_query.value(1).toString();
-            else
-                (*m_gameListData)[pos].developpers.clear();
-            emit dataChanged(index(pos, Game::DEVELOPPERS), index(pos, Game::DEVELOPPERS));
-        }
-    }
-#ifndef NDEBUG
-    else
-        std::cerr << QString("Failed to query Developpers of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-#endif
+    gameQueryUtilityField(gameID, UtilityTableName::DEVELOPPERS);
 }
 
 void TableModel::gameQueryPublishersField()
 {
     // Gettings all the Publishers of a game by concatenate all the field
     // of Publishers Utility table.
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID\n"
-        "ORDER BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
-            .arg("UtilityID")
-            .arg("ItemID");
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        while(m_query.next())
-        {
-            long long int gameID = m_query.value(0).toLongLong();
-            QString publishers = m_query.value(1).toString();
-
-            for (int i = 0; i < m_listCount; i++)
-            {
-                if (m_gameListData->at(i).gameID == gameID)
-                {
-                    (*m_gameListData)[i].publishers = publishers;
-                    break;
-                }
-            }
-        }
-    }
-    else
-        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
-            .arg(m_query.lastError().text())
-            .toLocal8Bit().constData()
-            << std::endl;
+    gameQueryUtilityField(UtilityTableName::PUBLISHERS);
 }
 
 void TableModel::gameQueryPublishersField(long long int gameID)
 {
     // Updating the field publishers of the game (gameID).
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "WHERE\n"
-        "   \"%1\".GameID = %7\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PUBLISHERS)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::PUBLISHERS))
-            .arg("UtilityID")
-            .arg("ItemID")
-            .arg(gameID);
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
-        if (pos >= 0 && pos < rowCount())
-        {
-            if (m_query.next())
-                (*m_gameListData)[pos].publishers = m_query.value(1).toString();
-            else
-                (*m_gameListData)[pos].publishers.clear();
-            emit dataChanged(index(pos, Game::PUBLISHERS), index(pos, Game::PUBLISHERS));
-        }
-    }
-#ifndef NDEBUG
-    else
-        std::cerr << QString("Failed to query Publishers of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-#endif
+    gameQueryUtilityField(gameID, UtilityTableName::PUBLISHERS);
 }
 
 void TableModel::gameQueryPlatformField()
 {
     // Gettings all the Platform of a game by concatenate all the field
     // of Platform Utility table.
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID\n"
-        "ORDER BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PLATFORM)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
-            .arg("UtilityID")
-            .arg("ItemID");
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        while (m_query.next())
-        {
-            long long int gameID = m_query.value(0).toLongLong();
-            QString platform = m_query.value(1).toString();
-
-            for (int i = 0; i < m_listCount; i++)
-            {
-                if (m_gameListData->at(i).gameID == gameID)
-                {
-                    (*m_gameListData)[i].platform = platform;
-                    break;
-                }
-            }
-        }
-    }
-    else
-        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
-            .arg(m_query.lastError().text())
-            .toLocal8Bit().constData()
-            << std::endl;
+    gameQueryUtilityField(UtilityTableName::PLATFORM);
 }
 
 void TableModel::gameQueryPlatformField(long long int gameID)
 {
     // Updating the field platform of the game (gameID).
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "WHERE\n"
-        "   \"%1\".GameID = %7\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::PLATFORM))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::PLATFORM)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::PLATFORM))
-            .arg("UtilityID")
-            .arg("ItemID")
-            .arg(gameID);
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
-        if (pos >= 0 && pos < rowCount())
-        {
-            if (m_query.next())
-                (*m_gameListData)[pos].platform = m_query.value(1).toString();
-            else
-                (*m_gameListData)[pos].platform.clear();
-            emit dataChanged(index(pos, Game::PLATFORMS), index(pos, Game::PLATFORMS));
-        }
-    }
-#ifndef NDEBUG
-    else
-        std::cerr << QString("Failed to query Platform of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-#endif
+    gameQueryUtilityField(gameID, UtilityTableName::PLATFORM);
 }
 
 void TableModel::gameQueryServicesField()
 {
     // Gettings all the Platform of a game by concatenate all the field
     // of Platform Utility table.
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID\n"
-        "ORDER BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::SERVICES)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
-            .arg("UtilityID")
-            .arg("ItemID");
-    
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        while (m_query.next())
-        {
-            long long int gameID = m_query.value(0).toLongLong();
-            QString services = m_query.value(1).toString();
-
-            for (int i = 0; i < m_listCount; i++)
-            {
-                if (m_gameListData->at(i).gameID == gameID)
-                {
-                    (*m_gameListData)[i].services = services;
-                    break;
-                }
-            }
-        }
-    }
-    else
-        std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
-            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
-            .arg(m_query.lastError().text())
-            .toLocal8Bit().constData()
-            << std::endl;
+    gameQueryUtilityField(UtilityTableName::SERVICES);
 }
 
 void TableModel::gameQueryServicesField(long long int gameID)
 {
     // Updating the field platform of the game (gameID).
-    m_query.clear();
-
-    QString statement = QString(
-        "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
-        "FROM\n"
-        "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
-        "INNER JOIN \"%4\" ON \"%4\".\"%6\" = \"%1\".GameID\n"
-        "WHERE\n"
-        "   \"%1\".GameID = %7\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(UtilityTableName::SERVICES))
-            .arg(QString("%1ID").arg(m_utilityTable.tableName(UtilityTableName::SERVICES)))
-            .arg(m_utilityInterface->tableName(UtilityTableName::SERVICES))
-            .arg("UtilityID")
-            .arg("ItemID")
-            .arg(gameID);
-
-#ifndef NDEBUG
-    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-    if (m_query.exec(statement))
-    {
-        // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
-        if (pos >= 0 && pos < rowCount())
-        {
-            if (m_query.next())
-                (*m_gameListData)[pos].services = m_query.value(1).toString();
-            else
-                (*m_gameListData)[pos].services.clear();
-            emit dataChanged(index(pos, Game::SERVICES), index(pos, Game::SERVICES));
-        }
-    }
-#ifndef NDEBUG
-    else
-        std::cerr << QString("Failed to query Services of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
-            << std::endl;
-#endif
+    gameQueryUtilityField(gameID, UtilityTableName::SERVICES);
 }
 
 void TableModel::gameQuerySensitiveContentField()

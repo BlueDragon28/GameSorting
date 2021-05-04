@@ -88,6 +88,8 @@ protected:
     template<typename T>
     bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
     void gameUpdateQuery();
+    void gameQueryUtilityField(UtilityTableName tableName);
+    void gameQueryUtilityField(long long int gameID, UtilityTableName tableName);
     void gameQueryCategoriesField();
     void gameQueryCategoriesField(long long int gameID);
     void gameQueryDeveloppersField();
