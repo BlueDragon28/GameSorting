@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	createMenu();
 	resize(800, 600);
 	move((screen()->availableSize().width() - 800) / 2, (screen()->availableSize().height() - 600) / 2);
+	updateWindowTitle();
 }
 
 MainWindow::~MainWindow()
