@@ -34,7 +34,8 @@ MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	m_db(QSqlDatabase::addDatabase("QSQLITE")),
 	m_tabAndList(nullptr),
-	m_listToolBar(nullptr)
+	m_listToolBar(nullptr),
+	m_listChanged(false)
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -99,6 +100,7 @@ void MainWindow::createMenu()
 	saveListAct->setShortcut(QKeySequence::Save);
 	saveListAct->setToolTip(tr("Save a list into a file"));
 	menuFile->addAction(saveListAct);
+	connect(saveListAct, &QAction::triggered, m_tabAndList, &TabAndList::save);
 	fileToolBar->addAction(saveListAct);
 
 	// Save as a list into a file.
@@ -129,6 +131,8 @@ void MainWindow::createCentralWidget()
 {
 	m_tabAndList = new TabAndList(m_db, this);
 	connect(m_tabAndList, &TabAndList::newList, this, &MainWindow::newListCreated);
+	connect(m_tabAndList, &TabAndList::newListFileName, this, &MainWindow::listFilePathChanged);
+	connect(m_tabAndList, &TabAndList::listChanged, this, &MainWindow::listChanged);
 	setCentralWidget(m_tabAndList);
 }
 
@@ -189,4 +193,33 @@ void MainWindow::newListCreated(ListType type)
 
 	if (type == ListType::GAMELIST)
 		createGameToolBar();
+}
+
+void MainWindow::listFilePathChanged(const QString& filePath)
+{
+	m_listFilePath = filePath;
+	m_listChanged = false;
+	updateWindowTitle();
+}
+
+void MainWindow::listChanged(bool isChanged)
+{
+	m_listChanged = isChanged;
+	updateWindowTitle();
+}
+
+void MainWindow::updateWindowTitle()
+{
+	// Update the window title using the program name,
+	// the file path and an indicator if the list is modified.
+	QString title("Game Sorting");
+
+	if (!m_listFilePath.isEmpty())
+	{
+		title += QString(" : %2%1")
+			.arg(m_listFilePath)
+			.arg(m_listChanged ? "*" : "");
+	}
+
+	setWindowTitle(title);
 }

@@ -38,7 +38,8 @@ TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     m_tabBar(new QTabBar(this)),
     m_stackedViews(new QStackedLayout()),
     m_listType(ListType::UNKNOWN),
-    m_sqlUtilityTable(m_listType, m_db)
+    m_sqlUtilityTable(m_listType, m_db),
+    m_isListModified(false)
 {
     setupView();
 }
@@ -101,6 +102,8 @@ void TabAndList::addTable()
         GameListView* newList = new GameListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
         m_stackedViews->addWidget(newList);
         m_tabBar->addTab(newList->tableName());
+        m_isListModified = true;
+        emit listChanged(true);
     }
 }
 
@@ -112,6 +115,11 @@ void TabAndList::removeTable(int index)
         QWidget* widget = m_stackedViews->widget(index);
         m_stackedViews->removeWidget(widget);
         m_tabBar->removeTab(index);
+        if (reinterpret_cast<AbstractListView*>(widget)->viewType() == ViewType::GAME)
+        {
+            m_isListModified = true;
+            emit listChanged(true);
+        }
         delete widget;
     }
 }
@@ -130,7 +138,10 @@ void TabAndList::newGameList()
     
     m_sqlUtilityTable.newList(ListType::GAMELIST);
     m_listType = ListType::GAMELIST;
+    m_isListModified = false;
+    m_filePath = QString();
     emit newList(ListType::GAMELIST);
+    emit newListFileName(QString());
 }
 
 void TabAndList::open()
@@ -145,7 +156,12 @@ void TabAndList::open()
         
     if (!filePath.isEmpty())
     {
-        if (!openFile(filePath))
+        if (openFile(filePath))
+        {
+            m_filePath = filePath;
+            emit newListFileName(m_filePath);
+        }
+        else
         {
             QMessageBox::critical(
                 this,
@@ -159,9 +175,43 @@ void TabAndList::open()
     }
 }
 
+void TabAndList::save()
+{
+    // Saving the list into the current file,
+    // or a new file if there is no current file.
+    if (m_listType == ListType::GAMELIST)
+    {
+        if (m_filePath.isEmpty())
+        {
+            saveAs();
+            return;
+        }
+
+        if (saveFile(m_filePath))
+        {
+            m_isListModified = false;
+            emit listChanged(false);
+        }
+        else
+            QMessageBox::critical(
+                this,
+                tr("Save Game List"),
+                tr("Saving the game list into the file %1 failed.").arg(m_filePath),
+                QMessageBox::Ok,
+                QMessageBox::NoButton);
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Saving a list"),
+            tr("No list created."),
+            QMessageBox::Ok,
+            QMessageBox::NoButton);
+}
+
 void TabAndList::saveAs()
 {
-    // Saving the file into a new file
+    // Saving the list into a new file
     // or by writing over an existing file.
     // Game list.
     if (m_listType == ListType::GAMELIST)
@@ -176,7 +226,11 @@ void TabAndList::saveAs()
         if (!filePath.isEmpty())
         {
             if(saveFile(filePath))
+            {
                 m_filePath = filePath;
+                m_isListModified = false;
+                emit newListFileName(m_filePath);
+            }
             else
                 QMessageBox::critical(
                     this,

@@ -40,10 +40,15 @@ private:
 	void createCentralWidget();
 	void newListCreated(ListType type);
 	void createGameToolBar();
+	void listFilePathChanged(const QString& filePath);
+	void listChanged(bool isChanged);
+	void updateWindowTitle();
 
 	TabAndList* m_tabAndList;
 	QSqlDatabase m_db;
 	QToolBar* m_listToolBar;
+	QString m_listFilePath;
+	bool m_listChanged;
 };
 
 #endif // GAMESORTING_MAINWINDOW

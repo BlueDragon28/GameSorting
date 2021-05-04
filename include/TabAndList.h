@@ -40,11 +40,14 @@ public:
 public slots:
     void newGameList();
     void open();
+    void save();
     void saveAs();
     void openUtility(UtilityTableName tableName);
 
 signals:
     void newList(ListType listType);
+    void newListFileName(const QString& filePath);
+    void listChanged(bool isChanged);
 
 private slots:
     void tabChanged(int index);
@@ -62,6 +65,7 @@ private:
     QTabBar* m_tabBar;
     QStackedLayout* m_stackedViews;
     QString m_filePath;
+    bool m_isListModified;
 };
 
 #endif
