@@ -474,7 +474,7 @@ void TableModel::gameQueryCategoriesField()
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".\"Name\", \",\")\n"
+        "   GROUP_CONCAT(\"%2\".\"Name\", \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
@@ -527,7 +527,7 @@ void TableModel::gameQueryDeveloppersField()
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
@@ -581,7 +581,7 @@ void TableModel::gameQueryPublishersField()
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
@@ -635,7 +635,7 @@ void TableModel::gameQueryPlatformField()
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
@@ -689,7 +689,7 @@ void TableModel::gameQueryServicesField()
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \",\")\n"
+        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%3\" = \"%4\".\"%5\"\n"
