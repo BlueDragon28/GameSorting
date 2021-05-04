@@ -895,5 +895,8 @@ bool TableModel::setGameItemsData(const QVariant& variant)
         return false;
     }
 
+    // Then, query the whole table.
+    gameUpdateQuery();
+
     return true;
 }
