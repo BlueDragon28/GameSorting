@@ -108,7 +108,7 @@ void MainWindow::createMenu()
 	QAction* saveAsListAct = new QAction(tr("Save as"), this);
 #ifdef WIN32
 	saveAsListAct->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_S);
-#elif
+#else
 	saveAsListAct->setShortcut(QKeySequence::SaveAs);
 #endif
 	saveAsListAct->setToolTip(tr("Save a list into a new file."));
