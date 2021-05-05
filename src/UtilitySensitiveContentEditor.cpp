@@ -72,7 +72,7 @@ void UtilitySensitiveContentEditor::createWidgets()
     connect(languageSpin, qOverload<int>(&QSpinBox::valueChanged), [this](int nb){this->m_nBadLanguageContent = nb;});
 
     // Adding the three spin boxes into the form layout.
-    formLayout->addRow(tr("Eplicit Content:"), explicitSpin);
+    formLayout->addRow(tr("Explicit Content:"), explicitSpin);
     formLayout->addRow(tr("Violence Content:"), violenceSpin);
     formLayout->addRow(tr("Bad Language Content:"), languageSpin);
 
