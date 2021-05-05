@@ -329,7 +329,6 @@ bool TableModel::setItemsData(const QVariant& data)
 
 void TableModel::utilityChanged(long long int itemID, UtilityTableName tableName)
 {
-    std::cout << "Update utility! " << std::endl;
     // Update and utility interface (tableName) of a specific field (itemID).
     if (m_listType == ListType::GAMELIST)
         gameUtilityChanged(itemID, tableName);
