@@ -66,12 +66,15 @@ void TabAndList::setupView()
     vLayout->addLayout(hBarLayout);
     vLayout->addLayout(m_stackedViews, 1);
 
-    // Allow the user to close tabs of the tab bar.
+    // Allowing the user to close tabs of the tab bar.
     m_tabBar->setTabsClosable(true);
+    // Allowing the user to move the tabs.
+    m_tabBar->setMovable(true);
 
     connect(addNewTableButton, &QPushButton::clicked, this, &TabAndList::addTable);
     connect(m_tabBar, &QTabBar::currentChanged, this, &TabAndList::tabChanged);
     connect(m_tabBar, &QTabBar::tabCloseRequested, this, &TabAndList::removeTable);
+    connect(m_tabBar, &QTabBar::tabMoved, this, &TabAndList::tabMoved);
 }
 
 void TabAndList::tabChanged(int index)
@@ -346,4 +349,14 @@ void TabAndList::openUtility(UtilityTableName tableName)
         m_stackedViews->addWidget(view);
         m_tabBar->addTab(SqlUtilityTable::tableName(tableName));
     }
+}
+
+void TabAndList::tabMoved(int from, int to)
+{
+    // This member function is called when the user moved
+    // a tab. This function then change the place of the 
+    // data inside the stacked view.
+    QWidget* view = m_stackedViews->widget(from);
+    m_stackedViews->removeWidget(view);
+    m_stackedViews->insertWidget(to, view);
 }
