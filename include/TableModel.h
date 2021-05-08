@@ -53,6 +53,7 @@ public:
     // Data information.
     int size() const;
     QString tableName() const;
+    void setTableName(const QString& tableName);
     QString rowTableName() const;
     ListType listType() const;
 

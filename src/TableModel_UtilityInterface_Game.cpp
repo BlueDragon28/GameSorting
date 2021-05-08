@@ -447,3 +447,23 @@ bool TableModel_UtilityInterface::setGameData(const QVariant& variant)
 
 	return true;
 }
+
+void TableModel_UtilityInterface::setGameParentTableNewName(const QString& name)
+{
+	// Update the name of the game utility interface table name.
+	QString oldCategoriesName = tableName(UtilityTableName::CATEGORIES);
+	QString oldDeveloppersName = tableName(UtilityTableName::DEVELOPPERS);
+	QString oldPublishersName = tableName(UtilityTableName::PUBLISHERS);
+	QString oldPlatformName = tableName(UtilityTableName::PLATFORM);
+	QString oldServiceName = tableName(UtilityTableName::SERVICES);
+	QString oldSensitiveName = tableName(UtilityTableName::SENSITIVE_CONTENT);
+
+	m_parentTableName = name;
+
+	renameTable(oldCategoriesName, tableName(UtilityTableName::CATEGORIES));
+	renameTable(oldDeveloppersName, tableName(UtilityTableName::DEVELOPPERS));
+	renameTable(oldPublishersName, tableName(UtilityTableName::PUBLISHERS));
+	renameTable(oldPlatformName, tableName(UtilityTableName::PLATFORM));
+	renameTable(oldServiceName, tableName(UtilityTableName::SERVICES));
+	renameTable(oldSensitiveName, tableName(UtilityTableName::SENSITIVE_CONTENT));
+}

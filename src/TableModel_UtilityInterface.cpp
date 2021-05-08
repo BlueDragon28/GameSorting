@@ -70,6 +70,13 @@ QString TableModel_UtilityInterface::tableName(UtilityTableName tableName) const
 	}
 }
 
+void TableModel_UtilityInterface::setParentTableNewName(const QString& tableName)
+{
+	// Update the utility interface name to the parent name.
+	if (m_listType == ListType::GAMELIST)
+		setGameParentTableNewName(tableName);
+}
+
 bool TableModel_UtilityInterface::isTableReady() const
 {
 	return m_isTableReady;
@@ -279,4 +286,32 @@ bool TableModel_UtilityInterface::setData(const QVariant& variant)
 	m_listType = ListType::UNKNOWN;
 	destroyTables();
 	return false;
+}
+
+void TableModel_UtilityInterface::renameTable(const QString& currentName, const QString& newName)
+{
+	QString statement = QString(
+		"ALTER TABLE \"%1\"\n"
+		"RENAME TO \"%2\";")
+			.arg(currentName, newName);
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	m_query.clear();
+	if (!m_query.exec(statement))
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to rename table %1 to %2.\n\t%3")
+			.arg(currentName,
+				newName,
+				m_query.lastError().text())
+			.toLocal8Bit().constData()
+			<< std::endl;
+#endif
+		return;
+	}
+
+	return;
 }

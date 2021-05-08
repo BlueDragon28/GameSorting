@@ -105,6 +105,12 @@ QString GameListView::tableName() const
         return QString();
 }
 
+void GameListView::setTableName(const QString& tableName)
+{
+    if (m_model)
+        m_model->setTableName(tableName);
+}
+
 void GameListView::createMenu(QVBoxLayout* vLayout)
 {
     if (m_type == ListType::GAMELIST)

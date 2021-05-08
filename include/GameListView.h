@@ -39,6 +39,7 @@ public:
     virtual ~GameListView();
 
     QString tableName() const;
+    void setTableName(const QString& tableName);
     ListType listType() const;
     QVariant listData() const;
     virtual ViewType viewType() const override;

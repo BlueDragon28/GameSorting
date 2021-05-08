@@ -36,6 +36,7 @@ public:
 	virtual ~TableModel_UtilityInterface();
 
 	QString tableName(UtilityTableName tableName) const;
+	void setParentTableNewName(const QString& tableName);
 	bool isTableReady() const;
 	void rowRemoved(const QList<long long int>& itemsID);
 	void updateItemUtility(long long int itemID, UtilityTableName tableName, const QList<long long int>& dataList);
@@ -51,6 +52,7 @@ private:
 	void createTables();
 	void destroyTables();
 	void destroyTableByName(const QString& tableName);
+	void renameTable(const QString& currentName, const QString& newName);
 
 	// Games
 	void createGameTables();
@@ -64,7 +66,8 @@ private:
 	void gameRowRemoved(const QList<long long int>& itemsID);
 	QVariant gameData() const;
 	bool setGameData(const QVariant& data);
-	inline bool setGameStandardData(UtilityTableName tName, const QList<Game::SaveUtilityInterfaceItem>& data);
+	bool setGameStandardData(UtilityTableName tName, const QList<Game::SaveUtilityInterfaceItem>& data);
+	void setGameParentTableNewName(const QString& tableName);
 
 	static void printTableCreationError(const QString& tableName, const QString& messageError);
 

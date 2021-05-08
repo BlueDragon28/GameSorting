@@ -238,6 +238,45 @@ QString TableModel::tableName() const
     return replaceUnderscoreBySpace(m_tableName);
 }
 
+void TableModel::setTableName(const QString& tableName)
+{
+    std::cout << "new table name: " << tableName.toLocal8Bit().constData() << std::endl;
+    // Update the table name, but before, check if the name is free.
+    if (tableName.isEmpty() || tableName.compare(m_tableName, Qt::CaseInsensitive) == 0)
+        return;
+    
+    QString newTableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtAndLastSpaces(tableName))));
+
+    // Apply the new name to the SQL Table.
+    m_query.clear();
+
+    QString statement = QString(
+        "ALTER TABLE \"%1\"\n"
+        "RENAME TO \"%2\";")
+            .arg(m_tableName)
+            .arg(newTableName);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+    
+    if (!m_query.exec(statement))
+    {
+#ifndef NDEBUG
+        std::cerr << QString("Failed to rename the table %1 to %2.\n\t%3")
+            .arg(m_tableName)
+            .arg(newTableName)
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+#endif
+        return;
+    }
+
+    m_tableName = newTableName;
+    m_utilityInterface->setParentTableNewName(newTableName);
+}
+
 QString TableModel::rowTableName() const
 {
     return m_tableName;

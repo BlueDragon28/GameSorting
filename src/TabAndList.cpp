@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "SaveInterface.h"
 #include "UtilityListView.h"
+#include "TabLineEdit.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -75,6 +76,7 @@ void TabAndList::setupView()
     connect(m_tabBar, &QTabBar::currentChanged, this, &TabAndList::tabChanged);
     connect(m_tabBar, &QTabBar::tabCloseRequested, this, &TabAndList::removeTable);
     connect(m_tabBar, &QTabBar::tabMoved, this, &TabAndList::tabMoved);
+    connect(m_tabBar, &QTabBar::tabBarDoubleClicked, this, &TabAndList::tabAskEdit);
 }
 
 void TabAndList::tabChanged(int index)
@@ -359,4 +361,38 @@ void TabAndList::tabMoved(int from, int to)
     QWidget* view = m_stackedViews->widget(from);
     m_stackedViews->removeWidget(view);
     m_stackedViews->insertWidget(to, view);
+}
+void TabAndList::tabAskEdit(int index)
+{
+    // Show a QLineEdit for the edition of the
+    // name of a tab (only if it's not an utility view tab)
+    // when the use double click on it.
+    AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(index));
+    // Don't allow renaming utility SQL table.
+    if (view->viewType() == ViewType::UTILITY)
+        return;
+
+    TabLineEdit* lineEdit = new TabLineEdit(m_tabBar->currentIndex(),
+                                            m_tabBar->tabText(m_tabBar->currentIndex()),
+                                            m_tabBar->tabRect(m_tabBar->currentIndex()),
+                                            this);
+    connect(lineEdit, &TabLineEdit::finished, this, &TabAndList::tabChangeApplying);
+    lineEdit->show();
+    lineEdit->setFocus();
+}
+
+void TabAndList::tabChangeApplying(int tabIndex, const QString& tabName)
+{
+    // Apply the change to the tab and the SQL Table.
+    if (tabIndex < 0 || tabIndex >= m_tabBar->count() || tabName.isEmpty())
+        return;
+
+    AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(tabIndex));
+
+    if (view->viewType() == ViewType::GAME)
+    {
+        GameListView* gameView = reinterpret_cast<GameListView*>(view);
+        gameView->setTableName(tabName);
+        m_tabBar->setTabText(tabIndex, gameView->tableName());
+    }
 }

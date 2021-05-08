@@ -16,59 +16,30 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_TABANDLIST_H
-#define GAMESORTING_TABANDLIST_H
+#ifndef GAMESORTING_TABLINEEDIT_H_
+#define GAMESORTING_TABLINEEDIT_H_
 
-#include "DataStruct.h"
-#include "SqlUtilityTable.h"
+#include <QLineEdit>
 
-#include <QWidget>
-#include <QSqlDatabase>
-#include <QTabBar>
 
-class QTabBar;
-class SqlListView;
-class QStackedLayout;
-
-class TabAndList : public QWidget
+class TabLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
-    virtual ~TabAndList();
-
-public slots:
-    void newGameList();
-    void open();
-    void save();
-    void saveAs();
-    void openUtility(UtilityTableName tableName);
+    TabLineEdit(int tabIndex, const QString& tabName, QRect tabRect, QWidget* parent = nullptr);
 
 signals:
-    void newList(ListType listType);
-    void newListFileName(const QString& filePath);
-    void listChanged(bool isChanged);
+    void finished(int tabIndex, const QString& str);
+    void discarded();
 
-private slots:
-    void tabChanged(int index);
-    void addTable();
-    void removeTable(int index);
-    void tabMoved(int from, int to);
-    void tabAskEdit(int index);
-    void tabChangeApplying(int tabIndex, const QString& tabName);
+protected:
+    void keyPressEvent(QKeyEvent* evt) override;
+    void focusOutEvent(QFocusEvent* evt) override;
+    void applyChange();
 
 private:
-    void setupView();
-    bool saveFile(const QString& filePath) const;
-    bool openFile(const QString& filePath);
-
-    QSqlDatabase& m_db;
-    ListType m_listType;
-    SqlUtilityTable m_sqlUtilityTable;
-    QTabBar* m_tabBar;
-    QStackedLayout* m_stackedViews;
-    QString m_filePath;
-    bool m_isListModified;
+    int m_tabIndex;
+    const QString m_tabStartName;
 };
 
-#endif
+#endif // GAMESORTING_TABLINEEDIT_H_
