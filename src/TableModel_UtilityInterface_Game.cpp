@@ -47,8 +47,6 @@ void TableModel_UtilityInterface::createCategoriesTable()
 	// Creating the Categories interface table.
 	if (!m_isTableReady) return;
 
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	ItemID INTEGER,\n"
@@ -63,14 +61,13 @@ void TableModel_UtilityInterface::createCategoriesTable()
 		printTableCreationError(tableName(UtilityTableName::CATEGORIES), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::createDeveloppersTable()
 {
 	// Creating the Developpers interface table
 	if (!m_isTableReady) return;
-
-	m_query.clear();
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
@@ -86,14 +83,13 @@ void TableModel_UtilityInterface::createDeveloppersTable()
 		printTableCreationError(tableName(UtilityTableName::DEVELOPPERS), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::createPublishersTable()
 {
 	// Creating the Publishers interface table
 	if (!m_isTableReady) return;
-
-	m_query.clear();
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
@@ -109,14 +105,13 @@ void TableModel_UtilityInterface::createPublishersTable()
 		printTableCreationError(tableName(UtilityTableName::PUBLISHERS), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::createPlatformTable()
 {
 	// Creating the Platform interface table
 	if (!m_isTableReady) return;
-
-	m_query.clear();
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
@@ -132,14 +127,13 @@ void TableModel_UtilityInterface::createPlatformTable()
 		printTableCreationError(tableName(UtilityTableName::PLATFORM), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::createServicesTable()
 {
 	// Creating the Services interface table
 	if (!m_isTableReady) return;
-
-	m_query.clear();
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
@@ -155,14 +149,13 @@ void TableModel_UtilityInterface::createServicesTable()
 		printTableCreationError(tableName(UtilityTableName::SERVICES), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::createSensitiveContentTable()
 {
 	// Creating the Sensitive Content interface table.
 	if (!m_isTableReady) return;
-
-	m_query.clear();
 
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
@@ -182,6 +175,7 @@ void TableModel_UtilityInterface::createSensitiveContentTable()
 		printTableCreationError(tableName(UtilityTableName::SENSITIVE_CONTENT), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& itemsID)
@@ -233,6 +227,7 @@ void TableModel_UtilityInterface::gameRowRemoved(const QList<long long int>& ite
 				.arg(m_query.lastError().text())
 				.toLocal8Bit().constData()
 				<< std::endl;
+		m_query.clear();
 	}
 }
 
@@ -373,7 +368,6 @@ inline bool TableModel_UtilityInterface::setGameStandardData(UtilityTableName tN
 			std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-			m_query.clear();
 			if (!m_query.exec(statement + strData))
 			{
 #ifndef NDEBUG
@@ -385,6 +379,7 @@ inline bool TableModel_UtilityInterface::setGameStandardData(UtilityTableName tN
 #endif
 				return false;
 			}
+			m_query.clear();
 		}
 	}
 
@@ -430,7 +425,6 @@ bool TableModel_UtilityInterface::setGameData(const QVariant& variant)
 			std::cout << (sensitiveContentStatement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 		
-			m_query.clear();
 			if (!m_query.exec(sensitiveContentStatement + strData))
 			{
 #ifndef NDEBUG
@@ -442,6 +436,7 @@ bool TableModel_UtilityInterface::setGameData(const QVariant& variant)
 #endif
 				return false;
 			}
+			m_query.clear();
 		}
 	}
 

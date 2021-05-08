@@ -69,6 +69,7 @@ TableModel::~TableModel()
         delete m_utilityInterface;
 
     deleteSqlTable();
+    m_query.clear();
 
     if (m_gameListData)
         delete m_gameListData;
@@ -248,8 +249,6 @@ void TableModel::setTableName(const QString& tableName)
     QString newTableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtAndLastSpaces(tableName))));
 
     // Apply the new name to the SQL Table.
-    m_query.clear();
-
     QString statement = QString(
         "ALTER TABLE \"%1\"\n"
         "RENAME TO \"%2\";")
@@ -272,6 +271,7 @@ void TableModel::setTableName(const QString& tableName)
 #endif
         return;
     }
+    m_query.clear();
 
     m_tableName = newTableName;
     m_utilityInterface->setParentTableNewName(newTableName);
@@ -287,8 +287,6 @@ void TableModel::deleteSqlTable()
     // Removing the SQL table when this object is destoyed.
     if (!m_isTableCreated) return;
 
-    m_query.clear();
-
     QString statement = QString(
         "DROP TABLE IF EXISTS \"%1\";"
         ).arg(m_tableName);
@@ -303,6 +301,7 @@ void TableModel::deleteSqlTable()
             << "\"\n\t"
             << m_query.lastError().text().toLocal8Bit().constData()
             << std::endl;
+    m_query.clear();
     
     m_isTableCreated = false;
 

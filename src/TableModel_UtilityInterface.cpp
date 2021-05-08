@@ -45,6 +45,7 @@ TableModel_UtilityInterface::TableModel_UtilityInterface(const QString& parentTa
 TableModel_UtilityInterface::~TableModel_UtilityInterface()
 {
 	destroyTables();
+	m_query.clear();
 }
 
 QString TableModel_UtilityInterface::tableName(UtilityTableName tableName) const
@@ -106,8 +107,6 @@ void TableModel_UtilityInterface::printTableCreationError(const QString& tableNa
 
 void TableModel_UtilityInterface::destroyTableByName(const QString& tableName)
 {
-	m_query.clear();
-
 	QString statement = QString(
 		"DROP TABLE IF EXISTS \"%1\";").arg(tableName);
 
@@ -121,6 +120,7 @@ void TableModel_UtilityInterface::destroyTableByName(const QString& tableName)
 			.arg(m_query.lastError().text())
 			.toLocal8Bit().constData()
 			<< std::endl;
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::rowRemoved(const QList<long long int>& itemsID)
@@ -134,8 +134,6 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 	// Updating all the utility of a category of the SQL table TableModel.
 
 	// First, removing all the utility of the itemID.
-	m_query.clear();
-
 	QString statement = QString(
 		"DELETE FROM \"%1\"\n"
 		"WHERE\n"
@@ -159,8 +157,6 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 	}
 
 	// Then, insert the data list into the utility table for the item itemID.
-	m_query.clear();
-
 	if (dataList.size() > 0)
 	{
 		statement = QString(
@@ -196,6 +192,7 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 			.arg(m_query.lastError().text())
 			.toLocal8Bit().constData()
 			<< std::endl;
+	m_query.clear();
 }
 
 void TableModel_UtilityInterface::updateItemUtility(long long int itemID, UtilityTableName tableName, int explicitContent, int violenceContent, int languageContent)
@@ -203,8 +200,6 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 	// Update the caterogies Sensitive Content.
 
 	// First, removing all the utility of the itemID.
-	m_query.clear();
-
 	QString statement = QString(
 		"DELETE FROM \"%1\"\n"
 		"WHERE\n"
@@ -254,6 +249,7 @@ void TableModel_UtilityInterface::updateItemUtility(long long int itemID, Utilit
 					.arg(m_query.lastError().text())
 					.toLocal8Bit().constData()
 					<< std::endl;
+	m_query.clear();
 }
 
 QVariant TableModel_UtilityInterface::data() const
@@ -299,7 +295,6 @@ void TableModel_UtilityInterface::renameTable(const QString& currentName, const 
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-	m_query.clear();
 	if (!m_query.exec(statement))
 	{
 #ifndef NDEBUG
@@ -312,6 +307,7 @@ void TableModel_UtilityInterface::renameTable(const QString& currentName, const 
 #endif
 		return;
 	}
+	m_query.clear();
 
 	return;
 }

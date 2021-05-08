@@ -38,6 +38,7 @@ SqlUtilityTable::SqlUtilityTable(ListType type, QSqlDatabase& db) :
 SqlUtilityTable::~SqlUtilityTable()
 {
 	destroyTables();
+	m_query.clear();
 }
 
 void SqlUtilityTable::newList(ListType type)
@@ -97,8 +98,6 @@ void SqlUtilityTable::errorMessageCreatingTable(const QString& tableName, const 
 void SqlUtilityTable::destroyTableByName(const QString& tableName)
 {
 	// A helper function used to delete a table.
-	m_query.clear();
-
 	QString statement = QString(
 		"DROP TABLE IF EXISTS \"%1\";").arg(tableName);
 
@@ -111,6 +110,7 @@ void SqlUtilityTable::destroyTableByName(const QString& tableName)
 		std::cerr << QString("Failed to destroy the %1 table.").arg(tableName).toLocal8Bit().constData() << std::endl << std::endl
 			<< QString("\t%1").arg(m_query.lastError().text()).toLocal8Bit().constData() << std::endl << std::endl;
 	}
+	m_query.clear();
 }
 
 QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName) const

@@ -46,8 +46,6 @@ void SqlUtilityTable::createCategoriesTable()
 	if (!m_isTableReady) return;
 
 	// Creating the categories table.
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
@@ -62,6 +60,7 @@ void SqlUtilityTable::createCategoriesTable()
 		errorMessageCreatingTable(tableName(UtilityTableName::CATEGORIES), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void SqlUtilityTable::createDeveloppersTable()
@@ -69,8 +68,6 @@ void SqlUtilityTable::createDeveloppersTable()
 	if (!m_isTableReady) return;
 
 	// Creating the developpers table.
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
@@ -85,6 +82,7 @@ void SqlUtilityTable::createDeveloppersTable()
 		errorMessageCreatingTable(tableName(UtilityTableName::DEVELOPPERS), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void SqlUtilityTable::createPublishersTable()
@@ -92,8 +90,6 @@ void SqlUtilityTable::createPublishersTable()
 	if (!m_isTableReady) return;
 
 	// Creating the publishers table.
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
@@ -108,6 +104,7 @@ void SqlUtilityTable::createPublishersTable()
 		errorMessageCreatingTable(tableName(UtilityTableName::PUBLISHERS), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void SqlUtilityTable::createPlatformTable()
@@ -115,8 +112,6 @@ void SqlUtilityTable::createPlatformTable()
 	if (!m_isTableReady) return;
 
 	// Creating the platform table.
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
@@ -131,6 +126,7 @@ void SqlUtilityTable::createPlatformTable()
 		errorMessageCreatingTable(tableName(UtilityTableName::PLATFORM), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 void SqlUtilityTable::createServicesTable()
@@ -138,8 +134,6 @@ void SqlUtilityTable::createServicesTable()
 	if (!m_isTableReady) return;
 
 	// Creating the services table.
-	m_query.clear();
-
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
@@ -154,6 +148,7 @@ void SqlUtilityTable::createServicesTable()
 		errorMessageCreatingTable(tableName(UtilityTableName::SERVICES), m_query.lastError().text());
 		m_isTableReady = false;
 	}
+	m_query.clear();
 }
 
 QVariant SqlUtilityTable::queryGameData() const
@@ -194,7 +189,6 @@ inline bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const Q
 			std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-			m_query.clear();
 			if (!m_query.exec(statement + strData))
 			{
 #ifndef NDEBUG
@@ -204,8 +198,10 @@ inline bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const Q
 					.toLocal8Bit().constData()
 					<< std::endl;
 #endif
+				m_query.clear();
 				return false;
 			}
+			m_query.clear();
 		}
 	}
 

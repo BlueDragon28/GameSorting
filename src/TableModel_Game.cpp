@@ -50,6 +50,7 @@ bool TableModel::gameUpdateField(QSqlQuery& query, const QString& columnName, in
             << std::endl;
         return false;
     }
+    m_query.clear();
 
     return true;
 }
@@ -80,6 +81,7 @@ bool TableModel::gameUpdateField(QSqlQuery& query, const QString& columnName, in
             << std::endl;
         return false;
     }
+    m_query.clear();
 
     return true;
 }
@@ -108,6 +110,7 @@ void TableModel::gameCreateTable()
         else
             std::cerr << "Failed to create table " << m_tableName.toLocal8Bit().constData() << "\n\t"
                 << m_query.lastError().text().toLocal8Bit().constData() << std::endl;
+        m_query.clear();
     }
 }
 
@@ -407,8 +410,6 @@ void TableModel::gameUpdateQuery()
     }
 
     // Getting the new data from the table.
-    m_query.clear();
-
     QString statement = QString(
         "SELECT\n"
         "   GameID,\n"
@@ -468,8 +469,6 @@ void TableModel::gameUpdateQuery()
 void TableModel::gameQueryUtilityField(UtilityTableName tableName)
 {
     // Standard interface to query the utility data except the sensitive data.
-    m_query.clear();
-
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
@@ -516,6 +515,7 @@ void TableModel::gameQueryUtilityField(UtilityTableName tableName)
                 }
             }
         }
+        m_query.clear();
     }
 #ifndef NDEBUG
     else
@@ -529,8 +529,6 @@ void TableModel::gameQueryUtilityField(UtilityTableName tableName)
 void TableModel::gameQueryUtilityField(long long int gameID, UtilityTableName tableName)
 {
     // Stardard interface to update the utility field of the game (gameID).
-    m_query.clear();
-
     QString statement = QString(
         "SELECT\n"
         "   \"%1\".GameID,\n"
@@ -573,6 +571,7 @@ void TableModel::gameQueryUtilityField(long long int gameID, UtilityTableName ta
             else if (tableName == UtilityTableName::SERVICES)
                 (*m_gameListData)[pos].services = utilityName;
         }
+        m_query.clear();
     }
 #ifndef NDEBUG
     else
@@ -652,8 +651,6 @@ void TableModel::gameQueryServicesField(long long int gameID)
 void TableModel::gameQuerySensitiveContentField()
 {
     // Getting the Sensitive Content Information for each game.
-    m_query.clear();
-
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
@@ -690,6 +687,7 @@ void TableModel::gameQuerySensitiveContentField()
                 }
             }
         }
+        m_query.clear();
     }
     else
         std::cerr << QString("Failed to query %1 utility interface table.\n\t%2")
@@ -702,8 +700,6 @@ void TableModel::gameQuerySensitiveContentField()
 void TableModel::gameQuerySensitiveContentField(long long int gameID)
 {
     // Updating the field sensitive content of the game (gameID).
-    m_query.clear();
-
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
@@ -734,6 +730,7 @@ void TableModel::gameQuerySensitiveContentField(long long int gameID)
             (*m_gameListData)[pos].sensitiveContent = m_query.value(1).toString();
             emit dataChanged(index(pos, Game::SENSITIVE_CONTENT), index(pos, Game::SENSITIVE_CONTENT));
         }
+        m_query.clear();
     }
 #ifndef NDEBUG
     else
@@ -828,7 +825,6 @@ bool TableModel::setGameItemsData(const QVariant& variant)
             std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-            m_query.clear();
             if (!m_query.exec(statement + strData))
             {
 #ifndef NDEBUG
@@ -841,6 +837,7 @@ bool TableModel::setGameItemsData(const QVariant& variant)
 
                 return false;
             }
+            m_query.clear();
         }
     }
     // Set the utility interface.
