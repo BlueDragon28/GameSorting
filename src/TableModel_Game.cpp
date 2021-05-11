@@ -175,7 +175,10 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 QSqlQuery query(m_db);
                 bool result = gameUpdateField<const QString&>(query, "Name", index.row(), gameName);
                 if (result)
+                {
                     emit dataChanged(index, index, {Qt::EditRole});
+                    emit listEdited();
+                }
                 return result;
             }
             else
@@ -192,7 +195,10 @@ bool TableModel::gameSetData(const QModelIndex& index, const QVariant& value, in
                 QSqlQuery query(m_db);
                 bool result = gameUpdateField<int>(query, "Rate", index.row(), rate);
                 if (result)
+                {
                     emit dataChanged(index, index, {Qt::EditRole});
+                    emit listEdited();
+                }
                 return result;
             }
             else
@@ -283,6 +289,9 @@ bool TableModel::gameInsertRows(int row, int count, const QModelIndex& parent)
             }
             else
                 updateQuery();
+            
+            // Emit the signal listEdited, this signal is used to tell that the list has been edited.
+            emit listEdited();
         }
         else
         {
@@ -351,6 +360,8 @@ bool TableModel::gameRemoveRows(int row, int count, const QModelIndex& parent)
             m_utilityInterface->rowRemoved(itemsID);
 
             endRemoveRows();
+
+            emit listEdited();
         }
         else
         {

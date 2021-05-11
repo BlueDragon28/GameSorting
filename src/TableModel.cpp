@@ -46,6 +46,7 @@ TableModel::TableModel(const QString& tableName, ListType type, QSqlDatabase& db
 
     m_utilityInterface = new TableModel_UtilityInterface(m_tableName, m_listType, m_db);
     connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::utilityChanged);
+    connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::listEdited);
 }
 
 TableModel::TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
@@ -61,6 +62,8 @@ TableModel::TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& 
     m_listCount(0)
 {
     setItemsData(data);
+    connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::utilityChanged);
+    connect(m_utilityInterface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModel::listEdited);
 }
 
 TableModel::~TableModel()
@@ -275,6 +278,7 @@ void TableModel::setTableName(const QString& tableName)
 
     m_tableName = newTableName;
     m_utilityInterface->setParentTableNewName(newTableName);
+    emit listEdited();
 }
 
 QString TableModel::rowTableName() const
@@ -326,6 +330,9 @@ void TableModel::deleteRows(const QModelIndexList& indexList)
         it != indexListCopy.cend();
         it++)
         removeRow((*it).row(), QModelIndex());
+    
+    if (indexList.size() > 0)
+        emit listEdited();
 }
 
 ListType TableModel::listType() const

@@ -42,6 +42,7 @@ GameListView::GameListView(const QString& tableName, ListType type, QSqlDatabase
 {
     setupWidget();
     setupView();
+    connect(m_model, &TableModel::listEdited, this, &GameListView::listEdited);
 }
 
 GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
@@ -56,6 +57,7 @@ GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTab
     setupWidget();
     setupView();
     setColumnsSize(data);
+    connect(m_model, &TableModel::listEdited, this, &GameListView::listEdited);
 }
 
 GameListView::~GameListView()

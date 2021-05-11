@@ -22,8 +22,9 @@
 
 #include <iostream>
 
-UtilityListModel::UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent) :
+UtilityListModel::UtilityListModel(SqlUtilityTable* utility, UtilityTableName tableName, QSqlDatabase& db, QObject* parent) :
     QAbstractListModel(parent),
+    m_utility(utility),
     m_tableName(tableName),
     m_db(db),
     m_query(m_db)
@@ -79,6 +80,7 @@ bool UtilityListModel::setData(const QModelIndex& index, const QVariant& value, 
             {
                 m_data[index.row()].name = value.toString();
                 dataChanged(index, index, {Qt::EditRole});
+                emit m_utility->utilityEdited();
                 return true;
             }
             else
@@ -169,6 +171,8 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
 #endif
                 return false;
             }
+
+            emit m_utility->utilityEdited();
         }
         else
         {
@@ -221,6 +225,7 @@ bool UtilityListModel::removeRows(int row, int count, const QModelIndex& parent)
             beginRemoveRows(QModelIndex(), row, row+count-1);
             m_data.remove(row, count);
             endRemoveRows();
+            emit m_utility->utilityEdited();
         }
         else
         {

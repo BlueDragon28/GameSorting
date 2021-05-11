@@ -20,15 +20,16 @@
 #define GAMESORTING_SQLUTILITYTABLE_H_
 
 #include "DataStruct.h"
+#include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QString>
 #include <QList>
 #include <QVariant>
 
-class SqlUtilityTable
+class SqlUtilityTable : public QObject
 {
-	SqlUtilityTable(const SqlUtilityTable&) = delete;
+	Q_OBJECT
 public:
 	SqlUtilityTable(ListType type, QSqlDatabase& db);
 	virtual ~SqlUtilityTable();
@@ -39,6 +40,9 @@ public:
 
 	QVariant data() const;
 	bool setData(const QVariant& data);
+
+signals:
+	void utilityEdited();
 
 private:
 	void createTables();

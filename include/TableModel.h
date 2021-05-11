@@ -71,6 +71,9 @@ public:
     QVariant retrieveData() const;
     bool setItemsData(const QVariant& data);
 
+signals:
+    void listEdited();
+
 protected:
     void createTable();
     void deleteSqlTable();

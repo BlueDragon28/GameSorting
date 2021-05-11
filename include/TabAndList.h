@@ -56,6 +56,7 @@ private slots:
     void tabMoved(int from, int to);
     void tabAskEdit(int index);
     void tabChangeApplying(int tabIndex, const QString& tabName);
+    void listUpdated();
 
 private:
     void setupView();

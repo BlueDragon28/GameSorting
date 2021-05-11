@@ -77,6 +77,7 @@ void TabAndList::setupView()
     connect(m_tabBar, &QTabBar::tabCloseRequested, this, &TabAndList::removeTable);
     connect(m_tabBar, &QTabBar::tabMoved, this, &TabAndList::tabMoved);
     connect(m_tabBar, &QTabBar::tabBarDoubleClicked, this, &TabAndList::tabAskEdit);
+    connect(&m_sqlUtilityTable, &SqlUtilityTable::utilityEdited, this, &TabAndList::listUpdated);
 }
 
 void TabAndList::tabChanged(int index)
@@ -109,6 +110,7 @@ void TabAndList::addTable()
         m_tabBar->addTab(newList->tableName());
         m_isListModified = true;
         emit listChanged(true);
+        connect(newList, &GameListView::listEdited, this, &TabAndList::listUpdated);
     }
 }
 
@@ -318,6 +320,7 @@ bool TabAndList::openFile(const QString& filePath)
                 return false;
             m_stackedViews->addWidget(view);
             m_tabBar->addTab(view->tableName());
+            connect(view, &GameListView::listEdited, this, &TabAndList::listUpdated);
         }
 
         return true;
@@ -347,7 +350,7 @@ void TabAndList::openUtility(UtilityTableName tableName)
     // If not, let's opening the editor.
     if (!isUtilityOpen)
     {
-        UtilityListView* view = new UtilityListView(tableName, m_db, this);
+        UtilityListView* view = new UtilityListView(&m_sqlUtilityTable, tableName, m_db, this);
         m_stackedViews->addWidget(view);
         m_tabBar->addTab(SqlUtilityTable::tableName(tableName));
     }
@@ -395,4 +398,14 @@ void TabAndList::tabChangeApplying(int tabIndex, const QString& tabName)
         gameView->setTableName(tabName);
         m_tabBar->setTabText(tabIndex, gameView->tableName());
     }
+}
+
+void TabAndList::listUpdated()
+{
+    // This member function is called when the list is changed.
+    // It is used to update the windows name and ask the user if he realy want to 
+    // leave without exiting when he is going to exit the application.
+
+    m_isListModified = true;
+    emit listChanged(true);
 }

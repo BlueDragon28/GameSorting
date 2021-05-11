@@ -17,6 +17,7 @@
 */
 
 #include "UtilityListView.h"
+#include "SqlUtilityTable.h"
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QAction>
@@ -24,11 +25,11 @@
 #include <QItemSelectionModel>
 #include <QHeaderView>
 
-UtilityListView::UtilityListView(UtilityTableName tableName, QSqlDatabase& db, QWidget* parent) :
+UtilityListView::UtilityListView(SqlUtilityTable* utility, UtilityTableName tableName, QSqlDatabase& db, QWidget* parent) :
     AbstractListView(parent),
     m_uName(tableName),
     m_view(nullptr),
-    m_model(new UtilityListModel(tableName, db, this))
+    m_model(new UtilityListModel(utility, tableName, db, this))
 {
     createMenu();
 }

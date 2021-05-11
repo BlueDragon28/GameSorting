@@ -27,11 +27,13 @@
 #include <QSqlQuery>
 #include <QSqlDatabase>
 
+class SqlUtilityTable;
+
 class UtilityListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit UtilityListModel(UtilityTableName tableName, QSqlDatabase& db, QObject* parent = nullptr);
+    explicit UtilityListModel(SqlUtilityTable* utility, UtilityTableName tableName, QSqlDatabase& db, QObject* parent = nullptr);
     virtual ~UtilityListModel();
 
     // Interface between the view and the model
@@ -48,6 +50,7 @@ public:
     void deleteIndexs(const QModelIndexList& indexList);
 
 private:
+    SqlUtilityTable* m_utility;
     UtilityTableName m_tableName;
     QList<ItemUtilityData> m_data;
     QSqlDatabase m_db;

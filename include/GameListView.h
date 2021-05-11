@@ -44,6 +44,9 @@ public:
     QVariant listData() const;
     virtual ViewType viewType() const override;
 
+signals:
+    void listEdited();
+
 public slots:
     void addingItem();
     void deletingItems();
