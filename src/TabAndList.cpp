@@ -120,10 +120,26 @@ void TabAndList::removeTable(int index)
     // Removing a table when requested by the user.
     if (index >= 0 && index < m_tabBar->count())
     {
-        QWidget* widget = m_stackedViews->widget(index);
+        AbstractListView* widget = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(index));
+
+        // If it's not an utility view, ask the user if he realy want
+        // to remove the table.
+        if (widget->viewType() != ViewType::UTILITY)
+        {
+            QMessageBox::StandardButton button = QMessageBox::warning(
+                this,
+                tr("Removing a tab."),
+                tr("Do you realy want to remove this table? This is irrevocable!"),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::Yes);
+            
+            if (button == QMessageBox::No)
+                return;
+        }
+
         m_stackedViews->removeWidget(widget);
         m_tabBar->removeTab(index);
-        if (reinterpret_cast<AbstractListView*>(widget)->viewType() == ViewType::GAME)
+        if (widget->viewType() == ViewType::GAME)
         {
             m_isListModified = true;
             emit listChanged(true);
