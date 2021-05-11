@@ -184,7 +184,7 @@ void TabAndList::open()
                 tr("Failed to open list."),
                 tr("Failed to open file file %1.").arg(filePath),
                 QMessageBox::Ok,
-                QMessageBox::NoButton);
+                QMessageBox::Ok);
             m_isListModified = false;
             newGameList();
             m_listType = ListType::UNKNOWN;
@@ -215,7 +215,7 @@ void TabAndList::save()
                 tr("Save Game List"),
                 tr("Saving the game list into the file %1 failed.").arg(m_filePath),
                 QMessageBox::Ok,
-                QMessageBox::NoButton);
+                QMessageBox::Ok);
     }
     else
         QMessageBox::warning(
@@ -223,7 +223,7 @@ void TabAndList::save()
             tr("Saving a list"),
             tr("No list created."),
             QMessageBox::Ok,
-            QMessageBox::NoButton);
+            QMessageBox::Ok);
 }
 
 void TabAndList::saveAs()
@@ -254,7 +254,7 @@ void TabAndList::saveAs()
                     tr("Save Game List"),
                     tr("Saving the game list into the file %1 failed.").arg(filePath),
                     QMessageBox::Ok,
-                    QMessageBox::NoButton);
+                    QMessageBox::Ok);
         }
     }
     else
@@ -263,7 +263,7 @@ void TabAndList::saveAs()
             tr("Saving a list"),
             tr("No list created."),
             QMessageBox::Ok,
-            QMessageBox::NoButton);
+            QMessageBox::Ok);
 }
 
 bool TabAndList::saveFile(const QString& filePath) const
