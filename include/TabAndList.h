@@ -37,6 +37,8 @@ public:
     explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
     virtual ~TabAndList();
 
+    bool maybeSave();
+
 public slots:
     void newGameList();
     void open();

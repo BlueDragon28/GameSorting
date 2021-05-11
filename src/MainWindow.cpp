@@ -29,6 +29,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QToolBar>
+#include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
@@ -223,4 +224,15 @@ void MainWindow::updateWindowTitle()
 	}
 
 	setWindowTitle(title);
+}
+
+void MainWindow::closeEvent(QCloseEvent* evt)
+{
+	// This member function is called when the user hit the X button
+	// to close this window. It check if the list need to be saved and if
+	// the want to leave.
+	if (m_tabAndList->maybeSave())
+		evt->accept();
+	else
+		evt->ignore();
 }

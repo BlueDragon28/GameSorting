@@ -35,6 +35,9 @@ public:
 	MainWindow(QWidget* parent = nullptr);
 	virtual ~MainWindow();
 
+protected:
+	void closeEvent(QCloseEvent* evt) override;
+
 private:
 	void createMenu();
 	void createCentralWidget();

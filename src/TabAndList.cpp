@@ -32,6 +32,7 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QCloseEvent>
 
 TabAndList::TabAndList(QSqlDatabase& db, QWidget* parent) :
     QWidget(parent),
@@ -134,6 +135,10 @@ void TabAndList::removeTable(int index)
 void TabAndList::newGameList()
 {
     // Deleting the existing list and creating a new list.
+    // First, check if there is any unsaved change.
+    if (!maybeSave())
+        return;
+
     for (int i = m_tabBar->count()-1; i >= 0; i--)
         m_tabBar->removeTab(i);
     for (int i = m_stackedViews->count()-1; i >= 0; i--)
@@ -154,6 +159,10 @@ void TabAndList::newGameList()
 void TabAndList::open()
 {
     // Opening a list from a file.
+    // First, check if there is unsaved change.
+    if (!maybeSave())
+        return;
+
     QString filePath = QFileDialog::getOpenFileName(
         this,
         tr("Open list"),
@@ -176,6 +185,7 @@ void TabAndList::open()
                 tr("Failed to open file file %1.").arg(filePath),
                 QMessageBox::Ok,
                 QMessageBox::NoButton);
+            m_isListModified = false;
             newGameList();
             m_listType = ListType::UNKNOWN;
         }
@@ -307,6 +317,7 @@ bool TabAndList::openFile(const QString& filePath)
     if (variant.canConvert<Game::SaveData>())
     {
         // Creating a new empty game list data.
+        m_isListModified = false;
         newGameList();
         Game::SaveData data = qvariant_cast<Game::SaveData>(variant);
         result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
@@ -408,4 +419,30 @@ void TabAndList::listUpdated()
 
     m_isListModified = true;
     emit listChanged(true);
+}
+
+bool TabAndList::maybeSave()
+{
+    // This function is called when the user try to close the list or close the program.
+    // This function check is there is unsaved change and if, ask the user if he want to save them.
+
+    if (m_isListModified)
+    {
+        QMessageBox::StandardButton button = QMessageBox::warning(
+            this,
+            tr("Unsaved change"),
+            tr("The list have unsaved change, do you want to save them?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        
+        if (button == QMessageBox::Save)
+        {
+            save();
+            return true;
+        }
+        else if (button == QMessageBox::Cancel)
+            return false;
+    }
+
+    return true;
 }
