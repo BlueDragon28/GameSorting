@@ -180,11 +180,11 @@ void TabAndList::open()
         return;
 
     QString filePath = QFileDialog::getOpenFileName(
-        this,
-        tr("Open list"),
-        QString(),
-        tr("List File (*.gld);;"
-           "All Files (*)"));
+            this,
+            tr("Open list"),
+            QString(),
+            tr("List File (*.gld);;"
+            "All Files (*)"));
         
     if (!filePath.isEmpty())
     {
@@ -199,6 +199,35 @@ void TabAndList::open()
                 this,
                 tr("Failed to open list."),
                 tr("Failed to open file file %1.").arg(filePath),
+                QMessageBox::Ok,
+                QMessageBox::Ok);
+            m_isListModified = false;
+            newGameList();
+            m_listType = ListType::UNKNOWN;
+        }
+    }
+}
+
+void TabAndList::open(const QString& filePath)
+{
+    // Opening a list from a file.
+    // First, check if there is unsaved change.
+    if (!maybeSave())
+        return;
+    
+    if (!filePath.isEmpty())
+    {
+        if (openFile(filePath))
+        {
+            m_filePath = filePath;
+            emit newListFileName(filePath);
+        }
+        else
+        {
+            QMessageBox::critical(
+                this,
+                tr("Failed to open list."),
+                tr("Failed to open file %1.").arg(filePath),
                 QMessageBox::Ok,
                 QMessageBox::Ok);
             m_isListModified = false;

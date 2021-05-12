@@ -17,6 +17,7 @@
 */
 
 #include "MainWindow.h"
+#include "CMDOpts.h"
 
 #include <QApplication>
 #include <QString>
@@ -36,7 +37,10 @@ int main(int argc, char** argv)
 	QIcon appIcon = QIcon(":/Images/GameSorting.ico");
 	app.setWindowIcon(appIcon);
 
-	MainWindow window;
+	// Parsing the command line arguments and options.
+	CMDOpts parser(app);
+
+	MainWindow window(parser.itemListFile());
 	window.show();
 
 	// Running the app main loop.

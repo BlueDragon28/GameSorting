@@ -31,7 +31,7 @@
 #include <QToolBar>
 #include <QCloseEvent>
 
-MainWindow::MainWindow(QWidget* parent) :
+MainWindow::MainWindow(const QString& filePath, QWidget* parent) :
 	QMainWindow(parent),
 	m_db(QSqlDatabase::addDatabase("QSQLITE")),
 	m_tabAndList(nullptr),
@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget* parent) :
 	resize(800, 600);
 	move((screen()->availableSize().width() - 800) / 2, (screen()->availableSize().height() - 600) / 2);
 	updateWindowTitle();
+
+	if (!filePath.isEmpty())
+		m_tabAndList->open(filePath);
 }
 
 MainWindow::~MainWindow()
@@ -93,7 +96,7 @@ void MainWindow::createMenu()
 	openListAct->setShortcut(QKeySequence::Open);
 	openListAct->setToolTip(tr("Opening a list from a file"));
 	menuFile->addAction(openListAct);
-	connect(openListAct, &QAction::triggered, m_tabAndList, &TabAndList::open);
+	connect(openListAct, &QAction::triggered, m_tabAndList, qOverload<>(&TabAndList::open));
 	fileToolBar->addAction(openListAct);
 
 	// Save a list into a file.

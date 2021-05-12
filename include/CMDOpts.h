@@ -16,42 +16,23 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
+#ifndef GAMESORTING_CMDOPTS_H_
+#define GAMESORTING_CMDOPTS_H_
 
-#include "DataStruct.h"
-#include <QMainWindow>
-#include <QSqlDatabase>
-#include <QString>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+#include <QApplication>
 
-class TabAndList;
-class QTableView;
-class QToolBar;
-
-class MainWindow : public QMainWindow
+class CMDOpts
 {
-	Q_OBJECT
+    CMDOpts(const CMDOpts& other) = delete;
 public:
-	MainWindow(const QString& filePath, QWidget* parent = nullptr);
-	virtual ~MainWindow();
+    CMDOpts(QApplication& app);
 
-protected:
-	void closeEvent(QCloseEvent* evt) override;
+    const QString& itemListFile() const;
 
 private:
-	void createMenu();
-	void createCentralWidget();
-	void newListCreated(ListType type);
-	void createGameToolBar();
-	void listFilePathChanged(const QString& filePath);
-	void listChanged(bool isChanged);
-	void updateWindowTitle();
-
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-	QToolBar* m_listToolBar;
-	QString m_listFilePath;
-	bool m_listChanged;
+    QString m_itemListFile;
 };
 
-#endif // GAMESORTING_MAINWINDOW
+#endif // GAMESORTING_CMDOPTS_H_

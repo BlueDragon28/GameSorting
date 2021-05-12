@@ -42,6 +42,7 @@ public:
 public slots:
     void newGameList();
     void open();
+    void open(const QString& filePath);
     void save();
     void saveAs();
     void openUtility(UtilityTableName tableName);

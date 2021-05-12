@@ -16,42 +16,27 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
+#include "CMDOpts.h"
 
-#include "DataStruct.h"
-#include <QMainWindow>
-#include <QSqlDatabase>
-#include <QString>
-
-class TabAndList;
-class QTableView;
-class QToolBar;
-
-class MainWindow : public QMainWindow
+CMDOpts::CMDOpts(QApplication& app)
 {
-	Q_OBJECT
-public:
-	MainWindow(const QString& filePath, QWidget* parent = nullptr);
-	virtual ~MainWindow();
+    // Parsing the command line argument.
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QApplication::translate(
+        "cmd parser",
+        "A little program to make list of wishing games."));
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("itemList",
+        QCoreApplication::translate("cmd parser", "Loading an item list file (game, ...)"));
+    
+    parser.process(app);
 
-protected:
-	void closeEvent(QCloseEvent* evt) override;
+    if (parser.positionalArguments().size() > 0)
+        m_itemListFile = parser.positionalArguments().first();
+}
 
-private:
-	void createMenu();
-	void createCentralWidget();
-	void newListCreated(ListType type);
-	void createGameToolBar();
-	void listFilePathChanged(const QString& filePath);
-	void listChanged(bool isChanged);
-	void updateWindowTitle();
-
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-	QToolBar* m_listToolBar;
-	QString m_listFilePath;
-	bool m_listChanged;
-};
-
-#endif // GAMESORTING_MAINWINDOW
+const QString& CMDOpts::itemListFile() const
+{
+    return m_itemListFile;
+}
