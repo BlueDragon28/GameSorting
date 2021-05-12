@@ -18,7 +18,8 @@
 
 #include "CMDOpts.h"
 
-CMDOpts::CMDOpts(QApplication& app)
+CMDOpts::CMDOpts(QApplication& app) :
+    m_resetSettings(false)
 {
     // Parsing the command line argument.
     QCommandLineParser parser;
@@ -30,13 +31,24 @@ CMDOpts::CMDOpts(QApplication& app)
     parser.addPositionalArgument("itemList",
         QCoreApplication::translate("cmd parser", "Loading an item list file (game, ...)"));
     
+    QCommandLineOption resetSettings(
+        "reset-settings",
+        QCoreApplication::translate("cmd parser", "Reset to default settings"));
+    parser.addOption(resetSettings);
+    
     parser.process(app);
 
     if (parser.positionalArguments().size() > 0)
         m_itemListFile = parser.positionalArguments().first();
+    m_resetSettings = parser.isSet(resetSettings);
 }
 
 const QString& CMDOpts::itemListFile() const
 {
     return m_itemListFile;
+}
+
+bool CMDOpts::resetSettings() const
+{
+    return m_resetSettings;
 }

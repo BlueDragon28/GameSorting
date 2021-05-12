@@ -30,13 +30,18 @@
 #include <QMenu>
 #include <QToolBar>
 #include <QCloseEvent>
+#include <QSettings>
+#include <QScreen>
+#include <QSize>
 
-MainWindow::MainWindow(const QString& filePath, QWidget* parent) :
+MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* parent) :
 	QMainWindow(parent),
 	m_db(QSqlDatabase::addDatabase("QSQLITE")),
 	m_tabAndList(nullptr),
 	m_listToolBar(nullptr),
-	m_listChanged(false)
+	m_listChanged(false),
+
+	m_isResetSettings(resetSettings)
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -53,6 +58,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget* parent) :
 	resize(800, 600);
 	move((screen()->availableSize().width() - 800) / 2, (screen()->availableSize().height() - 600) / 2);
 	updateWindowTitle();
+	readSettings();
 
 	if (!filePath.isEmpty())
 		m_tabAndList->open(filePath);
@@ -235,7 +241,65 @@ void MainWindow::closeEvent(QCloseEvent* evt)
 	// to close this window. It check if the list need to be saved and if
 	// the want to leave.
 	if (m_tabAndList->maybeSave())
+	{
+		writeSettings();
 		evt->accept();
+	}
 	else
 		evt->ignore();
+}
+
+void MainWindow::writeSettings()
+{
+	// Write the settings into Windows Registery or Linux Config File.
+	// The settings are used to save the geometry of the windows, the last opened file, etc.
+	QSettings settings("Erwan28250", "GameSorting_alpha");
+
+	// Save the geometry of the window.
+	settings.setValue("mainwindow/geometry", saveGeometry());
+
+	// Save the opened file path.
+	if (!m_tabAndList->filePath().isEmpty())
+		settings.setValue("core/filepath", m_tabAndList->filePath());
+	else
+		settings.remove("core/filepath");
+
+	// Save the current directory, this is the last directory opened with a file dialog.
+	if (!m_tabAndList->currentDirectory().isEmpty())
+		settings.setValue("core/currentdir", m_tabAndList->currentDirectory());
+	else
+		settings.remove("core/currentdir");
+}
+
+void MainWindow::readSettings()
+{
+	// Read the settings saved in the Windows Registery or in Linux Config File.
+	QSettings settings("Erwan28250", "GameSorting_alpha");
+
+	// Read the geometry of the window.
+	QVariant vGeometry = settings.value("mainwindow/geometry");
+	if (vGeometry.isValid() && !m_isResetSettings)
+		restoreGeometry(vGeometry.toByteArray());
+	else
+	{
+		// If there is no available geometry settings,
+		// put the window in the center of the screen.
+		QSize wSize(
+			screen()->size().width() / 2,
+			screen()->size().height() / 1.5);
+		QPoint wPos(
+			(screen()->size().width() - wSize.width()) / 2,
+			(screen()->size().height() - wSize.height()) / 2);
+		setGeometry(QRect(wPos, wSize));
+	}
+	
+	// Read the saved file path.
+	QVariant vFilePath = settings.value("core/filepath");
+	if (vFilePath.isValid() && !m_isResetSettings)
+		m_tabAndList->open(vFilePath.toString());
+	
+	// Read the current directory.
+	QVariant vCurrentDir = settings.value("core/currentdir");
+	if (vCurrentDir.isValid() && !m_isResetSettings)
+		m_tabAndList->setCurrentDit(vCurrentDir.toString());
 }

@@ -182,7 +182,7 @@ void TabAndList::open()
     QString filePath = QFileDialog::getOpenFileName(
             this,
             tr("Open list"),
-            QString(),
+            m_currentDirectory,
             tr("List File (*.gld);;"
             "All Files (*)"));
         
@@ -191,6 +191,7 @@ void TabAndList::open()
         if (openFile(filePath))
         {
             m_filePath = filePath;
+            m_currentDirectory = QFileInfo(filePath).absolutePath();
             emit newListFileName(m_filePath);
         }
         else
@@ -281,7 +282,7 @@ void TabAndList::saveAs()
         QString filePath = QFileDialog::getSaveFileName(
             this,
             tr("Save Game List"),
-            QString(),
+            m_currentDirectory,
             tr("Game List Data (*.gld);;"
                "All Files (*)"));
         
@@ -290,6 +291,7 @@ void TabAndList::saveAs()
             if(saveFile(filePath))
             {
                 m_filePath = filePath;
+                m_currentDirectory = QFileInfo(filePath).absolutePath();
                 m_isListModified = false;
                 emit newListFileName(m_filePath);
             }
@@ -490,4 +492,19 @@ bool TabAndList::maybeSave()
     }
 
     return true;
+}
+
+const QString& TabAndList::filePath() const
+{
+    return m_filePath;
+}
+
+const QString& TabAndList::currentDirectory() const
+{
+    return m_currentDirectory;
+}
+
+void TabAndList::setCurrentDit(const QString& dir)
+{
+    m_currentDirectory = dir;
 }

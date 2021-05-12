@@ -30,9 +30,11 @@ public:
     CMDOpts(QApplication& app);
 
     const QString& itemListFile() const;
+    bool resetSettings() const;
 
 private:
     QString m_itemListFile;
+    bool m_resetSettings;
 };
 
 #endif // GAMESORTING_CMDOPTS_H_

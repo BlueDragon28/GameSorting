@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(const QString& filePath, QWidget* parent = nullptr);
+	MainWindow(const QString& filePath, bool resetSettings, QWidget* parent = nullptr);
 	virtual ~MainWindow();
 
 protected:
@@ -46,12 +46,16 @@ private:
 	void listFilePathChanged(const QString& filePath);
 	void listChanged(bool isChanged);
 	void updateWindowTitle();
+	void writeSettings();
+	void readSettings();
 
 	TabAndList* m_tabAndList;
 	QSqlDatabase m_db;
 	QToolBar* m_listToolBar;
 	QString m_listFilePath;
 	bool m_listChanged;
+	
+	bool m_isResetSettings;
 };
 
 #endif // GAMESORTING_MAINWINDOW

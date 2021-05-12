@@ -38,6 +38,9 @@ public:
     virtual ~TabAndList();
 
     bool maybeSave();
+    const QString& filePath() const;
+    const QString& currentDirectory() const;
+    void setCurrentDit(const QString& dir);
 
 public slots:
     void newGameList();
@@ -72,6 +75,7 @@ private:
     QTabBar* m_tabBar;
     QStackedLayout* m_stackedViews;
     QString m_filePath;
+    QString m_currentDirectory;
     bool m_isListModified;
 };
 
