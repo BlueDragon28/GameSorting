@@ -43,112 +43,27 @@ void SqlUtilityTable::destroyGameTables()
 
 void SqlUtilityTable::createCategoriesTable()
 {
-	if (!m_isTableReady) return;
-
-	// Creating the categories table.
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT);").arg(tableName(UtilityTableName::CATEGORIES));
-
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::CATEGORIES), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-	m_query.clear();
+	standardTableCreation(UtilityTableName::CATEGORIES);
 }
 
 void SqlUtilityTable::createDeveloppersTable()
 {
-	if (!m_isTableReady) return;
-
-	// Creating the developpers table.
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT);").arg(tableName(UtilityTableName::DEVELOPPERS));
-
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::DEVELOPPERS), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-	m_query.clear();
+	standardTableCreation(UtilityTableName::DEVELOPPERS);
 }
 
 void SqlUtilityTable::createPublishersTable()
 {
-	if (!m_isTableReady) return;
-
-	// Creating the publishers table.
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT);").arg(tableName(UtilityTableName::PUBLISHERS));
-
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::PUBLISHERS), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-	m_query.clear();
+	standardTableCreation(UtilityTableName::PUBLISHERS);
 }
 
 void SqlUtilityTable::createPlatformTable()
 {
-	if (!m_isTableReady) return;
-
-	// Creating the platform table.
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT);").arg(tableName(UtilityTableName::PLATFORM));
-
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::PLATFORM), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-	m_query.clear();
+	standardTableCreation(UtilityTableName::PLATFORM);
 }
 
 void SqlUtilityTable::createServicesTable()
 {
-	if (!m_isTableReady) return;
-
-	// Creating the services table.
-	QString statement = QString(
-		"CREATE TABLE \"%1\" (\n"
-		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
-		"	Name TEXT);").arg(tableName(UtilityTableName::SERVICES));
-	
-#ifndef NDEBUG
-	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-	if (!m_query.exec(statement))
-	{
-		errorMessageCreatingTable(tableName(UtilityTableName::SERVICES), m_query.lastError().text());
-		m_isTableReady = false;
-	}
-	m_query.clear();
+	standardTableCreation(UtilityTableName::SERVICES);
 }
 
 QVariant SqlUtilityTable::queryGameData() const
@@ -163,7 +78,7 @@ QVariant SqlUtilityTable::queryGameData() const
 	return QVariant::fromValue(data);
 }
 
-inline bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data)
+bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data)
 {
 	// Convenient member function to set the data into the SQL Table.
 	QString statement = QString(

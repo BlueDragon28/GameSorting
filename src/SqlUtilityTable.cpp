@@ -173,3 +173,27 @@ bool SqlUtilityTable::setData(const QVariant& variant)
 	newList(ListType::UNKNOWN);
 	return false;
 }
+
+void SqlUtilityTable::standardTableCreation(UtilityTableName tableName)
+{
+	// This member function is used has a base plan for creating the utility table.
+	if (!m_isTableReady) return;
+
+	// Create the table.
+	QString statement = QString(
+		"CREATE TABLE \"%1\" (\n"
+		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
+		"	Name TEXT);")
+			.arg(this->tableName(tableName));
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+	{
+		errorMessageCreatingTable(this->tableName(tableName), m_query.lastError().text());
+		m_isTableReady = false;
+	}
+	m_query.clear();
+}
