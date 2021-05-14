@@ -65,6 +65,7 @@ private slots:
     void listUpdated();
 
 private:
+    void newEmptyList();
     void setupView();
     bool saveFile(const QString& filePath) const;
     bool openFile(const QString& filePath);

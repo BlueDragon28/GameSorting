@@ -202,9 +202,7 @@ void TabAndList::open()
                 tr("Failed to open file file %1.").arg(filePath),
                 QMessageBox::Ok,
                 QMessageBox::Ok);
-            m_isListModified = false;
-            newGameList();
-            m_listType = ListType::UNKNOWN;
+            newEmptyList();
         }
     }
 }
@@ -231,9 +229,7 @@ void TabAndList::open(const QString& filePath)
                 tr("Failed to open file %1.").arg(filePath),
                 QMessageBox::Ok,
                 QMessageBox::Ok);
-            m_isListModified = false;
-            newGameList();
-            m_listType = ListType::UNKNOWN;
+            newEmptyList();
         }
     }
 }
@@ -364,7 +360,7 @@ bool TabAndList::openFile(const QString& filePath)
     if (variant.canConvert<Game::SaveData>())
     {
         // Creating a new empty game list data.
-        m_isListModified = false;
+        newEmptyList();
         newGameList();
         Game::SaveData data = qvariant_cast<Game::SaveData>(variant);
         result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
@@ -507,4 +503,25 @@ const QString& TabAndList::currentDirectory() const
 void TabAndList::setCurrentDit(const QString& dir)
 {
     m_currentDirectory = dir;
+}
+
+void TabAndList::newEmptyList()
+{
+    // Creating a new empty list, this member
+    // function is used by the open member function.
+    for (int i = 0; i < m_tabBar->count(); i++)
+        m_tabBar->removeTab(i);
+    for (int i = 0; i < m_stackedViews->count(); i++)
+    {
+        AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+        m_stackedViews->removeWidget(view);
+        delete view;
+    }
+
+    m_sqlUtilityTable.newList(ListType::UNKNOWN);
+    m_listType = ListType::UNKNOWN;
+    m_isListModified = false;
+    m_filePath.clear();
+    emit newList(ListType::UNKNOWN);
+    emit newListFileName(m_filePath);
 }
