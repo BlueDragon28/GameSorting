@@ -27,6 +27,9 @@
 #include <QIcon>
 #include <QAction>
 #include <QToolBar>
+#include <QInputDialog>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <iostream>
 
@@ -117,29 +120,39 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
 {
     if (m_type == ListType::GAMELIST)
     {
-        QToolBar* menuBar = new QToolBar(tr("Game Menu Bar"), this);
-        menuBar->setMovable(false);
+        QToolBar* toolBar = new QToolBar(tr("Game Menu Bar"), this);
+        toolBar->setMovable(false);
 
         QIcon addIcon(":/Images/Add.svg");
         QAction* addAct = new QAction(addIcon, tr("Add New Game"), this);
         addAct->setToolTip(tr("Adding a new game into the current game list."));
         connect(addAct, &QAction::triggered, this, &GameListView::addingItem);
-        menuBar->addAction(addAct);
+        toolBar->addAction(addAct);
 
         QIcon delIcon(":/Images/Del.svg");
         QAction* delAct = new QAction(delIcon, tr("Delete Games"), this);
         delAct->setToolTip(tr("Deleting selected games in the current game list."));
         connect(delAct, &QAction::triggered, this, &GameListView::deletingItems);
-        menuBar->addAction(delAct);
+        toolBar->addAction(delAct);
 
         QIcon updateIcon(":/Images/Update.svg");
         QAction* updateAct = new QAction(updateIcon, tr("Synchronize SQL data with view."), this);
         updateAct->setToolTip(tr("Query all the rows from the list and update the entire view.\n"
                                  "Use it to check if there is no error between the data in the view and the SQL data."));
         connect(updateAct, &QAction::triggered, m_model, &TableModel::updateQuery);
-        menuBar->addAction(updateAct);
+        toolBar->addAction(updateAct);
 
-        vLayout->setMenuBar(menuBar);
+        QAction* setUrlAct = new QAction(tr("Set Url"), this);
+        setUrlAct->setToolTip(tr("Set the url to the selected game."));
+        connect(setUrlAct, &QAction::triggered, this, &GameListView::setUrl);
+        toolBar->addAction(setUrlAct);
+
+        QAction* openUrlAct = new QAction(tr("Open Url"), this);
+        openUrlAct->setToolTip(tr("Open the url of the selected game."));
+        connect(openUrlAct, &QAction::triggered, this, &GameListView::openUrl);
+        toolBar->addAction(openUrlAct);
+
+        vLayout->setMenuBar(toolBar);
     }
 }
 
@@ -216,4 +229,65 @@ void GameListView::setColumnsSize(const QVariant& variant)
 ViewType GameListView::viewType() const
 {
     return ViewType::GAME;
+}
+
+void GameListView::setUrl()
+{
+    // Set the url to the selected game.
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+
+        bool result = false;
+        QString url = QInputDialog::getText(
+            this,
+            tr("Set URL: \"%1\"").arg(m_model->data(indexList.at(0)).toString()),
+            tr("Url"),
+            QLineEdit::Normal,
+            QString(),
+            &result);
+        if (result)
+            m_model->setUrl(indexList.at(0), url);
+    }
+    else
+    {
+        QMessageBox::warning(
+            this,
+            tr("Set Url!"),
+            tr("No game selected."),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+    }
+}
+
+void GameListView::openUrl()
+{
+    // Open the url of the selected game into the default web browser.
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        QString url = m_model->url(indexList.at(0));
+        if (!url.isEmpty())
+            QDesktopServices::openUrl(QUrl(url));
+        else
+        {
+            QMessageBox::warning(
+                this,
+                tr("Open Url!"),
+                tr("This game does not have any url."),
+                QMessageBox::Ok,
+                QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        QMessageBox::warning(
+            this,
+            tr("Open Url!"),
+            tr("You need to select a game before."),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+    }
 }

@@ -901,3 +901,44 @@ int TableModel::findGamePos(long long int gameID) const
     }
     return -1;
 }
+
+void TableModel::setGameUrl(const QModelIndex& index, const QString& url)
+{
+    // Set the url of a game.
+    if (index.isValid() && index.row() > 0 && index.row() < m_listCount)
+    {
+        long long int gameID = m_gameListData->at(index.row()).gameID;
+
+        QString statement = QString(
+            "UPDATE \"%1\"\n"
+            "SET Url = \"%2\"\n"
+            "WHERE GameID = %3;")
+                .arg(m_tableName)
+                .arg(url)
+                .arg(m_gameListData->at(index.row()).gameID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
+            (*m_gameListData)[index.row()].url = url;
+        else
+        {
+#ifndef NDEBUG
+            std::cerr << QString("Failed to set the url to the table \"%1\".\n\t%2")
+                .arg(m_tableName)
+                .arg(m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+#endif
+        }
+    }
+}
+
+QString TableModel::gameUrl(const QModelIndex& index) const
+{
+    if (index.isValid() && index.row() >= 0 && index.row() < m_listCount)
+        return m_gameListData->at(index.row()).url;
+    return QString();
+}

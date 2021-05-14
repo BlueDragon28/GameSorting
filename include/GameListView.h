@@ -51,7 +51,9 @@ public slots:
     void addingItem();
     void deletingItems();
     
-protected:
+private slots:
+    void setUrl();
+    void openUrl();
 
 private:
     void setupWidget();

@@ -70,6 +70,8 @@ public:
 
     QVariant retrieveData() const;
     bool setItemsData(const QVariant& data);
+    void setUrl(const QModelIndex& index, const QString& url);
+    QString url(const QModelIndex& index) const;
 
 signals:
     void listEdited();
@@ -110,6 +112,8 @@ protected:
     bool setGameItemsData(const QVariant& data);
     void gameUtilityChanged(long long int gameID, UtilityTableName tableName);
     int findGamePos(long long int gameID) const;
+    void setGameUrl(const QModelIndex& index, const QString& url);
+    QString gameUrl(const QModelIndex& index) const;
 
 private:
     QString checkingIfNameFree(const QString& name, int n = -1) const;

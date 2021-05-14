@@ -378,3 +378,16 @@ void TableModel::utilityChanged(long long int itemID, UtilityTableName tableName
     if (m_listType == ListType::GAMELIST)
         gameUtilityChanged(itemID, tableName);
 }
+
+void TableModel::setUrl(const QModelIndex& index, const QString& url)
+{
+    if (m_listType == ListType::GAMELIST)
+        setGameUrl(index, url);
+}
+
+QString TableModel::url(const QModelIndex& index) const
+{
+    if (m_listType == ListType::GAMELIST)
+        return gameUrl(index);
+    return QString();
+}
