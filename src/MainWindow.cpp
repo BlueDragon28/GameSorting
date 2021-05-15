@@ -18,6 +18,7 @@
 
 #include "MainWindow.h"
 #include "TabAndList.h"
+#include "LicenceDialog.h"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -41,7 +42,12 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* par
 	m_listToolBar(nullptr),
 	m_listChanged(false),
 
-	m_isResetSettings(resetSettings)
+	m_isResetSettings(resetSettings),
+
+	m_fileMenu(nullptr),
+	m_utilityMenu(nullptr),
+	m_helpMenu(nullptr),
+	m_licenceDialog(nullptr)
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -73,7 +79,7 @@ void MainWindow::createMenu()
 	// Creation of all the menus and the toolbar.
 
 	// Create the menu file.
-	QMenu* menuFile = menuBar()->addMenu(tr("&File"));
+	m_fileMenu = menuBar()->addMenu(tr("&File"));
 	// Creating the toolbar
 	QToolBar* fileToolBar = addToolBar(tr("File"));
 	fileToolBar->setMovable(false);
@@ -86,7 +92,7 @@ void MainWindow::createMenu()
 	newGameListAct->setToolTip(tr("Creating a game list."));
 	newListMenu->addAction(newGameListAct);
 	connect(newGameListAct, &QAction::triggered, m_tabAndList, &TabAndList::newGameList);
-	menuFile->addMenu(newListMenu);
+	m_fileMenu->addMenu(newListMenu);
 
 	// Adding the newListMenu into the toolbar
 	QIcon newIcon = QIcon(":/Images/New.svg");
@@ -101,7 +107,7 @@ void MainWindow::createMenu()
 	QAction* openListAct = new QAction(openListIcon, tr("Open"), this);
 	openListAct->setShortcut(QKeySequence::Open);
 	openListAct->setToolTip(tr("Opening a list from a file"));
-	menuFile->addAction(openListAct);
+	m_fileMenu->addAction(openListAct);
 	connect(openListAct, &QAction::triggered, m_tabAndList, qOverload<>(&TabAndList::open));
 	fileToolBar->addAction(openListAct);
 
@@ -110,7 +116,7 @@ void MainWindow::createMenu()
 	QAction* saveListAct = new QAction(saveListIcon, tr("Save"), this);
 	saveListAct->setShortcut(QKeySequence::Save);
 	saveListAct->setToolTip(tr("Save a list into a file"));
-	menuFile->addAction(saveListAct);
+	m_fileMenu->addAction(saveListAct);
 	connect(saveListAct, &QAction::triggered, m_tabAndList, &TabAndList::save);
 	fileToolBar->addAction(saveListAct);
 
@@ -123,7 +129,7 @@ void MainWindow::createMenu()
 #endif
 	saveAsListAct->setToolTip(tr("Save a list into a new file."));
 	connect(saveAsListAct, &QAction::triggered, m_tabAndList, &TabAndList::saveAs);
-	menuFile->addAction(saveAsListAct);
+	m_fileMenu->addAction(saveAsListAct);
 
 	// Exitting the application.
 	QIcon quitIcon = QIcon(":/Images/Exit.svg");
@@ -135,7 +141,13 @@ void MainWindow::createMenu()
 	quitAct->setShortcuts(QKeySequence::Quit);
 #endif
 	connect(quitAct, &QAction::triggered, this, &MainWindow::close);
-	menuFile->addAction(quitAct);
+	m_fileMenu->addAction(quitAct);
+
+	// Add help menu
+	m_helpMenu = menuBar()->addMenu(tr("Help"));
+	QAction* licenceAct = new QAction(tr("Licence"), this);
+	connect(licenceAct, &QAction::triggered, this, &MainWindow::showLicence);
+	m_helpMenu->addAction(licenceAct);
 }
 
 void MainWindow::createCentralWidget()
@@ -155,39 +167,40 @@ void MainWindow::createGameToolBar()
 	m_listToolBar->setMovable(false);
 
 	// Create the utility menu.
-	QMenu* utilityMenu = new QMenu(tr("Game Utility"), m_listToolBar);
-	menuBar()->addMenu(utilityMenu);
+	m_utilityMenu = new QMenu(tr("Game Utility"), m_listToolBar);
+	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
+	reinsertMenu();
 	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
 	catAct->setToolTip(tr("Open the categories editor."));
 	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
-	utilityMenu->addAction(catAct);
+	m_utilityMenu->addAction(catAct);
 
 	QAction* devAct = new QAction(tr("Developpers"), m_listToolBar);
 	devAct->setToolTip(tr("Open the developpers editor."));
 	connect(devAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::DEVELOPPERS);});
-	utilityMenu->addAction(devAct);
+	m_utilityMenu->addAction(devAct);
 
 	QAction* pbAct = new QAction(tr("Publishers"), m_listToolBar);
 	pbAct->setToolTip(tr("Open the publishers editor."));
 	connect(pbAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PUBLISHERS);});
-	utilityMenu->addAction(pbAct);
+	m_utilityMenu->addAction(pbAct);
 
 	QAction* platAct = new QAction(tr("Platforms"), m_listToolBar);
 	platAct->setToolTip(tr("Open the platform editor."));
 	connect(platAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PLATFORM);});
-	utilityMenu->addAction(platAct);
+	m_utilityMenu->addAction(platAct);
 
 	QAction* servAct = new QAction(tr("Services"), m_listToolBar);
 	servAct->setToolTip(tr("Open the services editor."));
 	connect(servAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
-	utilityMenu->addAction(servAct);
+	m_utilityMenu->addAction(servAct);
 
 	// Creating the toolButton used to open the utilityMenu.
 	QIcon utilityIcon(":/Images/Utility.svg");
 	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
 	utilityToolButton->setText(tr("Game Utility"));
 	utilityToolButton->setIcon(utilityIcon);
-	utilityToolButton->setMenu(utilityMenu);
+	utilityToolButton->setMenu(m_utilityMenu);
 	utilityToolButton->setToolTip(tr("Set the Categories, Developpers, Publishers, Platforms and Services of the game list."));
 	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
 	m_listToolBar->addWidget(utilityToolButton);
@@ -200,6 +213,11 @@ void MainWindow::newListCreated(ListType type)
 	{
 		delete m_listToolBar;
 		m_listToolBar = nullptr;
+	}
+	if (m_utilityMenu)
+	{
+		m_utilityMenu->deleteLater();
+		m_utilityMenu = nullptr;
 	}
 
 	if (type == ListType::GAMELIST)
@@ -302,4 +320,27 @@ void MainWindow::readSettings()
 	QVariant vCurrentDir = settings.value("core/currentdir");
 	if (vCurrentDir.isValid() && !m_isResetSettings)
 		m_tabAndList->setCurrentDit(vCurrentDir.toString());
+}
+
+void MainWindow::showLicence()
+{
+	// Show the licence of the program.
+	if (!m_licenceDialog)
+	{
+		m_licenceDialog = new LicenceDialog(this);
+		m_licenceDialog->raise();
+		m_licenceDialog->activateWindow();
+	}
+	
+	m_licenceDialog->show();
+}
+
+void MainWindow::reinsertMenu()
+{
+	// Reinsert the menu into the menuBar.
+	menuBar()->clear();
+	menuBar()->addMenu(m_fileMenu);
+	if (m_utilityMenu)
+		menuBar()->addMenu(m_utilityMenu);
+	menuBar()->addMenu(m_helpMenu);
 }

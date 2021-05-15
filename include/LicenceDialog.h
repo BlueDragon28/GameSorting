@@ -16,54 +16,16 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
+#ifndef GAMESORTING_LICENCEDIALOG_H_
+#define GAMESORTING_LICENCEDIALOG_H_
 
-#include "DataStruct.h"
-#include <QMainWindow>
-#include <QSqlDatabase>
-#include <QString>
+#include <QDialog>
 
-class TabAndList;
-class QTableView;
-class QToolBar;
-class LicenceDialog;
-
-class MainWindow : public QMainWindow
+class LicenceDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	MainWindow(const QString& filePath, bool resetSettings, QWidget* parent = nullptr);
-	virtual ~MainWindow();
-
-protected:
-	void closeEvent(QCloseEvent* evt) override;
-
-private:
-	void createMenu();
-	void createCentralWidget();
-	void newListCreated(ListType type);
-	void createGameToolBar();
-	void listFilePathChanged(const QString& filePath);
-	void listChanged(bool isChanged);
-	void updateWindowTitle();
-	void writeSettings();
-	void readSettings();
-	void showLicence();
-	void reinsertMenu();
-
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-	QToolBar* m_listToolBar;
-	QString m_listFilePath;
-	bool m_listChanged;
-	
-	bool m_isResetSettings;
-
-	QMenu* m_fileMenu;
-	QMenu* m_utilityMenu;
-	QMenu* m_helpMenu;
-	LicenceDialog* m_licenceDialog;
+    LicenceDialog(QWidget* parent = nullptr);
 };
 
-#endif // GAMESORTING_MAINWINDOW
+#endif // GAMESORTING_LICENCEDIALOG_H_
