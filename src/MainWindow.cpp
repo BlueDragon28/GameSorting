@@ -35,6 +35,7 @@
 #include <QSettings>
 #include <QScreen>
 #include <QSize>
+#include <QToolButton>
 
 MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* parent) :
 	QMainWindow(parent),
@@ -75,7 +76,7 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* par
 MainWindow::~MainWindow()
 {
 }
-#include <QToolButton>
+
 void MainWindow::createMenu()
 {
 	// Creation of all the menus and the toolbar.
@@ -154,6 +155,10 @@ void MainWindow::createMenu()
 	QAction* aboutAct = new QAction(tr("About"), this);
 	connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
 	m_helpMenu->addAction(aboutAct);
+
+	QAction* aboutQt = new QAction(tr("About Qt"), this);
+	connect(aboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
+	m_helpMenu->addAction(aboutQt);
 }
 
 void MainWindow::createCentralWidget()
