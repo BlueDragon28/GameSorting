@@ -19,6 +19,7 @@
 #include "MainWindow.h"
 #include "TabAndList.h"
 #include "LicenceDialog.h"
+#include "AboutDialog.h"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -47,7 +48,8 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* par
 	m_fileMenu(nullptr),
 	m_utilityMenu(nullptr),
 	m_helpMenu(nullptr),
-	m_licenceDialog(nullptr)
+	m_licenceDialog(nullptr),
+	m_aboutDialog(nullptr)
 {
 	// Opening the database
 	m_db.setDatabaseName(":memory:");
@@ -148,6 +150,10 @@ void MainWindow::createMenu()
 	QAction* licenceAct = new QAction(tr("Licence"), this);
 	connect(licenceAct, &QAction::triggered, this, &MainWindow::showLicence);
 	m_helpMenu->addAction(licenceAct);
+
+	QAction* aboutAct = new QAction(tr("About"), this);
+	connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
+	m_helpMenu->addAction(aboutAct);
 }
 
 void MainWindow::createCentralWidget()
@@ -333,6 +339,19 @@ void MainWindow::showLicence()
 	}
 	
 	m_licenceDialog->show();
+}
+
+void MainWindow::about()
+{
+	// Show the about menu.
+	if (!m_aboutDialog)
+	{
+		m_aboutDialog = new AboutDialog(this);
+		m_aboutDialog->raise();
+		m_aboutDialog->activateWindow();
+	}
+
+	m_aboutDialog->show();
 }
 
 void MainWindow::reinsertMenu()

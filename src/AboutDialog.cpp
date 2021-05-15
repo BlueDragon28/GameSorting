@@ -16,57 +16,33 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
+#include "AboutDialog.h"
+#include "Common.h"
 
-#include "DataStruct.h"
-#include <QMainWindow>
-#include <QSqlDatabase>
-#include <QString>
+#include <QLabel>
+#include <QScrollArea>
+#include <QVBoxLayout>
 
-class TabAndList;
-class QTableView;
-class QToolBar;
-class LicenceDialog;
-class AboutDialog;
-
-class MainWindow : public QMainWindow
+AboutDialog::AboutDialog(QWidget* parent) :
+    QDialog(parent)
 {
-	Q_OBJECT
-public:
-	MainWindow(const QString& filePath, bool resetSettings, QWidget* parent = nullptr);
-	virtual ~MainWindow();
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
 
-protected:
-	void closeEvent(QCloseEvent* evt) override;
+    QString strAbout(tr(
+        "<b>About this application :</b><br><br>"
+        "<b>Name :</b><br>Game Sorting v" GAMESORTING_VERSION "<br><br>"
+        "<b>Library used :</b><br>"
+        "Qt " QT_VERSION_STR "<br><br>"
+        "<b>Author :</b><br>"
+        "Erwan Saclier de la Bâtie (Erwan28250)"));
 
-private:
-	void createMenu();
-	void createCentralWidget();
-	void newListCreated(ListType type);
-	void createGameToolBar();
-	void listFilePathChanged(const QString& filePath);
-	void listChanged(bool isChanged);
-	void updateWindowTitle();
-	void writeSettings();
-	void readSettings();
-	void showLicence();
-	void about();
-	void reinsertMenu();
+    QLabel *aboutText = new QLabel();
+    aboutText->setAlignment(Qt::AlignCenter);
+    aboutText->setText(strAbout);
+    aboutText->setMargin(5);
 
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-	QToolBar* m_listToolBar;
-	QString m_listFilePath;
-	bool m_listChanged;
-	
-	bool m_isResetSettings;
-
-	QMenu* m_fileMenu;
-	QMenu* m_utilityMenu;
-	QMenu* m_helpMenu;
-	LicenceDialog* m_licenceDialog;
-	AboutDialog* m_aboutDialog;
-};
-
-#endif // GAMESORTING_MAINWINDOW
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(aboutText);
+    vLayout->addWidget(scrollArea);
+}

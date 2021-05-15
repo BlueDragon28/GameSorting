@@ -18,6 +18,7 @@
 
 #include "MainWindow.h"
 #include "CMDOpts.h"
+#include "Common.h"
 
 #include <QApplication>
 #include <QString>
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
 	QApplication app(argc, argv);
 	app.setOrganizationName("Erwan28250");
 	app.setApplicationName("GameSorting");
-	app.setApplicationVersion("1.0-inDevelopment");
+	app.setApplicationVersion(GAMESORTING_VERSION);
 	
 	// Setting the application icon.
 	QIcon appIcon = QIcon(":/Images/GameSorting.ico");

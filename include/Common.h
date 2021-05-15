@@ -21,6 +21,8 @@
 
 #include <QString>
 
+#define GAMESORTING_VERSION "1.0-inDevelopment"
+
 QString removeFirstSpaces(const QString& str);
 QString removeLastSpaces(const QString& str);
 QString removeFirtAndLastSpaces(const QString& str);
