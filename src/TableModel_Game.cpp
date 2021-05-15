@@ -922,7 +922,10 @@ void TableModel::setGameUrl(const QModelIndex& index, const QString& url)
 #endif
 
         if (m_query.exec(statement))
+        {
             (*m_gameListData)[index.row()].url = url;
+            emit listEdited();
+        }
         else
         {
 #ifndef NDEBUG
