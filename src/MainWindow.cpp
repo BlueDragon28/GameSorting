@@ -282,7 +282,7 @@ void MainWindow::writeSettings()
 {
 	// Write the settings into Windows Registery or Linux Config File.
 	// The settings are used to save the geometry of the windows, the last opened file, etc.
-	QSettings settings("Erwan28250", "GameSorting_alpha");
+	QSettings settings("Erwan28250", "GameSorting-New");
 
 	// Save the geometry of the window.
 	settings.setValue("mainwindow/geometry", saveGeometry());
@@ -303,7 +303,7 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
 	// Read the settings saved in the Windows Registery or in Linux Config File.
-	QSettings settings("Erwan28250", "GameSorting_alpha");
+	QSettings settings("Erwan28250", "GameSorting-New");
 
 	// Read the geometry of the window.
 	QVariant vGeometry = settings.value("mainwindow/geometry");
