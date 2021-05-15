@@ -30,6 +30,8 @@
 #include <QInputDialog>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QToolButton>
+#include <QMenu>
 
 #include <iostream>
 
@@ -142,15 +144,24 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         connect(updateAct, &QAction::triggered, m_model, &TableModel::updateQuery);
         toolBar->addAction(updateAct);
 
+        // Make the two action for the manipulation of the urls inside a menu controlled by a QToolButton.
+        QMenu* urlMenu = new QMenu(tr("Url menu"), this);
         QAction* setUrlAct = new QAction(tr("Set Url"), this);
         setUrlAct->setToolTip(tr("Set the url to the selected game."));
         connect(setUrlAct, &QAction::triggered, this, &GameListView::setUrl);
-        toolBar->addAction(setUrlAct);
+        urlMenu->addAction(setUrlAct);
 
         QAction* openUrlAct = new QAction(tr("Open Url"), this);
         openUrlAct->setToolTip(tr("Open the url of the selected game."));
         connect(openUrlAct, &QAction::triggered, this, &GameListView::openUrl);
-        toolBar->addAction(openUrlAct);
+        urlMenu->addAction(openUrlAct);
+
+        QIcon urlIcon(":/Images/Url.svg");
+        QToolButton* urlToolButton = new QToolButton(this);
+        urlToolButton->setIcon(urlIcon);
+        urlToolButton->setPopupMode(QToolButton::InstantPopup);
+        urlToolButton->setMenu(urlMenu);
+        toolBar->addWidget(urlToolButton);
 
         vLayout->setMenuBar(toolBar);
     }
