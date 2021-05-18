@@ -19,7 +19,8 @@
 #include "CMDOpts.h"
 
 CMDOpts::CMDOpts(QApplication& app) :
-    m_resetSettings(false)
+    m_resetSettings(false),
+    m_doNotSaveSettings(false)
 {
     // Parsing the command line argument.
     QCommandLineParser parser;
@@ -35,12 +36,18 @@ CMDOpts::CMDOpts(QApplication& app) :
         "reset-settings",
         QCoreApplication::translate("cmd parser", "Reset to default settings"));
     parser.addOption(resetSettings);
+
+    QCommandLineOption doNotSaveSettings(
+        "do-not-save-settings",
+        QCoreApplication::translate("cmd parser", "Do not save the settings"));
+    parser.addOption(doNotSaveSettings);
     
     parser.process(app);
 
     if (parser.positionalArguments().size() > 0)
         m_itemListFile = parser.positionalArguments().first();
     m_resetSettings = parser.isSet(resetSettings);
+    m_doNotSaveSettings = parser.isSet(doNotSaveSettings);
 }
 
 const QString& CMDOpts::itemListFile() const
@@ -51,4 +58,9 @@ const QString& CMDOpts::itemListFile() const
 bool CMDOpts::resetSettings() const
 {
     return m_resetSettings;
+}
+
+bool CMDOpts::doNotSaveSettings() const
+{
+    return m_doNotSaveSettings;
 }

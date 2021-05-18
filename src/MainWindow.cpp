@@ -37,7 +37,7 @@
 #include <QSize>
 #include <QToolButton>
 
-MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* parent) :
+MainWindow::MainWindow(const QString& filePath, bool resetSettings, bool doNotSaveSettings, QWidget* parent) :
 	QMainWindow(parent),
 	m_db(QSqlDatabase::addDatabase("QSQLITE")),
 	m_tabAndList(nullptr),
@@ -45,6 +45,7 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, QWidget* par
 	m_listChanged(false),
 
 	m_isResetSettings(resetSettings),
+	m_doNotSaveSettings(doNotSaveSettings),
 
 	m_fileMenu(nullptr),
 	m_utilityMenu(nullptr),
@@ -282,6 +283,12 @@ void MainWindow::writeSettings()
 {
 	// Write the settings into Windows Registery or Linux Config File.
 	// The settings are used to save the geometry of the windows, the last opened file, etc.
+
+	// If the member variable m_doNotSaveSettings is true,
+	// we do not save the settings.
+	if (m_doNotSaveSettings)
+		return;
+
 	QSettings settings("Erwan28250", "GameSorting-New");
 
 	// Save the geometry of the window.

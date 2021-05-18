@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	// Parsing the command line arguments and options.
 	CMDOpts parser(app);
 
-	MainWindow window(parser.itemListFile(), parser.resetSettings());
+	MainWindow window(parser.itemListFile(), parser.resetSettings(), parser.doNotSaveSettings());
 	window.show();
 
 	// Running the app main loop.

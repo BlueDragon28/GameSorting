@@ -31,10 +31,12 @@ public:
 
     const QString& itemListFile() const;
     bool resetSettings() const;
+    bool doNotSaveSettings() const;
 
 private:
     QString m_itemListFile;
     bool m_resetSettings;
+    bool m_doNotSaveSettings;
 };
 
 #endif // GAMESORTING_CMDOPTS_H_

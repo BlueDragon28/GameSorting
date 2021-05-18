@@ -34,7 +34,7 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(const QString& filePath, bool resetSettings, QWidget* parent = nullptr);
+	MainWindow(const QString& filePath, bool resetSettings, bool doNotSaveSettings, QWidget* parent = nullptr);
 	virtual ~MainWindow();
 
 protected:
@@ -61,6 +61,7 @@ private:
 	bool m_listChanged;
 	
 	bool m_isResetSettings;
+	bool m_doNotSaveSettings;
 
 	QMenu* m_fileMenu;
 	QMenu* m_utilityMenu;
