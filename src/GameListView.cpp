@@ -17,7 +17,7 @@
 */
 
 #include "GameListView.h"
-#include "TableModel.h"
+#include "TableModelGame.h"
 #include <QTableView>
 #include <QItemSelectionModel>
 #include <QSqlQuery>
@@ -42,7 +42,7 @@ GameListView::GameListView(const QString& tableName, ListType type, QSqlDatabase
     m_db(db),
     m_type(type),
     m_view(new QTableView(this)),
-    m_model(new TableModel(tableName, m_type, m_db, utilityTable, this)),
+    m_model(new TableModelGame(tableName, m_db, utilityTable, this)),
     m_utilityTable(utilityTable)
 {
     setupWidget();
@@ -55,7 +55,7 @@ GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTab
     m_db(db),
     m_type(ListType::UNKNOWN),
     m_view(new QTableView(this)),
-    m_model(new TableModel(data, db, utilityTable, this)),
+    m_model(new TableModelGame(data, db, utilityTable, this)),
     m_utilityTable(utilityTable)
 {
     m_type = m_model->listType();

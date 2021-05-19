@@ -29,104 +29,45 @@
 #include "SqlUtilityTable.h"
 
 class TableModel_UtilityInterface;
-class UtilitySensitiveContentEditor;
 
 class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit TableModel(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
-    explicit TableModel(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
+    TableModel(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
+    TableModel(QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     virtual ~TableModel();
 
-    // Data interface.
-    virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
-    virtual bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
-    virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
-    bool appendRows(int count = 1);
-    void deleteRows(const QModelIndexList& indexList);
-
-    // Data information.
-    int size() const;
+    virtual void appendRows(int count = 1) = 0;
+    virtual void deleteRows(const QModelIndexList& indexList) = 0;
+    virtual int size() const = 0;
     QString tableName() const;
     void setTableName(const QString& tableName);
-    QString rowTableName() const;
-    ListType listType() const;
+    QString rawTableName() const;
+    virtual ListType listType() const = 0;
+    virtual long long int itemID(const QModelIndex& index) const = 0;
 
-    // Allow access to the user of the utilityInterface.
-    TableModel_UtilityInterface* utilityInterface();
+    virtual void updateQuery() = 0;
+    virtual QVariant retrieveData() const = 0;
+    virtual bool setItemData(const QVariant& data) = 0;
 
-    // Getting the itemID from a index.
-    long long int itemID(const QModelIndex& index) const;
-
-    // Headers column's name.
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    void updateQuery();
-
-    QVariant retrieveData() const;
-    bool setItemsData(const QVariant& data);
-    void setUrl(const QModelIndex& index, const QString& url);
-    QString url(const QModelIndex& index) const;
+    virtual TableModel_UtilityInterface* utilityInterface() = 0;
 
 signals:
     void listEdited();
+    void tableNameChanged(const QString& tableName);
 
 protected:
-    void createTable();
-    void deleteSqlTable();
-    void utilityChanged(long long int itemID, UtilityTableName tableName);
-
-    // Games specific member functions.
-    void gameCreateTable();
-    int gameColumnCount() const;
-    int gameRowCount() const;
-    QVariant gameData(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    bool gameSetData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
-    bool gameInsertRows(int row, int count, const QModelIndex& parent = QModelIndex());
-    bool gameRemoveRows(int row, int count, const QModelIndex& parent = QModelIndex());
-    QVariant gameHeaderData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    long long int gameItemID(const QModelIndex& index) const;
-    template<typename T>
-    bool gameUpdateField(QSqlQuery& query, const QString& columnName, int rowNB, T value);
-    void gameUpdateQuery();
-    void gameQueryUtilityField(UtilityTableName tableName);
-    void gameQueryUtilityField(long long int gameID, UtilityTableName tableName);
-    void gameQueryCategoriesField();
-    void gameQueryCategoriesField(long long int gameID);
-    void gameQueryDeveloppersField();
-    void gameQueryDeveloppersField(long long int gameID);
-    void gameQueryPublishersField();
-    void gameQueryPublishersField(long long int gameID);
-    void gameQueryPlatformField();
-    void gameQueryPlatformField(long long int gameID);
-    void gameQueryServicesField();
-    void gameQueryServicesField(long long int gameID);
-    void gameQuerySensitiveContentField();
-    void gameQuerySensitiveContentField(long long int gameID);
-    QVariant gameRetrieveData() const;
-    bool setGameItemsData(const QVariant& data);
-    void gameUtilityChanged(long long int gameID, UtilityTableName tableName);
-    int findGamePos(long long int gameID) const;
-    void setGameUrl(const QModelIndex& index, const QString& url);
-    QString gameUrl(const QModelIndex& index) const;
-
-private:
+    virtual void createTable() = 0;
+    virtual void deleteTable() = 0;
+    virtual void utilityChanged(long long int itemID, UtilityTableName tableName) = 0;
     QString checkingIfNameFree(const QString& name, int n = -1) const;
 
     QSqlDatabase& m_db;
     SqlUtilityTable& m_utilityTable;
-    TableModel_UtilityInterface* m_utilityInterface;
     QSqlQuery m_query;
     QString m_tableName;
-    ListType m_listType;
-    QList<GameItem>* m_gameListData;
     bool m_isTableCreated, m_isTableChanged;
-    int m_listCount;
 };
 
 #endif // GAMESORTING_TABLEMODEL_H_

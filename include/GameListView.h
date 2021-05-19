@@ -26,7 +26,7 @@
 #include <QWidget>
 #include <QSqlDatabase>
 
-class TableModel;
+class TableModelGame;
 class QTableView;
 class QVBoxLayout;
 
@@ -64,7 +64,7 @@ private:
     QSqlDatabase& m_db;
     ListType m_type;
     QTableView* m_view;
-    TableModel* m_model;
+    TableModelGame* m_model;
     SqlUtilityTable& m_utilityTable;
 };
 
