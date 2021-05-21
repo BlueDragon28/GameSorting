@@ -17,7 +17,7 @@
 */
 
 #include "TableModelGame.h"
-#include "TableModel_UtilityInterface.h"
+#include "TableModelGame_UtilityInterface.h"
 #include <QSqlError>
 #include <iostream>
 #include <algorithm>
@@ -99,9 +99,9 @@ TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUt
     m_interface(nullptr)
 {
     createTable();
-    m_interface = new TableModel_UtilityInterface(rawTableName(), listType(), m_db);
-    connect(m_interface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModelGame::utilityChanged);
-    connect(m_interface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
+    m_interface = new TableModelGame_UtilityInterface(rawTableName(), m_db);
+    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::utilityChanged);
+    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
 }
 
 TableModelGame::TableModelGame(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
@@ -109,8 +109,8 @@ TableModelGame::TableModelGame(const QVariant& data, QSqlDatabase& db, SqlUtilit
     m_interface(nullptr)
 {
     setItemData(data);
-    connect(m_interface, &TableModel_UtilityInterface::interfaceChanged,  this, &TableModelGame::utilityChanged);
-    connect(m_interface, &TableModel_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
+    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged,  this, &TableModelGame::utilityChanged);
+    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
 }
 
 TableModelGame::~TableModelGame()
@@ -636,7 +636,7 @@ bool TableModelGame::setItemData(const QVariant& variant)
         delete m_interface;
         m_interface = nullptr;
     }
-    m_interface = new TableModel_UtilityInterface(m_tableName, listType(), m_db, QVariant::fromValue(data.interface));
+    m_interface = new TableModelGame_UtilityInterface(m_tableName, m_db, QVariant::fromValue(data.interface));
     if (!m_interface->isTableReady())
     {
         m_isTableCreated = false;

@@ -21,6 +21,8 @@
 
 #include "TableModel.h"
 
+class TableModelGame_UtilityInterface;
+
 class TableModelGame : public TableModel
 {
     Q_OBJECT
@@ -79,7 +81,7 @@ private:
     void querySensitiveContentField(long long int gameID);
     int findGamePos(long long int gameID) const;
 
-    TableModel_UtilityInterface* m_interface;
+    TableModelGame_UtilityInterface* m_interface;
     QList<GameItem> m_data;
 };
 

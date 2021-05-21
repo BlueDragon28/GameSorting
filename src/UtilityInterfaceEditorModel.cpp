@@ -124,7 +124,7 @@ void UtilityInterfaceEditorModel::applyChange()
     for (int i = 0; i < m_checkedIDList.size(); i++)
         interfaceData.append(m_checkedIDList.at(i));
     
-    m_dataInterface->updateItemUtility(m_itemID, m_utilityTableName, interfaceData);
+    m_dataInterface->updateItemUtility(m_itemID, m_utilityTableName, QVariant::fromValue(interfaceData));
 }
 
 bool UtilityInterfaceEditorModel::isUtilityIDChecked(long long int utilityID) const

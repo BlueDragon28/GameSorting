@@ -81,6 +81,13 @@ namespace Game
         RATE = 7
     };
 
+    struct SensitiveContentData
+    {
+        long long int explicitContent;
+        long long int violenceContent;
+        long long int badLanguageContent;
+    };
+
     struct SaveUtilityData
     {
         QList<ItemUtilityData> categories;
@@ -154,5 +161,6 @@ Q_DECLARE_METATYPE(Game::SaveUtilityInterfaceData);
 Q_DECLARE_METATYPE(Game::SaveUtilityData);
 Q_DECLARE_METATYPE(Game::SaveDataTable);
 Q_DECLARE_METATYPE(Game::SaveData);
+Q_DECLARE_METATYPE(Game::SensitiveContentData);
 
 #endif // GAMESORTING_DATASTRUCT_H_

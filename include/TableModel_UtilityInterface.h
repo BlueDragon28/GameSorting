@@ -31,48 +31,29 @@ class TableModel_UtilityInterface : public QObject
 {
 	Q_OBJECT
 public:
-	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db);
-	TableModel_UtilityInterface(const QString& parentTableName, ListType type, QSqlDatabase& db, const QVariant& data);
+	TableModel_UtilityInterface(const QString& parentTableName, QSqlDatabase& db);
 	virtual ~TableModel_UtilityInterface();
 
-	QString tableName(UtilityTableName tableName) const;
-	void setParentTableNewName(const QString& tableName);
-	bool isTableReady() const;
-	void rowRemoved(const QList<long long int>& itemsID);
-	void updateItemUtility(long long int itemID, UtilityTableName tableName, const QList<long long int>& dataList);
-	void updateItemUtility(long long int itemID, UtilityTableName tableName, int explicitContent, int violenceContent, int languageContent);
+	virtual QString tableName(UtilityTableName tableName) const = 0;
+	virtual void newParentName(const QString& tableName) = 0;
+	virtual bool isTableReady() const;
+	virtual void rowRemoved(const QList<long long int>& itemID) = 0;
+	virtual void updateItemUtility(long long int itemID, UtilityTableName tableName, const QVariant& data) = 0;
+	virtual ListType listType() const = 0;
 
-	QVariant data() const;
-	bool setData(const QVariant& data);
+	virtual QVariant data() const = 0;
 
 signals:
 	void interfaceChanged(long long int itemID, UtilityTableName tableName);
 
-private:
-	void createTables();
-	void destroyTables();
-	void destroyTableByName(const QString& tableName);
-	void renameTable(const QString& currentName, const QString& newName);
-
-	// Games
-	void createGameTables();
-	void destroyGameTables();
-	void createCategoriesTable();
-	void createDeveloppersTable();
-	void createPublishersTable();
-	void createPlatformTable();
-	void createServicesTable();
-	void createSensitiveContentTable();
-	void gameRowRemoved(const QList<long long int>& itemsID);
-	QVariant gameData() const;
-	bool setGameData(const QVariant& data);
-	bool setGameStandardData(UtilityTableName tName, const QList<Game::SaveUtilityInterfaceItem>& data);
-	void setGameParentTableNewName(const QString& tableName);
-
-	static void printTableCreationError(const QString& tableName, const QString& messageError);
+protected:
+	virtual bool setData(const QVariant& data) = 0;
+	virtual void createTables() = 0;
+	virtual void destroyTables() = 0;
+	virtual void destroyTableByName(const QString& tableName);
+	virtual void renameTable(const QString& currentName, const QString& newName);
 
 	QString m_parentTableName;
-	ListType m_listType;
 	QSqlDatabase& m_db;
 	QSqlQuery m_query;
 	bool m_isTableReady;

@@ -105,6 +105,10 @@ void UtilitySensitiveContentEditor::createWidgets()
 
 void UtilitySensitiveContentEditor::applyChange()
 {
-    m_dataInterface->updateItemUtility(m_itemID, UtilityTableName::SENSITIVE_CONTENT, m_nExplicitContent, m_nViolenceContent, m_nBadLanguageContent);
+    Game::SensitiveContentData data = {};
+    data.explicitContent = m_nExplicitContent;
+    data.violenceContent = m_nViolenceContent;
+    data.badLanguageContent = m_nBadLanguageContent;
+    m_dataInterface->updateItemUtility(m_itemID, UtilityTableName::SENSITIVE_CONTENT, QVariant::fromValue(data));
     deleteLater();
 }
