@@ -230,7 +230,6 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         count > 0 && m_isTableCreated)
     {
         // Executing the sql statement for inserting new rows.
-        QSqlQuery query(m_db);
         QString statement = QString(
             "INSERT INTO \"%1\" (\n"
             "   GamePos,\n"
@@ -252,9 +251,9 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
 #endif
 
         // Then, querying the new inserted data and add it to the m_listData
-        if (query.exec(statement))
+        if (m_query.exec(statement))
         {
-            query.clear();
+            m_query.clear();
             statement = QString(
                 "SELECT\n"
                 "   GameID,\n"
@@ -275,7 +274,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
             std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-            if (query.exec(statement))
+            if (m_query.exec(statement))
             {
                 if (count == 1)
                     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -286,11 +285,11 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
                 while(m_query.next())
                 {
                     GameItem game = {};
-                    game.gameID = query.value(0).toLongLong();
-                    game.gamePos = query.value(1).toLongLong();
-                    game.name = query.value(2).toString();
-                    game.url = query.value(3).toString();
-                    game.rate = query.value(4).toInt();
+                    game.gameID = m_query.value(0).toLongLong();
+                    game.gamePos = m_query.value(1).toLongLong();
+                    game.name = m_query.value(2).toString();
+                    game.url = m_query.value(3).toString();
+                    game.rate = m_query.value(4).toInt();
                     gameList.prepend(game);
                 }
                 m_data.append(gameList.cbegin(), gameList.cend());
@@ -309,7 +308,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
 #ifndef NDEBUG
             std::cerr << QString("Failed to insert row of table %1\n\t%2")
                 .arg(m_tableName)
-                .arg(query.lastError().text()).toLocal8Bit().constData() << std::endl;
+                .arg(m_query.lastError().text()).toLocal8Bit().constData() << std::endl;
 #endif
             
             return false;
@@ -326,7 +325,6 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
         row + (count - 1) < rowCount() && m_isTableCreated)
     {
         // Defining the SQL statement.
-        QSqlQuery query(m_db);
         QString statement  = QString(
             "DELETE FROM \"%1\"\n"
             "WHERE GameID ")
@@ -360,7 +358,7 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
         // If the statement success, then
         // removing the data from the list
         // and updating the view.
-        if (query.exec(statement))
+        if (m_query.exec(statement))
         {
             if (count == 1)
                 beginRemoveRows(QModelIndex(), row, row);
@@ -379,7 +377,7 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
         {
 #ifndef NDEBUG
             std::cerr << "Failed to remove rows from the table " << m_tableName.toLocal8Bit().constData() << "\n\t" <<
-                query.lastError().text().toLocal8Bit().constData() << std::endl;
+                m_query.lastError().text().toLocal8Bit().constData() << std::endl;
 #endif
             return false;
         }
