@@ -1,8 +1,19 @@
-# About Game Sorting
+﻿# About Game Sorting
 
 Game Sorting is a little application to help classify wished games. It is in development and there is a lot of lacking features need to be added.
 
 Some data added to the list needs to be inserted into a separated list called utility (the name isn't good, I didn't find anything better) and then added to the main list. The purpose is to help searching and filtering the list.
+
+# Command Line Arguments
+
+*Usage: ./GameSorting [options] itemList*
+
+- *--reset-settings* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reset to default settings
+- *--do-not-save-settings* &nbsp;Do not save the settings
+- *-v, --version* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Displays version information.
+- *-h, --help* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Displays help on commandline options.
+
+The *itemList* is a positionnal argument, it's a path to a list file to open.
 
 # Installation
 
