@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,33 +16,40 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_GAMETEXTLINEEDITOR
-#define GAMESORTING_GAMETEXTLINEEDITOR
+#ifndef GAMESORTING_LISTVIEWDELETAGE_H_
+#define GAMESORTING_LISTVIEWDELETAGE_H_
 
-#include <QLineEdit>
+#include <QStyledItemDelegate>
+#include <QSqlDatabase>
+#include "SqlUtilityTable.h"
 
-class QTabBar;
+class TableModel;
+class TableModel_UtilityInterface;
 
-class GameTextLineEditor : public QLineEdit
+class ListViewDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 public:
-	explicit GameTextLineEditor(int tabIndex, QTabBar* tabBar, QWidget* parent = nullptr);
+	ListViewDelegate(
+		TableModel* tableModel,
+		SqlUtilityTable& utilityTable,
+		QSqlDatabase& db,
+		QObject* parent = nullptr);
+	virtual ~ListViewDelegate();
 
-signals:
-	void editingCancelled();
-
-public slots:
-	void resizeToTab();
-
-protected:
-	void keyReleaseEvent(QKeyEvent* event) override;
+	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void setEditorData(QWidget* editor, const QModelIndex& parent) const override;
+	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 
 private:
-	void updateTabBarName();
+	void commitAndCloseEditor(QWidget* editor);
 
-	int m_tabIndex;
-	QTabBar* m_tabBar;
+	TableModel* m_tableModel;
+	SqlUtilityTable& m_utilityTable;
+	TableModel_UtilityInterface* m_utilityInterface;
+	QSqlDatabase& m_db;
 };
 
-#endif // GAMESORTING_GAMETEXTLINEEDITOR
+#endif // GAMESORTING_LISTVIEWDELETAGE_H_

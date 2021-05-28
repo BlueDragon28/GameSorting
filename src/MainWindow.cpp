@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -17,77 +17,61 @@
 */
 
 #include "MainWindow.h"
-#include "GameListModel.h"
-#include "GameStarDelegate.h"
-#include "GameTabAndList.h"
-#include "AboutDialog.h"
+#include "TabAndList.h"
 #include "LicenceDialog.h"
+#include "AboutDialog.h"
 
+#include <QApplication>
 #include <QVBoxLayout>
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
-#include <QTableView>
+#include <QScreen>
+#include <QMessageBox>
 #include <QToolBar>
 #include <QIcon>
-#include <QHeaderView>
-#include <QItemSelectionModel>
-#include <QModelIndex>
-#include <QFile>
-#include <QFileInfo>
-#include <QSaveFile>
-#include <QDataStream>
-#include <QDialog>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSettings>
-#include <QApplication>
-#include <QScreen>
+#include <QAction>
+#include <QMenuBar>
+#include <QMenu>
+#include <QToolBar>
 #include <QCloseEvent>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QSettings>
+#include <QScreen>
+#include <QSize>
+#include <QToolButton>
 
-#include <algorithm>
-#include <functional>
-
-#define DEFINED_GLD_IDENTIFIER "GLD"
-#define DEFINED_GLD_VERSION_2 2
-#define DEFINED_GLD_VERSION_3 3
-#define DEFINED_GLD_VERSION DEFINED_GLD_VERSION_3
-
-MainWindow::MainWindow(QWidget* parent) :
+MainWindow::MainWindow(const QString& filePath, bool resetSettings, bool doNotSaveSettings, QWidget* parent) :
 	QMainWindow(parent),
-	m_gTabAndList(new GameTabAndList(this)),
-	m_aboutDialog(nullptr),
+	m_db(QSqlDatabase::addDatabase("QSQLITE")),
+	m_tabAndList(nullptr),
+	m_listToolBar(nullptr),
+	m_listChanged(false),
+
+	m_isResetSettings(resetSettings),
+	m_doNotSaveSettings(doNotSaveSettings),
+
+	m_fileMenu(nullptr),
+	m_utilityMenu(nullptr),
+	m_helpMenu(nullptr),
 	m_licenceDialog(nullptr),
-	m_lastOpenedFiles(nullptr)
+	m_aboutDialog(nullptr)
 {
+	// Opening the database
+	m_db.setDatabaseName(":memory:");
+	if (!m_db.open())
+	{
+		QMessageBox::critical(this, tr("SQL Error"), tr("Failed to open sqlite database."), QMessageBox::Ok);
+		std::exit(EXIT_FAILURE);
+	}
+
 	// Calling the methods for the creation of the menu and toolbar and also
 	// set the QTableView as the central object of the MainWindow.
-	createMenu();
 	createCentralWidget();
+	createMenu();
+	resize(800, 600);
+	move((screen()->availableSize().width() - 800) / 2, (screen()->availableSize().height() - 600) / 2);
+	updateWindowTitle();
 	readSettings();
-	setFileNameIntoWindowTitle();
-	connect(m_gTabAndList, &GameTabAndList::listEdited, this, &MainWindow::setFileNameIntoWindowTitle);
-}
 
-MainWindow::MainWindow(const QString& filePath, bool noSettings, QWidget* parent) :
-	QMainWindow(parent),
-	//m_gameListView(new QTableView(this)),
-	//m_gModel(new GameListModel(this)),
-	m_gTabAndList(new GameTabAndList(this)),
-	m_aboutDialog(nullptr),
-	m_licenceDialog(nullptr),
-	m_lastOpenedFiles(nullptr)
-{
-	// Calling the methods for the creation of the menu and toolbar and also
-	// set the QTableView as the central object of the MainWindow.
-	createMenu();
-	createCentralWidget();
-	readSettings(!noSettings, filePath.isEmpty() ? true : false);
-	openingAFile(filePath);
-	connect(m_gTabAndList, &GameTabAndList::listEdited, this, &MainWindow::setFileNameIntoWindowTitle);
+	if (!filePath.isEmpty())
+		m_tabAndList->open(filePath);
 }
 
 MainWindow::~MainWindow()
@@ -96,774 +80,285 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenu()
 {
-	/*
-	*	Creation of the menu "File".
-	*	The first call of menuBar()->addMenu() create the menu bar
-	*	in the MainWindow.
-	*/
-	QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
-	QToolBar* fileBar = addToolBar(tr("File"));
+	// Creation of all the menus and the toolbar.
 
-	QIcon newGameListIcon(":/Images/New.svg");
-	QAction* newGameListAct = new QAction(newGameListIcon, tr("&New"), this);
-	newGameListAct->setShortcut(QKeySequence::New);
-	newGameListAct->setToolTip(tr("Making a new game list"));
-	connect(newGameListAct, &QAction::triggered, this, &MainWindow::newGameList);
-	fileMenu->addAction(newGameListAct);
-	fileBar->addAction(newGameListAct);
+	// Create the menu file.
+	m_fileMenu = menuBar()->addMenu(tr("&File"));
+	// Creating the toolbar
+	QToolBar* fileToolBar = addToolBar(tr("File"));
+	fileToolBar->setMovable(false);
 
-	QIcon openGameListIcon(":/Images/Open.svg");
-	QAction* openGameListAct = new QAction(openGameListIcon, tr("&Open"), this);
-	openGameListAct->setShortcut(QKeySequence::Open);
-	openGameListAct->setToolTip(tr("Open a game list file"));
-	connect(openGameListAct, &QAction::triggered, this, &MainWindow::openGameList);
-	fileMenu->addAction(openGameListAct);
-	fileBar->addAction(openGameListAct);
+	// Creating and adding the action.
+	// Creating a new list.
+	QMenu* newListMenu = new QMenu(tr("New"), this);
+	// Game list.
+	QAction* newGameListAct = new QAction(tr("Game list"), this);
+	newGameListAct->setToolTip(tr("Creating a game list."));
+	newListMenu->addAction(newGameListAct);
+	connect(newGameListAct, &QAction::triggered, m_tabAndList, &TabAndList::newGameList);
+	m_fileMenu->addMenu(newListMenu);
 
-	m_lastOpenedFiles = new QMenu(tr("Recent files"));
-	fileMenu->addMenu(m_lastOpenedFiles);
+	// Adding the newListMenu into the toolbar
+	QIcon newIcon = QIcon(":/Images/New.svg");
+	QToolButton* newListButton = new QToolButton();
+	newListButton->setIcon(newIcon);
+	newListButton->setMenu(newListMenu);
+	newListButton->setPopupMode(QToolButton::InstantPopup);
+	fileToolBar->addWidget(newListButton);
 
-	QIcon saveGameListIcon(":/Images/Save.svg");
-	QAction* saveGameListAct = new QAction(saveGameListIcon, tr("&Save"), this);
-	saveGameListAct->setShortcut(QKeySequence::Save);
-	saveGameListAct->setToolTip(tr("Save a game list into a file"));
-	connect(saveGameListAct, &QAction::triggered, this, &MainWindow::saveGameList);
-	fileMenu->addAction(saveGameListAct);
-	fileBar->addAction(saveGameListAct);
+	// Opening a list file.
+	QIcon openListIcon = QIcon(":/Images/Open.svg");
+	QAction* openListAct = new QAction(openListIcon, tr("Open"), this);
+	openListAct->setShortcut(QKeySequence::Open);
+	openListAct->setToolTip(tr("Opening a list from a file"));
+	m_fileMenu->addAction(openListAct);
+	connect(openListAct, &QAction::triggered, m_tabAndList, qOverload<>(&TabAndList::open));
+	fileToolBar->addAction(openListAct);
 
-	QAction* saveAsGameListAct = new QAction(tr("Save &as"), this);
+	// Save a list into a file.
+	QIcon saveListIcon = QIcon(":/Images/Save.svg");
+	QAction* saveListAct = new QAction(saveListIcon, tr("Save"), this);
+	saveListAct->setShortcut(QKeySequence::Save);
+	saveListAct->setToolTip(tr("Save a list into a file"));
+	m_fileMenu->addAction(saveListAct);
+	connect(saveListAct, &QAction::triggered, m_tabAndList, &TabAndList::save);
+	fileToolBar->addAction(saveListAct);
+
+	// Save as a list into a file.
+	QAction* saveAsListAct = new QAction(tr("Save as"), this);
 #ifdef WIN32
-	saveAsGameListAct->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_S);
+	saveAsListAct->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_S);
 #else
-	saveAsGameListAct->setShortcut(QKeySequence::SaveAs);
+	saveAsListAct->setShortcut(QKeySequence::SaveAs);
 #endif
-	saveAsGameListAct->setToolTip(tr("Save as the game list into a file"));
-	connect(saveAsGameListAct, &QAction::triggered, this, &MainWindow::saveAsGameList);
-	fileMenu->addAction(saveAsGameListAct);
+	saveAsListAct->setToolTip(tr("Save a list into a new file."));
+	connect(saveAsListAct, &QAction::triggered, m_tabAndList, &TabAndList::saveAs);
+	m_fileMenu->addAction(saveAsListAct);
 
-	fileMenu->addSeparator();
-
-	QIcon quitIcon(":/Images/Exit.svg");
+	// Exitting the application.
+	QIcon quitIcon = QIcon(":/Images/Exit.svg");
 	QAction* quitAct = new QAction(quitIcon, tr("&Quit"), this);
+	quitAct->setToolTip(tr("Exiting the application."));
 #ifdef WIN32
 	quitAct->setShortcut(Qt::CTRL | Qt::Key_Q);
 #else
-	quitAct->setShortcut(QKeySequence::Quit);
+	quitAct->setShortcuts(QKeySequence::Quit);
 #endif
-	quitAct->setToolTip(tr("Quit the application."));
 	connect(quitAct, &QAction::triggered, this, &MainWindow::close);
-	fileMenu->addAction(quitAct);
+	m_fileMenu->addAction(quitAct);
 
-	// creation of the edit menu
-	QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
-	QToolBar* editBar = addToolBar(tr("Edit"));
-
-	const QIcon addIcon(":/Images/Add.svg");
-	QAction* addAct = new QAction(addIcon, tr("&Add game"), this);
-	addAct->setShortcut(Qt::CTRL | Qt::Key_A);
-	addAct->setToolTip(tr("Adding a new game to the games list"));
-	connect(addAct, &QAction::triggered, this, &MainWindow::appendGame);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [addAct](bool value) { addAct->setEnabled(!value); });
-	editMenu->addAction(addAct);
-	editBar->addAction(addAct);
-
-	const QIcon delIcon(":/Images/Del.svg");
-	QAction* delAct = new QAction(delIcon, tr("&Delete games"), this);
-	delAct->setShortcut(Qt::CTRL | Qt::Key_D);
-	delAct->setToolTip(tr("Removing all selected games"));
-	connect(delAct, &QAction::triggered, this, &MainWindow::removeGame);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [delAct](bool value) { delAct->setEnabled(!value); });
-	editMenu->addAction(delAct);
-	editBar->addAction(delAct);
-
-	editMenu->addSeparator();
-	editBar->addSeparator();
-
-	QIcon copyIcon(":/Images/Copy.svg");
-	QAction* copyAct = new QAction(copyIcon, tr("Copy"), this);
-	copyAct->setShortcut(QKeySequence::Copy);
-	copyAct->setToolTip(tr("Copy the selected games names into the clipboard"));
-	connect(copyAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::copyGameNameToClipboard);
-	editMenu->addAction(copyAct);
-	editBar->addAction(copyAct);
-
-	QAction* copyAllColumnsAct = new QAction(tr("Copy all columns"), this);
-	copyAllColumnsAct->setShortcut(Qt::SHIFT | Qt::Key_C);
-	copyAllColumnsAct->setToolTip(tr("Copy the selected games names, types and rates into the clipboard in this way : name;type;rate."));
-	connect(copyAllColumnsAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::copyGameNameTypeAndRateToClipboard);
-	editMenu->addAction(copyAllColumnsAct);
-
-	QIcon pasteIcon(":/Images/Paste.svg");
-	QAction* pasteAct = new QAction(pasteIcon, tr("Paste"), this);
-	pasteAct->setShortcut(QKeySequence::Paste);
-	pasteAct->setToolTip(tr("Paste the games names (and if available, types and rates) into the game list."));
-	connect(pasteAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::pasteGameNameFromCliptboard);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [pasteAct](bool value) { pasteAct->setEnabled(!value); });
-	editMenu->addAction(pasteAct);
-	editBar->addAction(pasteAct);
-
-	editMenu->addSeparator();
-	editBar->addSeparator();
-
-	QIcon sortingEnabledMenuIcon = QIcon(":/Images/Sorting_lowResolution.svg");
-	QAction* sortingEnabledMenuAct = new QAction(sortingEnabledMenuIcon, tr("Enable sorting"), this);
-	sortingEnabledMenuAct->setCheckable(true);
-	connect(sortingEnabledMenuAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::setSortingEnabled);
-	connect(m_gTabAndList, &GameTabAndList::gameListSorted, sortingEnabledMenuAct, &QAction::setChecked);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [sortingEnabledMenuAct](bool value) { if (value) sortingEnabledMenuAct->setChecked(false); sortingEnabledMenuAct->setEnabled(!value); });
-	editMenu->addAction(sortingEnabledMenuAct);
-
-	QIcon sortingEnabledBarIcon = QIcon(":/Images/Sorting.svg");
-	QAction* sortingEnabledBarAct = new QAction(sortingEnabledBarIcon, tr("Enable sorting"), this);
-	sortingEnabledBarAct->setCheckable(true);
-	connect(sortingEnabledBarAct, &QAction::triggered, m_gTabAndList, &GameTabAndList::setSortingEnabled);
-	connect(m_gTabAndList, &GameTabAndList::gameListSorted, sortingEnabledBarAct, &QAction::setChecked);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [sortingEnabledBarAct](bool value) { if (value) sortingEnabledBarAct->setChecked(false); sortingEnabledBarAct->setEnabled(!value); });
-	connect(sortingEnabledMenuAct, &QAction::triggered, sortingEnabledBarAct, &QAction::setChecked);
-	connect(sortingEnabledBarAct, &QAction::triggered, sortingEnabledMenuAct, &QAction::setChecked);
-	editBar->addAction(sortingEnabledBarAct);
-
-	QIcon filterMenuIcon(":/Images/Filter_lowResolution.svg");
-	QAction* filterMenuAct = new QAction(filterMenuIcon, tr("Apply filter"), this);
-	filterMenuAct->setToolTip(tr("Apply a filter to the current focussed game list using a dialog."));
-	connect(filterMenuAct, &QAction::triggered, this, &MainWindow::filteringGameList);
-	editMenu->addAction(filterMenuAct);
-
-	QIcon filterBarIcon(":/Images/Filter.svg");
-	QAction* filterBarAct = new QAction(filterBarIcon, tr("Apply filter"), this);
-	filterMenuAct->setToolTip(tr("Apply a filter to the current focussed game list using a dialog"));
-	connect(filterBarAct, &QAction::triggered, this, &MainWindow::filteringGameList);
-	editBar->addAction(filterBarAct);
-
-	// add predefined game only for debuging
-#ifndef NDEBUG
-	QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
-
-	QAction* addGameDebugAct = new QAction(tr("Add games"), this);
-	addGameDebugAct->setToolTip(tr("Add predefined game only for debugging"));
-	connect(addGameDebugAct, &QAction::triggered, this, &MainWindow::addGame);
-	connect(m_gTabAndList, &GameTabAndList::gameListFiltered, [addGameDebugAct](bool value) { addGameDebugAct->setEnabled(!value); });
-	debugMenu->addAction(addGameDebugAct);
-#endif // NDEBUG
-
-	QMenu* helpMenu = menuBar()->addMenu(tr("Help"));
+	// Add help menu
+	m_helpMenu = menuBar()->addMenu(tr("Help"));
+	QAction* licenceAct = new QAction(tr("Licence"), this);
+	connect(licenceAct, &QAction::triggered, this, &MainWindow::showLicence);
+	m_helpMenu->addAction(licenceAct);
 
 	QAction* aboutAct = new QAction(tr("About"), this);
-	aboutAct->setToolTip(tr("Information about this application"));
-	connect(aboutAct, &QAction::triggered, this, &MainWindow::aboutApp);
-	helpMenu->addAction(aboutAct);
+	connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
+	m_helpMenu->addAction(aboutAct);
 
-	QAction* licenceAct = new QAction(tr("Licence"), this);
-	licenceAct->setToolTip(tr("Information about the licence of this application."));
-	connect(licenceAct, &QAction::triggered, this, &MainWindow::aboutLicence);
-	helpMenu->addAction(licenceAct);
+	QAction* aboutQt = new QAction(tr("About Qt"), this);
+	connect(aboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
+	m_helpMenu->addAction(aboutQt);
 }
 
 void MainWindow::createCentralWidget()
 {
-	// Setting the GameTabAndList widget on center of MainWindow
-	m_gTabAndList->restoreToDefault();
-	setCentralWidget(m_gTabAndList);
+	m_tabAndList = new TabAndList(m_db, this);
+	connect(m_tabAndList, &TabAndList::newList, this, &MainWindow::newListCreated);
+	connect(m_tabAndList, &TabAndList::newListFileName, this, &MainWindow::listFilePathChanged);
+	connect(m_tabAndList, &TabAndList::listChanged, this, &MainWindow::listChanged);
+	setCentralWidget(m_tabAndList);
 }
 
-#ifndef NDEBUG
-void MainWindow::addGame()
+void MainWindow::createGameToolBar()
 {
-	m_gTabAndList->appendGames(
-		{
-			{ "Game 1", "Type 1", 1 },
-			{ "Game 2", "Type 2", 2 },
-			{ "Game 3", "Type 3", 3 },
-			{ "Game 4", "Type 4", 4 },
-			{ "Game 5", "Type 5", 5 }
-		});
-}
-#endif // NDEBUG
+	// Creating the toolbar next to the file toolbar.
+	// This toolbar is used to open the utility editor.
+	m_listToolBar = addToolBar(tr("Game ToolBar"));
+	m_listToolBar->setMovable(false);
 
-void MainWindow::removeGame()
-{
-	// Remove games that the user has selected.
-	m_gTabAndList->removeGames();
+	// Create the utility menu.
+	m_utilityMenu = new QMenu(tr("Game Utility"), m_listToolBar);
+	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
+	reinsertMenu();
+	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
+	catAct->setToolTip(tr("Open the categories editor."));
+	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
+	m_utilityMenu->addAction(catAct);
+
+	QAction* devAct = new QAction(tr("Developpers"), m_listToolBar);
+	devAct->setToolTip(tr("Open the developpers editor."));
+	connect(devAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::DEVELOPPERS);});
+	m_utilityMenu->addAction(devAct);
+
+	QAction* pbAct = new QAction(tr("Publishers"), m_listToolBar);
+	pbAct->setToolTip(tr("Open the publishers editor."));
+	connect(pbAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PUBLISHERS);});
+	m_utilityMenu->addAction(pbAct);
+
+	QAction* platAct = new QAction(tr("Platforms"), m_listToolBar);
+	platAct->setToolTip(tr("Open the platform editor."));
+	connect(platAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PLATFORM);});
+	m_utilityMenu->addAction(platAct);
+
+	QAction* servAct = new QAction(tr("Services"), m_listToolBar);
+	servAct->setToolTip(tr("Open the services editor."));
+	connect(servAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
+	m_utilityMenu->addAction(servAct);
+
+	// Creating the toolButton used to open the utilityMenu.
+	QIcon utilityIcon(":/Images/Utility.svg");
+	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
+	utilityToolButton->setText(tr("Game Utility"));
+	utilityToolButton->setIcon(utilityIcon);
+	utilityToolButton->setMenu(m_utilityMenu);
+	utilityToolButton->setToolTip(tr("Set the Categories, Developpers, Publishers, Platforms and Services of the game list."));
+	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_listToolBar->addWidget(utilityToolButton);
 }
 
-void MainWindow::appendGame()
+void MainWindow::newListCreated(ListType type)
 {
-	// Add a new empty game in the game list.
-	m_gTabAndList->appendGame();
-}
-
-void MainWindow::newGameList()
-{
-	// Creating a new game list, but thirst, 
-	// let check if it's needed to save the current list.
-	if (maybeSave())
+	// Recreating the menu when a new list is created.
+	if (m_listToolBar)
 	{
-		m_gTabAndList->restoreToDefault();
-		m_gFilePath.clear();
-		setFileNameIntoWindowTitle();
+		delete m_listToolBar;
+		m_listToolBar = nullptr;
 	}
-}
-
-void MainWindow::openGameList()
-{
-	// Opening a game list from a file.
-
-	// Thirst, check if it's needed to save the current list.
-	if (!maybeSave()) return;
-
-	// Opening a dialog to tell the user wich file he want to open.
-	QFileDialog dialog(this, tr("Open a game list file"));
-	dialog.setWindowModality(Qt::WindowModal);
-	dialog.setAcceptMode(QFileDialog::AcceptOpen);
-	dialog.setNameFilters(
-		{
-			"Game List Data (*.gld)",
-			"Any files (*)"
-		});
-	dialog.setFileMode(QFileDialog::ExistingFile);
-	dialog.setDirectory(m_lastOpenedDir);
-	if (dialog.exec() != QFileDialog::Accepted)
-		return;
-	m_lastOpenedDir = dialog.directory().absolutePath();
-
-	// If the user has selected a file, trying to opening it.
-	QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-	openingAFile(dialog.selectedFiles().first());
-
-	QGuiApplication::restoreOverrideCursor();
-}
-
-bool MainWindow::saveGameList()
-{
-	/*
-	* Save the current gameList.
-	* If the game list is already saved on the file,
-	* save the game list on the save file stored at
-	* m_gFilePath. Otherwise, save it has a new file.
-	* */
-	if (m_gFilePath.isEmpty())
-		return saveAsGameList();
-	else
+	if (m_utilityMenu)
 	{
-		QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-		bool result = saveFile(m_gFilePath);
-		if (result)
-		{
-			m_gTabAndList->pendingChangeSaved();
-			setFileNameIntoWindowTitle();
-		}
-		QGuiApplication::restoreOverrideCursor();
-		return result;
+		m_utilityMenu->deleteLater();
+		m_utilityMenu = nullptr;
 	}
+
+	if (type == ListType::GAMELIST)
+		createGameToolBar();
 }
 
-bool MainWindow::saveAsGameList()
+void MainWindow::listFilePathChanged(const QString& filePath)
 {
-	/*
-	* Saving the game list has a new file.
-	*/
-	QFileDialog dialog(this, tr("Save game to a file"));
-	dialog.setWindowModality(Qt::WindowModal);
-	dialog.setAcceptMode(QFileDialog::AcceptSave);
-	dialog.setNameFilters(
-		{
-			"Game List Data (*.gld)",
-			"Any files (*)"
-		});
-	dialog.setDirectory(m_lastOpenedDir);
+	m_listFilePath = filePath;
+	m_listChanged = false;
+	updateWindowTitle();
+}
 
-	if (dialog.exec() != QFileDialog::Accepted)
-		return false;
+void MainWindow::listChanged(bool isChanged)
+{
+	m_listChanged = isChanged;
+	updateWindowTitle();
+}
 
-	m_lastOpenedDir = dialog.directory().absolutePath();
+void MainWindow::updateWindowTitle()
+{
+	// Update the window title using the program name,
+	// the file path and an indicator if the list is modified.
+	QString title("Game Sorting");
 
-	QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-	bool result = saveFile(dialog.selectedFiles().first());
-	QGuiApplication::restoreOverrideCursor();
-	if (result)
+	if (!m_listFilePath.isEmpty())
 	{
-		m_gFilePath = dialog.selectedFiles().first();
-		m_gTabAndList->pendingChangeSaved();
-		setFileNameIntoWindowTitle();
-		newOpenedFiles(m_gFilePath);
+		title += QString(" : %2%1")
+			.arg(m_listFilePath)
+			.arg(m_listChanged ? "*" : "");
 	}
-	return result;
+
+	setWindowTitle(title);
 }
 
-void MainWindow::filteringGameList()
+void MainWindow::closeEvent(QCloseEvent* evt)
 {
-	// Apply a filter set by the user to the current focussed games list.
-
-	QDialog dialog(this);
-	Qt::WindowFlags wFlags = dialog.windowFlags();
-	wFlags &= ~Qt::WindowContextHelpButtonHint;
-	dialog.setWindowFlags(wFlags);
-	dialog.setModal(true);
-	
-	QLabel* filterLabel = new QLabel(tr("Type filter :"));
-	QLineEdit* filterText = new QLineEdit();
-	QPushButton* acceptButton = new QPushButton(tr("Filter"));
-	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-
-	QVBoxLayout* vLayout = new QVBoxLayout();
-	QHBoxLayout* hLayout = new QHBoxLayout();
-
-	vLayout->addWidget(filterLabel);
-	vLayout->addWidget(filterText);
-	hLayout->addWidget(acceptButton, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-	hLayout->addWidget(cancelButton, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-	vLayout->addLayout(hLayout);
-
-	dialog.setLayout(vLayout);
-
-	acceptButton->setDefault(true);
-
-	connect(acceptButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-	connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-	filterText->setText(m_gTabAndList->gameFilteringTypeText());
-
-	if (dialog.exec() == QDialog::Accepted)
-		m_gTabAndList->filterGamesFromType(filterText->text());
-}
-
-void MainWindow::readSettings(bool readSettings, bool loadLastSavedFile)
-{
-	// reading the settings
-	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-
-	// restore the geometry of the main window
-	QVariant vGeometry = settings.value("mainwindow/geometry");
-	if (vGeometry.isValid() && readSettings)
+	// This member function is called when the user hit the X button
+	// to close this window. It check if the list need to be saved and if
+	// the want to leave.
+	if (m_tabAndList->maybeSave())
 	{
-		QByteArray bGeometry = vGeometry.toByteArray();
-		restoreGeometry(bGeometry);
+		writeSettings();
+		evt->accept();
 	}
 	else
-	{
-#if QT_VERSION_MINOR >= 14
-		QSize screenSize = screen()->availableSize();
-#else
-		QSize screenSize = qApp->primaryScreen()->availableSize();
-#endif
-
-		QSize windowSize(screenSize.width() / 3, screenSize.height() / 2);
-		QPoint windowPos(
-			(screenSize.width() - windowSize.width()) / 2,
-			(screenSize.height() - windowSize.height()) / 2);
-		setGeometry(QRect(windowPos, windowSize));
-	}
-
-	// get the last opened directory
-	QVariant vLastOpenedDirectory = settings.value("mainwindow/lastopeneddirectory");
-	if (vLastOpenedDirectory.isValid() && readSettings)
-		m_lastOpenedDir = vLastOpenedDirectory.toString();
-
-	// Retrieve the "recentFiles"
-	QVariant vRecentFiles = settings.value("gamelist/recentfiles");
-	if (vRecentFiles.isValid() && readSettings)
-	{
-		QByteArray bRecentFiles = vRecentFiles.toByteArray();
-		QDataStream recentFilesDataStream(bRecentFiles);
-		quint8 numberOfFiles = 0;
-		if (!recentFilesDataStream.atEnd())
-			recentFilesDataStream.readRawData(reinterpret_cast<char*>(&numberOfFiles), sizeof(quint8));
-
-		for (int i = 0; i < numberOfFiles; i++)
-		{
-			QString filePath;
-			if (!recentFilesDataStream.atEnd())
-			{
-				recentFilesDataStream >> filePath;
-				m_lastOpenedFilesPath.append(filePath);
-			}
-			else
-				break;
-		}
-
-		updateLastOpenedFileMenu();
-	}
-
-	// open the last opened file.
-	QVariant vLastFilePath = settings.value("gamelist/lastgamelist");
-	if (vLastFilePath.isValid() && readSettings && loadLastSavedFile)
-	{
-		QString lastFilePath = vLastFilePath.toString();
-		openingAFile(lastFilePath, false);
-	}
+		evt->ignore();
 }
 
 void MainWindow::writeSettings()
 {
-	// Write the settings
-	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-	// Save the window geometry
-	settings.setValue("mainwindow/geometry", QVariant::fromValue(saveGeometry()));
+	// Write the settings into Windows Registery or Linux Config File.
+	// The settings are used to save the geometry of the windows, the last opened file, etc.
 
-	// Save the opened file path
-	if (m_gFilePath.isEmpty())
-	{
-		if (settings.contains("gamelist/lastgamelist"))
-			settings.remove("gamelist/lastgamelist");
-	}
+	// If the member variable m_doNotSaveSettings is true,
+	// we do not save the settings.
+	if (m_doNotSaveSettings)
+		return;
+
+	QSettings settings("Erwan28250", "GameSorting-Alpha");
+
+	// Save the geometry of the window.
+	settings.setValue("mainwindow/geometry", saveGeometry());
+
+	// Save the opened file path.
+	if (!m_tabAndList->filePath().isEmpty())
+		settings.setValue("core/filepath", m_tabAndList->filePath());
 	else
-		settings.setValue("gamelist/lastgamelist", QVariant::fromValue(m_gFilePath));
+		settings.remove("core/filepath");
 
-	// Save the last opened directory in a file dialog.
-	if (m_lastOpenedDir.isEmpty())
-	{
-		if (settings.contains("mainwindow/lastopeneddirectory"))
-			settings.remove("mainwindow/lastopeneddirectory");
-	}
+	// Save the current directory, this is the last directory opened with a file dialog.
+	if (!m_tabAndList->currentDirectory().isEmpty())
+		settings.setValue("core/currentdir", m_tabAndList->currentDirectory());
 	else
-		settings.setValue("mainwindow/lastopeneddirectory", QVariant::fromValue(m_lastOpenedDir));
-
-	// Save the recent files into "gamelist/recentfiles".
-	if (m_lastOpenedFilesPath.isEmpty())
-	{
-		if (settings.contains("gamelist/recentfiles"))
-			settings.remove("gamelist/recentfiles");
-	}
-	else
-	{
-		QByteArray bRecentFile;
-		QDataStream recentFileDataStream(&bRecentFile, QIODevice::WriteOnly);
-
-		quint8 numberOfRecentFiles = m_lastOpenedFilesPath.size();
-		recentFileDataStream.writeRawData(reinterpret_cast<const char*>(&numberOfRecentFiles), sizeof(quint8));
-
-		for (int i = 0; i < numberOfRecentFiles; i++)
-			recentFileDataStream << m_lastOpenedFilesPath.at(i);
-
-		settings.setValue("gamelist/recentfiles", bRecentFile);
-	}
+		settings.remove("core/currentdir");
 }
 
-bool MainWindow::saveFile(const QString& filePath) const
+void MainWindow::readSettings()
 {
-	// Saving the game list at filePath.
-	// If the filePath is empty, stop.
-	if (filePath.isEmpty())
-	{
-		QMessageBox::warning((QWidget*)this, tr("Error saving file"), tr("Error: cannot save file %1, game list is empty.").arg(filePath), QMessageBox::Ok);
-		return false;
-	}
+	// Read the settings saved in the Windows Registery or in Linux Config File.
+	QSettings settings("Erwan28250", "GameSorting-Alpha");
 
-	// getting the games data and tabs names
-	TabAndListData gamesData = m_gTabAndList->gamesData();
-
-	// Storing to a QByteArray
-	QByteArray bArray;
-	// QDataStream is a usefull hight level interface for manupilate data stream
-	QDataStream data(&bArray, QIODevice::WriteOnly);
-
-	// Write the file identifier, it's 3 char that is used when opening the file
-	// to reconize the data format of the file.
-	const char* fileIdentifier = DEFINED_GLD_IDENTIFIER;
-	data.writeRawData(fileIdentifier, 3);
-
-	// writing the data version of the file
-	data << (quint32)DEFINED_GLD_VERSION;
-
-	// Writing the number of existing tabs available.
-	// It is uses when opening the file to know how many tabs we need to read.
-	data << (quint32)gamesData.tabCount;
-
-	// if there is existing tab, writing everytihing on the QByteArray, otherwise, write nothing, it's the end of the file.
-	if (gamesData.tabCount > 0)
-	{
-		// First writing all the tab names.
-		for (int i = 0; i < gamesData.tabCount; i++)
-			data << gamesData.tabNames.at(i);
-
-		// now, writing all the games data from each tab
-		for (int i = 0; i < gamesData.tabCount; i++)
-		{
-			// store the number of games  there is on this tab
-			data << (quint32)gamesData.gamesData.at(i).size();
-
-			data << gamesData.gamesListSortIndicator.at(i);
-
-			// if there is any games on this tab, write it, otherwise, write nothing
-			for (int j = 0; j < gamesData.gamesData.at(i).size(); j++)
-			{
-				const GameListModel::GameList& g = gamesData.gamesData.at(i).at(j);
-
-				data << g.name;
-				data << g.type;
-				data << (quint8)g.rate.starCount();
-			}
-		}
-	}
-	data.setDevice(nullptr);
-
-	/*
-	* Now, write everything on a file.
-	* QSaveFile is usefull for saving file, because when
-	* we replace an existing file, the existing file is is deleted then
-	* we rewrite on it, but QSaveFile don't replace directly the existing file, it's write everything
-	* on a temporary file and then, if the writing success, it replace the existing file
-	* with the temporary file. If the process fail to write the file, the existing file is not lost.
-	*/
-	QSaveFile file(filePath);
-	if (file.open(QIODevice::WriteOnly))
-	{
-		file.write(bArray);
-
-		if (!file.commit())
-			QMessageBox::warning((QWidget*)this, tr("Error saving file"),
-				tr("Cannot write the file %1.").arg(filePath), QMessageBox::Ok);
-	}
+	// Read the geometry of the window.
+	QVariant vGeometry = settings.value("mainwindow/geometry");
+	if (vGeometry.isValid() && !m_isResetSettings)
+		restoreGeometry(vGeometry.toByteArray());
 	else
 	{
-		QMessageBox::warning((QWidget*)this, tr("Error saving file"),
-			tr("Cannot opening or creating the file %1 for writing.").arg(filePath), QMessageBox::Ok);
-		return false;
+		// If there is no available geometry settings,
+		// put the window in the center of the screen.
+		QSize wSize(
+			screen()->size().width() / 2,
+			screen()->size().height() / 1.5);
+		QPoint wPos(
+			(screen()->size().width() - wSize.width()) / 2,
+			(screen()->size().height() - wSize.height()) / 2);
+		setGeometry(QRect(wPos, wSize));
 	}
 	
-	return true;
-}
-
-const TabAndListData MainWindow::openFile(const QString& fileName, bool& result) const
-{
-	std::function<void(const QString&)> wMsg = [this](const QString& message)->void
-	{ QMessageBox::warning((QWidget*)this, tr("Error opening file"), message, QMessageBox::Ok); };
-	// Opening the file. Same has save.
-	// if the filePath is empty, stop.
-	if (fileName.isEmpty())
-	{
-		wMsg(tr("Error: cannot open the file because the file path is empty."));
-		result = false;
-		return {};
-	}
-
-	// Opening the file
-	QFile file(fileName);
-	if (file.open(QIODevice::ReadOnly))
-	{
-		// if the file size is less than the GLD data stucture, it's not a valid data file.
-		if (file.size() < 11)
-		{
-			wMsg(tr("Error, the file %1 is not a valid gld file data.").arg(fileName));
-			result = false;
-			return {};
-		}
-
-		// Reading all the file in a byte array.
-		QByteArray bData = file.readAll();
+	// Read the saved file path.
+	QVariant vFilePath = settings.value("core/filepath");
+	if (vFilePath.isValid() && !m_isResetSettings)
+		m_tabAndList->open(vFilePath.toString());
 	
-		// no need file anymore, it can be close.
-		file.close();
-
-		// Using the QDataStream class for an hight level interface with the bits data.
-		QDataStream dataStream(&bData, QIODevice::ReadOnly);
-
-		// get the first 3 char and see if it's "GLD"
-		char identifier[4] = { 0, 0, 0, '\0' };
-		dataStream.readRawData(&identifier[0], 3);
-		if (strcmp(&identifier[0], DEFINED_GLD_IDENTIFIER) != 0)
-		{
-			wMsg(tr("Error: file %1 is not a valid GLD file.").arg(fileName));
-			result = false;
-			return {};
-		}
-
-		// verify the version of the file data structure, if it's a different version, 
-		// it's mean it cannot be read correctly.
-		quint32 fileVersion;
-		dataStream >> fileVersion;
-
-		if (fileVersion == DEFINED_GLD_VERSION_2 || fileVersion == DEFINED_GLD_VERSION_3)
-		{
-			bool file002Result;
-			TabAndListData gamesListData = openFileVersion002And003(dataStream, fileVersion == DEFINED_GLD_VERSION_3, file002Result);
-			if (!file002Result)
-			{
-				wMsg(tr("Error: fail to read file %1.").arg(fileName));
-				result = false;
-				return {};
-			}
-			else
-			{
-				result = true;
-				return gamesListData;
-			}
-		}
-		else
-		{
-			wMsg(tr("Error: file %1 is not a valid GLD file format.").arg(fileName));
-			result = false;
-			return {};
-		}
-	}
-	else
-	{
-		wMsg(tr("Cannot open file %1.").arg(fileName));
-		result = false;
-		return {};
-	}
+	// Read the current directory.
+	QVariant vCurrentDir = settings.value("core/currentdir");
+	if (vCurrentDir.isValid() && !m_isResetSettings)
+		m_tabAndList->setCurrentDit(vCurrentDir.toString());
 }
 
-const TabAndListData MainWindow::openFileVersion002And003(QDataStream& dataStream, bool v003, bool& result) const
+void MainWindow::showLicence()
 {
-	if (dataStream.atEnd()) { result = false; return {}; }
-
-	TabAndListData listData = {};
-
-	quint32 numberOfTabs;
-	dataStream >> numberOfTabs;
-
-	if (numberOfTabs == 0)
+	// Show the licence of the program.
+	if (!m_licenceDialog)
 	{
-		listData.tabCount = 0;
-		result = false;
-		return listData;
+		m_licenceDialog = new LicenceDialog(this);
+		m_licenceDialog->raise();
+		m_licenceDialog->activateWindow();
 	}
-	else
-		listData.tabCount = numberOfTabs;
-
-	if (dataStream.atEnd()) { result = false; return {}; }
-
-	listData.tabNames.resize(numberOfTabs);
-	listData.gamesData.resize(numberOfTabs);
-	listData.gamesListSortIndicator.resize(numberOfTabs);
-
-	for (int i = 0; i < static_cast<int>(numberOfTabs); i++)
-	{
-		if (dataStream.atEnd()) { result = false; return {}; }
-
-		QString tabName;
-		dataStream >> tabName;
-		listData.tabNames[i] = tabName;
-	}
-
-	for (int i = 0; i < static_cast<int>(numberOfTabs); i++)
-	{
-		if (dataStream.atEnd()) { result = false; return {}; }
-
-		quint32 gamesCount;
-		dataStream >> gamesCount;
-		listData.gamesData[i].resize(gamesCount);
-
-		if (v003)
-		{
-			GameListViewSortIndicator sortIndicator;
-			dataStream >> sortIndicator;
-			listData.gamesListSortIndicator[i] = sortIndicator;
-		}
-		else
-		{
-			GameListViewSortIndicator sortIndicator;
-			sortIndicator.isEnabled = false;
-			sortIndicator.sortColumn = 0;
-			sortIndicator.sortOrder = static_cast<quint8>(Qt::DescendingOrder);
-			listData.gamesListSortIndicator[i] = sortIndicator;
-		}
-
-		for (int j = 0; j < static_cast<int>(gamesCount); j++)
-		{
-			if (dataStream.atEnd()) { result = false; return {}; }
-			
-			GameListModel::GameList gameList = {};
-
-			QString gameName, gameType;
-			quint8 gameRate;
-
-			dataStream >> gameName;
-
-			if (dataStream.atEnd()) { result = false; return {}; }
-
-			dataStream >> gameType;
-
-			if (dataStream.atEnd()) { result = false; return {}; }
-
-			dataStream >> gameRate;
-
-			listData.gamesData[i][j].name = gameName;
-			listData.gamesData[i][j].type = gameType;
-			listData.gamesData[i][j].rate = GameStarRating(static_cast<int>(gameRate));
-		}
-	}
-
-	result = true;
-	return listData;
+	
+	m_licenceDialog->show();
 }
 
-void MainWindow::closeEvent(QCloseEvent* e)
+void MainWindow::about()
 {
-	/*
-	* Called when the window is closing.
-	* If there is pending change, the code below ask the user if he want to save pending change.
-	* If finally the user don't want to exit the application when he asked to save pending change,
-	* we ignore the leaving event.
-	*/
-	if (!maybeSave())
-		e->ignore();
-	else
-	{
-		writeSettings();
-		e->accept();
-	}
-}
-
-bool MainWindow::maybeSave()
-{
-	// If there is pending change, the code below tell the user 
-	// if he want to save the pending change.
-	if (m_gTabAndList->isListEdited())
-	{
-		QMessageBox::StandardButton result =
-			QMessageBox::warning(this,
-				tr("Pending change!"),
-				tr("You have pending change not saved.\nWould you like to save them ?"),
-				QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-				QMessageBox::Save);
-
-		switch (result)
-		{
-		case QMessageBox::Save:
-		{
-			bool result = saveGameList();
-			if (result)
-				m_gTabAndList->pendingChangeSaved();
-			return result;
-		}
-		case QMessageBox::Discard:
-			return true;
-		case QMessageBox::Cancel:
-			return false;
-		}
-	}
-
-	return true;
-}
-
-void MainWindow::setFileNameIntoWindowTitle()
-{
-	// Showing the file name into the window title.
-	// Showing a '*' before the file name if the list 
-	// has been edited.
-	QString applicationName("Game Sorting");
-	QString fileName;
-
-	if (m_gFilePath.isEmpty())
-		fileName = QString("%1.gld").arg(tr("untitled"));
-	else
-		fileName = QFileInfo(m_gFilePath).fileName();
-
-	if (m_gTabAndList->isListEdited())
-		setWindowTitle(QString("%1 : *%2").arg(applicationName, fileName));
-	else
-		setWindowTitle(QString("%1 : %2").arg(applicationName, fileName));
-}
-
-void MainWindow::aboutApp()
-{
-	// Show a little dialog about this application.
+	// Show the about menu.
 	if (!m_aboutDialog)
 	{
 		m_aboutDialog = new AboutDialog(this);
-		connect(m_aboutDialog, &QDialog::destroyed, [this]() { m_aboutDialog = nullptr; });
 		m_aboutDialog->raise();
 		m_aboutDialog->activateWindow();
 	}
@@ -871,88 +366,12 @@ void MainWindow::aboutApp()
 	m_aboutDialog->show();
 }
 
-void MainWindow::aboutLicence()
+void MainWindow::reinsertMenu()
 {
-	// Show a little dialog about the licence of the application.
-
-	if (!m_licenceDialog)
-	{
-		m_licenceDialog = new LicenceDialog(this);
-		connect(m_licenceDialog, &QDialog::destroyed, [this]() { m_licenceDialog = nullptr; });
-		m_licenceDialog->raise();
-		m_licenceDialog->activateWindow();
-	}
-
-	m_licenceDialog->show();
-}
-
-void MainWindow::newOpenedFiles(const QString& filePath)
-{
-	// Adding the new opened file into the lastOpenedFilePath list.
-	// But before, removing this filepath from the list to make it on the top of it.
-	QString absoluteRecentFilePath = QFileInfo(filePath).absoluteFilePath();
-	m_lastOpenedFilesPath.removeAll(absoluteRecentFilePath);
-	m_lastOpenedFilesPath.prepend(absoluteRecentFilePath);
-	updateLastOpenedFileMenu();
-}
-
-void MainWindow::updateLastOpenedFileMenu()
-{
-	// First delete all the actions.
-	for (int i = 0; i < m_lastOpenedFilesActions.size(); i++)
-		delete m_lastOpenedFilesActions[i];
-	m_lastOpenedFilesActions.clear();
-
-	if (m_lastOpenedFilesPath.size() > 10)
-		m_lastOpenedFilesPath.removeLast();
-
-	// Now, create all the actions based on m_lastOpenedFilesPath if there are any.
-	QList<QString>::const_iterator it;
-	for (it = m_lastOpenedFilesPath.cbegin(); it != m_lastOpenedFilesPath.cend(); it++)
-	{
-		QFileInfo filePathInfo((*it));
-		QAction* recentFilePath = new QAction(filePathInfo.fileName(), this);
-		connect(recentFilePath, &QAction::triggered, [this, it]() { openingRecentFile((*it)); });
-		m_lastOpenedFiles->addAction(recentFilePath);
-		m_lastOpenedFilesActions.prepend(recentFilePath);
-	}
-}
-
-bool MainWindow::openingAFile(const QString& filePath, bool warningOnFail)
-{
-	if (!filePath.isEmpty() && QFileInfo::exists(filePath))
-	{
-		bool result = false;
-		const TabAndListData gamesData = openFile(filePath, result);
-		if (result)
-		{
-			m_gTabAndList->clearTabs();
-			m_gTabAndList->setGamesAndTabData(gamesData);
-			m_gFilePath = filePath;
-			newOpenedFiles(filePath);
-			setFileNameIntoWindowTitle();
-		}
-		else if (!result && warningOnFail)
-			QMessageBox::warning(this, tr("Opening file"), tr("Failed to open the file %1.").arg(filePath), QMessageBox::Ok);
-
-		return result;
-	}
-
-	return false;
-}
-
-void MainWindow::openingRecentFile(const QString& filePath)
-{
-	bool result = openingAFile(filePath, false);
-
-	if (!result)
-	{
-		QMessageBox::warning(this, tr("Error opening file"), tr("The file \"%1\" cannot be open.").arg(filePath), QMessageBox::Ok);
-		
-		int indexOf = m_lastOpenedFilesPath.indexOf(filePath);
-		if (indexOf > -1)
-			m_lastOpenedFilesPath.removeAt(indexOf);
-
-		updateLastOpenedFileMenu();
-	}
+	// Reinsert the menu into the menuBar.
+	menuBar()->clear();
+	menuBar()->addMenu(m_fileMenu);
+	if (m_utilityMenu)
+		menuBar()->addMenu(m_utilityMenu);
+	menuBar()->addMenu(m_helpMenu);
 }

@@ -16,58 +16,47 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_MAINWINDOW
-#define GAMESORTING_MAINWINDOW
+#ifndef GAMESORTING_TABLEMODEL_UTILITYINTERFACE_H_
+#define GAMESORTING_TABLEMODEL_UTILITYINTERFACE_H_
 
 #include "DataStruct.h"
-#include <QMainWindow>
+
+#include <QObject>
 #include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QString>
+#include <QVariant>
 
-class TabAndList;
-class QTableView;
-class QToolBar;
-class LicenceDialog;
-class AboutDialog;
-
-class MainWindow : public QMainWindow
+class TableModel_UtilityInterface : public QObject
 {
 	Q_OBJECT
 public:
-	MainWindow(const QString& filePath, bool resetSettings, bool doNotSaveSettings, QWidget* parent = nullptr);
-	virtual ~MainWindow();
+	TableModel_UtilityInterface(const QString& parentTableName, QSqlDatabase& db);
+	virtual ~TableModel_UtilityInterface();
+
+	virtual QString tableName(UtilityTableName tableName) const = 0;
+	virtual void newParentName(const QString& tableName) = 0;
+	virtual bool isTableReady() const;
+	virtual void rowRemoved(const QList<long long int>& itemID) = 0;
+	virtual void updateItemUtility(long long int itemID, UtilityTableName tableName, const QVariant& data) = 0;
+	virtual ListType listType() const = 0;
+
+	virtual QVariant data() const = 0;
+
+signals:
+	void interfaceChanged(long long int itemID, UtilityTableName tableName);
 
 protected:
-	void closeEvent(QCloseEvent* evt) override;
+	virtual bool setData(const QVariant& data) = 0;
+	virtual void createTables() = 0;
+	virtual void destroyTables() = 0;
+	virtual void destroyTableByName(const QString& tableName);
+	virtual void renameTable(const QString& currentName, const QString& newName);
 
-private:
-	void createMenu();
-	void createCentralWidget();
-	void newListCreated(ListType type);
-	void createGameToolBar();
-	void listFilePathChanged(const QString& filePath);
-	void listChanged(bool isChanged);
-	void updateWindowTitle();
-	void writeSettings();
-	void readSettings();
-	void showLicence();
-	void about();
-	void reinsertMenu();
-
-	TabAndList* m_tabAndList;
-	QSqlDatabase m_db;
-	QToolBar* m_listToolBar;
-	QString m_listFilePath;
-	bool m_listChanged;
-	
-	bool m_isResetSettings;
-	bool m_doNotSaveSettings;
-
-	QMenu* m_fileMenu;
-	QMenu* m_utilityMenu;
-	QMenu* m_helpMenu;
-	LicenceDialog* m_licenceDialog;
-	AboutDialog* m_aboutDialog;
+	QString m_parentTableName;
+	QSqlDatabase& m_db;
+	QSqlQuery m_query;
+	bool m_isTableReady;
 };
 
-#endif // GAMESORTING_MAINWINDOW
+#endif // GAMESORTING_TABLEMODEL_UTILITYINTERFACE_H_

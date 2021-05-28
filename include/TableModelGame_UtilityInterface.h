@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,19 +16,30 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_LISTTABLEVIEW
-#define GAMESORTING_LISTTABLEVIEW
+#ifndef GAMESORTING_TABLEMODELGAME_UTILITYINTERFACE_H_
+#define GAMESORTING_TABLEMODELGAME_UTILITYINTERFACE_H_
 
-#include "QTableView"
+#include "TableModel_UtilityInterface.h"
 
-class ListTableView : public QTableView
+class TableModelGame_UtilityInterface : public TableModel_UtilityInterface
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	ListTableView(QWidget* parent = nullptr);
+    TableModelGame_UtilityInterface(const QString& parentTableName, QSqlDatabase& db);
+    TableModelGame_UtilityInterface(const QString& parentTableName, QSqlDatabase& db, const QVariant& data);
+    virtual ~TableModelGame_UtilityInterface();
+
+    virtual QString tableName(UtilityTableName tableName) const override;
+    virtual void newParentName(const QString& tableName) override;
+    virtual void rowRemoved(const QList<long long int>& gamesID) override;
+    virtual void updateItemUtility(long long int gameID, UtilityTableName tableName, const QVariant& data) override;
+    virtual ListType listType() const override;
+    virtual QVariant data() const override;
 
 protected:
-	virtual void mousePressEvent(QMouseEvent* evt);
+    virtual bool setData(const QVariant& data) override;
+    virtual void createTables() override;
+    virtual void destroyTables() override;
 };
 
-#endif // GAMESORTING_LISTTABLEVIEW
+#endif // GAMESORTING_TABLEMODELGAME_UTILITYINTERFACE_H_

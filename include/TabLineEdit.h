@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,27 +16,30 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_GAMESTARDELEGATE
-#define GAMESORTING_GAMESTARDELEGATE
+#ifndef GAMESORTING_TABLINEEDIT_H_
+#define GAMESORTING_TABLINEEDIT_H_
 
-#include <QStyledItemDelegate>
+#include <QLineEdit>
 
-class GameStarEditor;
 
-class GameStarDelegate : public QStyledItemDelegate
+class TabLineEdit : public QLineEdit
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	GameStarDelegate(QWidget* parent = nullptr);
+    TabLineEdit(int tabIndex, const QString& tabName, QRect tabRect, QWidget* parent = nullptr);
 
-	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-	void setEditorData(QWidget* editor, const QModelIndex& parent) const override;
-	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+signals:
+    void finished(int tabIndex, const QString& str);
+    void discarded();
 
-private slots:
-	void commitAndCloseEditor(GameStarEditor* editor);
+protected:
+    void keyPressEvent(QKeyEvent* evt) override;
+    void focusOutEvent(QFocusEvent* evt) override;
+    void applyChange();
+
+private:
+    int m_tabIndex;
+    const QString m_tabStartName;
 };
 
-#endif // GAMESORTING_GAMESTARDELEGATE
+#endif // GAMESORTING_TABLINEEDIT_H_

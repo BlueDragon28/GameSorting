@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,43 +16,35 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_GAMESTARRATING
-#define GAMESORTING_GAMESTARRATING
+#ifndef GAMESORTING_UTILITYSENSITIVECONTENTEDITOR_H_
+#define GAMESORTING_UTILITYSENSITIVECONTENTEDITOR_H_
 
-#include <QPolygonF>
-#include <QRect>
-#include <QPalette>
-#include <QDataStream>
+#include <QDialog>
+#include <QSqlDatabase>
 
-class GameStarRating
+class TableModel_UtilityInterface;
+
+class UtilitySensitiveContentEditor : public QDialog
 {
+    Q_OBJECT
 public:
-	enum class EditMode { Editable, ReadOnly };
-
-	GameStarRating(int starCount = 1, int maxStarCount = 5, QWidget* parent = nullptr);
-	GameStarRating(const GameStarRating& gameStarRating);
-
-	void paint(QPainter* painter, const QRect& rect, const QPalette& palette, EditMode editMode) const;
-	QSize sizeHint() const;
-	int starCount() const;
-	int maxStarCount() const;
-	void setStarCount(int starCount);
-	void setMaxStarCount(int maxStarCount);
-	void initStarPolygon();
-
-	bool operator<(const GameStarRating& other) const;
-	bool operator>(const GameStarRating& other) const;
-	bool operator<=(const GameStarRating& other) const;
-	bool operator>=(const GameStarRating& other) const;
+    explicit UtilitySensitiveContentEditor(
+        long long int itemID,
+        TableModel_UtilityInterface* dataInterface,
+        QSqlDatabase& db,
+        QWidget* parent = nullptr);
+    virtual ~UtilitySensitiveContentEditor();
 
 private:
-	int m_starCount, m_maxStarCount, m_paintScaleFactor;
-	QPolygonF m_starPolygon;
+    void createWidgets();
+    void applyChange();
+
+    long long int m_itemID;
+    TableModel_UtilityInterface* m_dataInterface;
+    QSqlDatabase& m_db;
+    int m_nExplicitContent,
+        m_nViolenceContent,
+        m_nBadLanguageContent;
 };
 
-Q_DECLARE_METATYPE(GameStarRating)
-
-QDataStream& operator<<(QDataStream& out, const GameStarRating& star);
-QDataStream& operator>>(QDataStream& in, GameStarRating& star);
-
-#endif // GAMESORTING_GAMESTARRATING
+#endif // GAMESORTING_UTILITYSENSITIVECONTENTEDITOR_H_

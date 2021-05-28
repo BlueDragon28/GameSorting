@@ -13,5 +13,8 @@
         <file>Images/Save.svg</file>
         <file>Images/Sorting.svg</file>
         <file>Images/Sorting_lowResolution.svg</file>
+        <file>Images/Update.svg</file>
+        <file>Images/Utility.svg</file>
+        <file>Images/Url.svg</file>
     </qresource>
 </RCC>

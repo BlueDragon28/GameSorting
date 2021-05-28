@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,36 +16,20 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_GAMESTAREDITOR
-#define GAMESORTING_GAMESTAREDITOR
+#ifndef GAMESORTING_ABSTRACTLISTVIEW_H_
+#define GAMESORTING_ABSTRACTLISTVIEW_H_
 
 #include <QWidget>
-#include <QSize>
+#include "DataStruct.h"
 
-#include "GameStarRating.h"
-
-class GameStarEditor : public QWidget
+class AbstractListView : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	GameStarEditor(QWidget* parent = nullptr);
+    explicit AbstractListView(QWidget* parent = nullptr);
+    virtual ~AbstractListView();
 
-	QSize sizeHint() const override;
-	void setGameStarRating(const GameStarRating& gStarRating);
-	GameStarRating gameStarRating();
-
-protected:
-	void paintEvent(QPaintEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
-	void mouseReleaseEvent(QMouseEvent* event) override;
-
-signals:
-	void editFinished(GameStarEditor* editor);
-
-private:
-	int getStarNumberFromCursorPosition(int x) const;
-
-	GameStarRating m_gStarRating;
+    virtual ViewType viewType() const = 0;
 };
 
-#endif // GAMESORTING_GAMESTAREDITOR
+#endif // GAMESORTING_ABSTRACTLISTVIEW_H_

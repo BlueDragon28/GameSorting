@@ -16,34 +16,11 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "MainWindow.h"
-#include "CMDOpts.h"
-#include "Common.h"
+#include "AbstractListView.h"
 
-#include <QApplication>
-#include <QString>
+AbstractListView::AbstractListView(QWidget* parent) :
+    QWidget(parent)
+{}
 
-int main(int argc, char** argv)
-{
-	// Initialize the resources of the program (images, etc).
-	Q_INIT_RESOURCE(gamesorting);
-
-	// Creating an application object.
-	QApplication app(argc, argv);
-	app.setOrganizationName("Erwan28250");
-	app.setApplicationName("GameSorting");
-	app.setApplicationVersion(GAMESORTING_VERSION);
-	
-	// Setting the application icon.
-	QIcon appIcon = QIcon(":/Images/GameSorting.ico");
-	app.setWindowIcon(appIcon);
-
-	// Parsing the command line arguments and options.
-	CMDOpts parser(app);
-
-	MainWindow window(parser.itemListFile(), parser.resetSettings(), parser.doNotSaveSettings());
-	window.show();
-
-	// Running the app main loop.
-	return app.exec();
-}
+AbstractListView::~AbstractListView()
+{}

@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,20 +16,16 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_LICENCEDIALOG
-#define GAMESORTING_LICENCEDIALOG
+#ifndef GAMESORTING_LICENCEDIALOG_H_
+#define GAMESORTING_LICENCEDIALOG_H_
 
 #include <QDialog>
 
 class LicenceDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit LicenceDialog(QWidget* parent);
-
-private:
-	void setDialogParameters();
-	void createLicenceText();
+    LicenceDialog(QWidget* parent = nullptr);
 };
 
-#endif // GAMESORTING_LICENCEDIALOG
+#endif // GAMESORTING_LICENCEDIALOG_H_

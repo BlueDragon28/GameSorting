@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -16,19 +16,27 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "ListTableView.h"
+#ifndef GAMESORTING_CMDOPTS_H_
+#define GAMESORTING_CMDOPTS_H_
 
-#include <QItemSelectionModel>
-#include <QMouseEvent>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+#include <QApplication>
 
-ListTableView::ListTableView(QWidget* parent) :
-	QTableView(parent)
-{}
-
-void ListTableView::mousePressEvent(QMouseEvent* evt)
+class CMDOpts
 {
-	if (evt->button() == Qt::RightButton)
-		selectionModel()->clearSelection();
-	else
-		QTableView::mousePressEvent(evt);
-}
+    CMDOpts(const CMDOpts& other) = delete;
+public:
+    CMDOpts(QApplication& app);
+
+    const QString& itemListFile() const;
+    bool resetSettings() const;
+    bool doNotSaveSettings() const;
+
+private:
+    QString m_itemListFile;
+    bool m_resetSettings;
+    bool m_doNotSaveSettings;
+};
+
+#endif // GAMESORTING_CMDOPTS_H_

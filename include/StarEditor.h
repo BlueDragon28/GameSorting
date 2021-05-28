@@ -16,34 +16,45 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "MainWindow.h"
-#include "CMDOpts.h"
-#include "Common.h"
+#ifndef GAMESORTING_STAREDITOR_H_
+#define GAMESORTING_STAREDITOR_H_
 
-#include <QApplication>
-#include <QString>
+#include <QWidget>
 
-int main(int argc, char** argv)
+class StarEditor : public QWidget
 {
-	// Initialize the resources of the program (images, etc).
-	Q_INIT_RESOURCE(gamesorting);
+	Q_OBJECT
+public:
+	StarEditor(QWidget* parent = nullptr);
+	StarEditor(int maxStars, QWidget* parent = nullptr);
+	virtual ~StarEditor();
 
-	// Creating an application object.
-	QApplication app(argc, argv);
-	app.setOrganizationName("Erwan28250");
-	app.setApplicationName("GameSorting");
-	app.setApplicationVersion(GAMESORTING_VERSION);
-	
-	// Setting the application icon.
-	QIcon appIcon = QIcon(":/Images/GameSorting.ico");
-	app.setWindowIcon(appIcon);
+	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false);
+	static QSize sizeHint(int maxStars);
+	static double paintFactor();
 
-	// Parsing the command line arguments and options.
-	CMDOpts parser(app);
+	int stars() const;
+	int maxStars() const;
+	void setStars(int stars);
+	void setMaxStars(int maxStars);
 
-	MainWindow window(parser.itemListFile(), parser.resetSettings(), parser.doNotSaveSettings());
-	window.show();
+	virtual QSize sizeHint() const override;
 
-	// Running the app main loop.
-	return app.exec();
-}
+signals:
+	void editFinished(QWidget* editor);
+
+protected:
+	virtual void paintEvent(QPaintEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void mousePressEvent(QMouseEvent* event) override;
+
+private:
+	int m_stars;
+	int m_maxStars;
+	int m_cursorXPos;
+
+	static QPolygonF starPolygonData;
+	static double staticPaintFactor;
+};
+
+#endif // GAMESORTING_STAREDITOR_H_

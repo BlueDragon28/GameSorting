@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -17,45 +17,32 @@
 */
 
 #include "AboutDialog.h"
-#include "CommonStruct.h"
+#include "Common.h"
 
 #include <QLabel>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 AboutDialog::AboutDialog(QWidget* parent) :
-	QDialog(parent)
+    QDialog(parent)
 {
-	setDialogParameters();
-	createAboutText();
-}
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
 
-void AboutDialog::setDialogParameters()
-{
-	setModal(false);
+    QString strAbout(tr(
+        "<b>About this application :</b><br><br>"
+        "<b>Name :</b><br>Game Sorting v" GAMESORTING_VERSION "<br><br>"
+        "<b>Library used :</b><br>"
+        "Qt " QT_VERSION_STR "<br><br>"
+        "<b>Author :</b><br>"
+        "Erwan Saclier de la Bâtie (Erwan28250)"));
 
-	Qt::WindowFlags wFlags = windowFlags();
-	wFlags &= ~Qt::WindowContextHelpButtonHint;
-	setWindowFlags(wFlags);
+    QLabel *aboutText = new QLabel();
+    aboutText->setAlignment(Qt::AlignCenter);
+    aboutText->setText(strAbout);
+    aboutText->setMargin(5);
 
-	setWindowTitle(tr("About"));
-}
-
-void AboutDialog::createAboutText()
-{
-	QString strAbout =
-		tr("<b>About this application :</b><br><br>"
-			"<b>Name :</b><br>Game Sorting v" GAMESORTING_VERSION "<br><br>"
-			"<b>Library used :</b><br>"
-			"Qt " QT_VERSION_STR "<br><br>"
-			"<b>Author :</b><br>"
-			"Erwan Saclier de la Bâtie (Erwan28250)");
-
-	QLabel* aboutLabel = new QLabel();
-	aboutLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	aboutLabel->setText(strAbout);
-
-	QVBoxLayout *vLayout = new QVBoxLayout();
-	vLayout->addWidget(aboutLabel);
-
-	setLayout(vLayout);
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(aboutText);
+    vLayout->addWidget(scrollArea);
 }

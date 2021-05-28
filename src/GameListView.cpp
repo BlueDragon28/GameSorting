@@ -1,5 +1,5 @@
-﻿/*
-* MIT License
+/*
+* MIT Licence
 *
 * This file is part of the GameSorting
 *
@@ -17,265 +17,288 @@
 */
 
 #include "GameListView.h"
-#include "GameStarDelegate.h"
-#include "ListTableView.h"
-
-#include <QGuiApplication>
+#include "TableModelGame.h"
+#include <QTableView>
 #include <QItemSelectionModel>
+#include <QSqlQuery>
 #include <QVBoxLayout>
-#include <QHeaderView>
-#include <QClipboard>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QIcon>
+#include <QAction>
+#include <QToolBar>
+#include <QInputDialog>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QToolButton>
+#include <QMenu>
 
-GameListView::GameListView(QWidget* parent) :
-	QWidget(parent),
-	m_view(new ListTableView()),
-	m_model(new GameListModel()),
-	m_noGameAddedToList(true),
-	m_isSortingEnabled(false),
-	m_listIsFiltered(false)
+#include <iostream>
+
+#include "ListViewDelegate.h"
+
+GameListView::GameListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
+    AbstractListView(parent),
+    m_db(db),
+    m_type(type),
+    m_view(new QTableView(this)),
+    m_model(new TableModelGame(tableName, m_db, utilityTable, this)),
+    m_utilityTable(utilityTable)
 {
-	// Creating the table view and the game list proxy model.
-	m_view->setModel(m_model);
-	m_view->setSortingEnabled(m_isSortingEnabled);
-	// set the two first column to expend to all the size avalaible, except for the 3 column
-	m_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-	m_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-	// Hide the vertical header.
-	m_view->verticalHeader()->hide();
-	// Set the custom delegate for the stars
-	// QTableView do not take ownership of item delegate, so we deleting it manually.
-	QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
-	m_view->setItemDelegate(new GameStarDelegate());
-	delete itemDelegate;
-	m_view->setSelectionBehavior(QTableView::SelectRows);
-	m_view->setSelectionMode(QTableView::ExtendedSelection);
-	m_view->setDragDropMode(QTableView::DragDrop);
-	m_view->setAcceptDrops(true);
-	m_view->setDragDropOverwriteMode(false);
-	connect(m_model, &GameListModel::listEdited, [this]() { emit listEdited(); });
-	connect(m_model, &GameListModel::listFiltered, this, &GameListView::filteringTheList);
-	createLayout();
+    setupWidget();
+    setupView();
+    connect(m_model, &TableModel::listEdited, this, &GameListView::listEdited);
+}
+
+GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
+    AbstractListView(parent),
+    m_db(db),
+    m_type(ListType::UNKNOWN),
+    m_view(new QTableView(this)),
+    m_model(new TableModelGame(data, db, utilityTable, this)),
+    m_utilityTable(utilityTable)
+{
+    m_type = m_model->listType();
+    setupWidget();
+    setupView();
+    setColumnsSize(data);
+    connect(m_model, &TableModel::listEdited, this, &GameListView::listEdited);
 }
 
 GameListView::~GameListView()
 {
-	// Deleting all the memory allocated manually.
-	if (m_view)
-	{
-		// the selection model from the view is not deleted manually.
-		QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
-		delete m_view;
-		delete itemDelegate;
-	}
-	if (m_model)
-		delete m_model;
+    if (m_view)
+    {
+        // Deleting the item delegate of the view.
+        QAbstractItemDelegate* itemDelegate = m_view->itemDelegate();
+        if (itemDelegate)
+            delete itemDelegate;
+    }
 }
 
-void GameListView::createLayout()
+void GameListView::setupWidget()
 {
-	QVBoxLayout* vLayout = new QVBoxLayout(this);
-	vLayout->setSpacing(0);
-	vLayout->setContentsMargins(0, 0, 0, 0);
-	vLayout->addWidget(m_view);
-	setLayout(vLayout);
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->addWidget(m_view);
+    createMenu(vLayout);
+
+    // Allow the user to only select all a row.
+    m_view->setSelectionBehavior(QTableView::SelectRows);
+    m_view->setSelectionMode(QTableView::ExtendedSelection);
+
+    // Setting the custom item delegate ListViewDelegate.
+    QAbstractItemDelegate* oldDelegate = m_view->itemDelegate();
+    m_view->setItemDelegate(new ListViewDelegate(m_model, m_utilityTable, m_db));
+    delete oldDelegate;
 }
 
-QTableView* GameListView::view()
+void GameListView::setupView()
 {
-	return static_cast<QTableView*>(m_view);
+    m_view->setModel(m_model);
 }
 
-GameListModel* GameListView::model()
+void GameListView::addingItem()
 {
-	return m_model;
+    if (m_model)
+        m_model->appendRows();
 }
 
-void GameListView::appendGame()
+QString GameListView::tableName() const
 {
-	m_model->appendGame();
+    if (m_model)
+        return m_model->tableName();
+    else
+        return QString();
 }
 
-void GameListView::appendGame(const GameListModel::GameList& game)
+void GameListView::setTableName(const QString& tableName)
 {
-	m_model->appendGame(game);
+    if (m_model)
+        m_model->setTableName(tableName);
 }
 
-void GameListView::appendGames(const QVector<GameListModel::GameList>& games, bool isSorting)
+void GameListView::createMenu(QVBoxLayout* vLayout)
 {
-	m_model->appendGames(games, isSorting);
+    if (m_type == ListType::GAMELIST)
+    {
+        QToolBar* toolBar = new QToolBar(tr("Game Menu Bar"), this);
+        toolBar->setMovable(false);
+
+        QIcon addIcon(":/Images/Add.svg");
+        QAction* addAct = new QAction(addIcon, tr("Add New Game"), this);
+        addAct->setToolTip(tr("Adding a new game into the current game list."));
+        connect(addAct, &QAction::triggered, this, &GameListView::addingItem);
+        toolBar->addAction(addAct);
+
+        QIcon delIcon(":/Images/Del.svg");
+        QAction* delAct = new QAction(delIcon, tr("Delete Games"), this);
+        delAct->setToolTip(tr("Deleting selected games in the current game list."));
+        connect(delAct, &QAction::triggered, this, &GameListView::deletingItems);
+        toolBar->addAction(delAct);
+
+        QIcon updateIcon(":/Images/Update.svg");
+        QAction* updateAct = new QAction(updateIcon, tr("Synchronize SQL data with view."), this);
+        updateAct->setToolTip(tr("Query all the rows from the list and update the entire view.\n"
+                                 "Use it to check if there is no error between the data in the view and the SQL data."));
+        connect(updateAct, &QAction::triggered, m_model, &TableModel::updateQuery);
+        toolBar->addAction(updateAct);
+
+        // Make the two action for the manipulation of the urls inside a menu controlled by a QToolButton.
+        QMenu* urlMenu = new QMenu(tr("Url menu"), this);
+        QAction* setUrlAct = new QAction(tr("Set Url"), this);
+        setUrlAct->setToolTip(tr("Set the url to the selected game."));
+        connect(setUrlAct, &QAction::triggered, this, &GameListView::setUrl);
+        urlMenu->addAction(setUrlAct);
+
+        QAction* openUrlAct = new QAction(tr("Open Url"), this);
+        openUrlAct->setToolTip(tr("Open the url of the selected game."));
+        connect(openUrlAct, &QAction::triggered, this, &GameListView::openUrl);
+        urlMenu->addAction(openUrlAct);
+
+        QIcon urlIcon(":/Images/Url.svg");
+        QToolButton* urlToolButton = new QToolButton(this);
+        urlToolButton->setIcon(urlIcon);
+        urlToolButton->setPopupMode(QToolButton::InstantPopup);
+        urlToolButton->setMenu(urlMenu);
+        toolBar->addWidget(urlToolButton);
+
+        vLayout->setMenuBar(toolBar);
+    }
 }
 
-void GameListView::removeGames()
+void GameListView::deletingItems()
 {
-	QItemSelectionModel* selectionModel = m_view->selectionModel();
-	if (selectionModel->hasSelection())
-	{
-		QModelIndexList gamesToRemoves = selectionModel->selectedRows(0);
-		m_model->removeGames(gamesToRemoves);
-	}
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->deleteRows(indexList);
+    }
 }
 
-void GameListView::clearGameList()
+QVariant GameListView::listData() const
 {
-	m_model->clear();
+    // Return the data inside the model.
+    if (m_model)
+    {
+        // Retrieve the data of the model.
+        QVariant variant = m_model->retrieveData();
+        // If the list is a game list.
+        if (m_type == ListType::GAMELIST)
+        {
+            if (variant.canConvert<Game::SaveDataTable>() && m_view)
+            {
+                // Retrieve the size of the column.
+                Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+                data.viewColumnsSize.name = m_view->columnWidth(Game::NAME);
+                data.viewColumnsSize.categories = m_view->columnWidth(Game::CATEGORIES);
+                data.viewColumnsSize.developpers = m_view->columnWidth(Game::DEVELOPPERS);
+                data.viewColumnsSize.publishers = m_view->columnWidth(Game::PUBLISHERS);
+                data.viewColumnsSize.platform = m_view->columnWidth(Game::PLATFORMS);
+                data.viewColumnsSize.services = m_view->columnWidth(Game::SERVICES);
+                data.viewColumnsSize.sensitiveContent = m_view->columnWidth(Game::SENSITIVE_CONTENT);
+                data.viewColumnsSize.rate = m_view->columnWidth(Game::RATE);
+                return QVariant::fromValue(data);
+            }
+            else
+                return QVariant();
+        }
+    }
+    
+    return QVariant();
 }
 
-void GameListView::makeGameRatingAtSizeHint()
+ListType GameListView::listType() const
 {
-	if (m_noGameAddedToList)
-		m_view->resizeColumnToContents(2);
+    if (m_model)
+        return m_model->listType();
+    else
+        return ListType::UNKNOWN;
 }
 
-const QVector<GameListModel::GameList>& GameListView::gamesData() const
+void GameListView::setColumnsSize(const QVariant& variant)
 {
-	return m_model->getGameData();
+    // Set the size of the columns inside the table view.
+    if (m_type == ListType::GAMELIST)
+    {
+        if (variant.canConvert<Game::SaveDataTable>() && m_view)
+        {
+            Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+            m_view->setColumnWidth(Game::NAME, data.viewColumnsSize.name);
+            m_view->setColumnWidth(Game::CATEGORIES, data.viewColumnsSize.categories);
+            m_view->setColumnWidth(Game::DEVELOPPERS, data.viewColumnsSize.developpers);
+            m_view->setColumnWidth(Game::PUBLISHERS, data.viewColumnsSize.publishers);
+            m_view->setColumnWidth(Game::PLATFORMS, data.viewColumnsSize.platform);
+            m_view->setColumnWidth(Game::SERVICES, data.viewColumnsSize.services);
+            m_view->setColumnWidth(Game::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);
+            m_view->setColumnWidth(Game::RATE, data.viewColumnsSize.rate);
+        }
+    }
 }
 
-int GameListView::gamesCount() const
+ViewType GameListView::viewType() const
 {
-	return m_model->size();
+    return ViewType::GAME;
 }
 
-void GameListView::setSortingEnabled(bool isEnabled)
+void GameListView::setUrl()
 {
-	m_model->setSortingEnabled(isEnabled);
-	m_view->setSortingEnabled(isEnabled);
+    // Set the url to the selected game.
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+
+        bool result = false;
+        QString url = QInputDialog::getText(
+            this,
+            tr("Set URL: \"%1\"").arg(m_model->data(indexList.at(0)).toString()),
+            tr("Url"),
+            QLineEdit::Normal,
+            QString(),
+            &result);
+        if (result)
+            m_model->setUrl(indexList.at(0), url);
+    }
+    else
+    {
+        QMessageBox::warning(
+            this,
+            tr("Set Url!"),
+            tr("No game selected."),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+    }
 }
 
-bool GameListView::isSortingEnabled() const
+void GameListView::openUrl()
 {
-	return m_model->isSortingEnabled();
-}
-
-void GameListView::filterGamesFromType(const QString& types)
-{
-	m_model->filteringType(types);
-}
-
-void GameListView::copyToClipboard() const
-{
-	/*
-	* This method is copying the selected games into the clipboard.
-	* This method only copy the name of the game. Each games are seperated with
-	* a line break '\n'.
-	*/
-
-	QClipboard* clipboard = QGuiApplication::clipboard();
-
-	QItemSelectionModel* selectionModel = m_view->selectionModel();
-	if (selectionModel->hasSelection())
-	{
-		QModelIndexList selectionList = selectionModel->selectedRows(0);
-		if (selectionList.size() > 0)
-		{
-			QString gamesText;
-			for (QModelIndexList::const_iterator it = selectionList.cbegin(); it != selectionList.cend(); it++)
-				gamesText += m_model->getGame(it->row()).name + '\n';
-			gamesText.remove(gamesText.size() - 1, 1);
-			clipboard->setText(gamesText);
-		}
-	}
-}
-
-void GameListView::copyAllColumnToClipboard() const
-{
-	/*
-	* This method is used to copy the selected games into the clipboard.
-	* All the column are copying using the following format :
-	* Name;Type;Rate. Each game is seperated by a line break '\n'.
-	*/
-
-	QClipboard* clipboard = QGuiApplication::clipboard();
-
-	QItemSelectionModel* selectionModel = m_view->selectionModel();
-	if (selectionModel->hasSelection())
-	{
-		QModelIndexList selectionList = selectionModel->selectedRows(0);
-		if (selectionList.size() > 0)
-		{
-			QString gamesText;
-			for (QModelIndexList::const_iterator it = selectionList.cbegin(); it != selectionList.cend(); it++)
-			{
-				gamesText += QString("%1;%2;%3\n")
-					.arg(m_model->getGame(it->row()).name)
-					.arg(m_model->getGame(it->row()).type)
-					.arg(m_model->getGame(it->row()).rate.starCount());
-			}
-			gamesText.remove(gamesText.size() - 1, 1);
-			clipboard->setText(gamesText);
-		}
-	}
-}
-
-void GameListView::pasteFromClipboard()
-{
-	/*
-	* Pasting the content of the clipboard into the the game list.
-	* The user can past different game by seperating each one with a
-	* line break '\n'. The user can also paste the game with the
-	* name, type and rating by seperating on the same line with ';'.
-	* Also note that the space added by the user from the ';' and the
-	* first caracter of the type or rate is preserved.
-	* If there is no selected game in the view, the clipboard games are append to
-	* the end of the list. Otherwise, the selected games are replaced by the clipboard
-	* games.
-	*/
-
-	QClipboard* clipboard = QGuiApplication::clipboard();
-
-	QString clipboardText = clipboard->text();
-
-	if (!clipboardText.isEmpty())
-	{
-		QStringList gameNames = clipboardText.split('\n');
-		for (QStringList::reverse_iterator it = gameNames.rbegin(); it != gameNames.rend(); it++)
-		{
-			if ((*it).isEmpty())
-				gameNames.erase(it.base());
-		}
-
-		QVector<GameListModel::GameList> games(gameNames.size(), { "", "No categorie", 1 });
-
-		for (int i = 0; i < gameNames.size(); i++)
-		{
-			QStringList strGameTypeRate = gameNames.at(i).split(';');
-			for (QStringList::reverse_iterator rit = gameNames.rbegin(); rit != gameNames.rend(); rit++)
-			{
-				if ((*rit).isEmpty())
-					gameNames.erase(rit.base());
-			}
-
-			if (strGameTypeRate.size() > 0)
-				games[i].name = strGameTypeRate.at(0);
-			if (strGameTypeRate.size() > 1)
-				games[i].type = strGameTypeRate.at(1);
-			if (strGameTypeRate.size() > 2)
-			{
-				bool result;
-				int rate = strGameTypeRate.at(2).toInt(&result);
-				if (result)
-					games[i].rate = GameStarRating(rate);
-			}
-		}
-
-		m_model->appendGames(games);
-	}
-}
-
-void GameListView::filteringTheList(bool value)
-{
-	// This method is called when whenever the filtering 
-	// is enabled or disabled in the model.
-	m_listIsFiltered = value;
-	emit listFiltered(value);
-}
-
-bool GameListView::isListFiltered() const
-{
-	return m_listIsFiltered;
-}
-
-QString GameListView::GameFilteringTypeText() const
-{
-	return m_model->filteringTypeText();
+    // Open the url of the selected game into the default web browser.
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        QString url = m_model->url(indexList.at(0));
+        if (!url.isEmpty())
+            QDesktopServices::openUrl(QUrl(url));
+        else
+        {
+            QMessageBox::warning(
+                this,
+                tr("Open Url!"),
+                tr("This game does not have any url."),
+                QMessageBox::Ok,
+                QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        QMessageBox::warning(
+            this,
+            tr("Open Url!"),
+            tr("You need to select a game before."),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+    }
 }
