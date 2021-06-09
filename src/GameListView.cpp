@@ -137,6 +137,19 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         connect(delAct, &QAction::triggered, this, &GameListView::deletingItems);
         toolBar->addAction(delAct);
 
+        // Move item up and down
+        QIcon moveUPIcon(":/Images/MoveUP.svg");
+        QAction* moveUpAct = new QAction(moveUPIcon, tr("Move up"), this);
+        moveUpAct->setToolTip(tr("Move the selected items up by one row."));
+        connect(moveUpAct, &QAction::triggered, this, &GameListView::moveItemUp);
+        toolBar->addAction(moveUpAct);
+
+        QIcon moveDownIcon(":/Images/MoveDown.svg");
+        QAction* moveDownAct = new QAction(moveDownIcon, tr("Move down"), this);
+        moveDownAct->setToolTip(tr("Move the selected items down by one row."));
+        connect(moveDownAct, &QAction::triggered, this, &GameListView::moveItemDown);
+        toolBar->addAction(moveDownAct);
+
         QIcon updateIcon(":/Images/Update.svg");
         QAction* updateAct = new QAction(updateIcon, tr("Synchronize SQL data with view."), this);
         updateAct->setToolTip(tr("Query all the rows from the list and update the entire view.\n"
@@ -300,5 +313,39 @@ void GameListView::openUrl()
             tr("You need to select a game before."),
             QMessageBox::Ok,
             QMessageBox::Ok);
+    }
+}
+
+void GameListView::moveItemUp()
+{
+    // Get the selection model
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    // Check if the selection model has selection
+    if (selectionModel->hasSelection())
+    {
+        // Extract the selection.
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        // Send the selection to the model.
+        QItemSelection selectedItems = m_model->moveItemsUp(indexList);
+
+        selectionModel->clear();
+        selectionModel->select(selectedItems, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+}
+
+void GameListView::moveItemDown()
+{
+    // Get the selection model
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    // Check if the selection model has selection
+    if (selectionModel->hasSelection())
+    {
+        // Extract the selection.
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        // Send the selection to the model.
+        QItemSelection selectedItems = m_model->moveItemsDown(indexList);
+
+        selectionModel->clear();
+        selectionModel->select(selectedItems, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 }

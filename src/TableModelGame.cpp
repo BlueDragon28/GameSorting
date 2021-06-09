@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #define GAME_TABLE_COLUMN_COUNT 8
+#define NUMBER_GAME_TABLE_COLUMN_COUNT 7
 
 template<typename T>
 bool TableModelGame::updateField(const QString& columnName, int rowNB, T value)
@@ -1058,4 +1059,148 @@ TableModel_UtilityInterface* TableModelGame::utilityInterface()
     if (m_isTableCreated)
         return m_interface;
     return nullptr;
+}
+
+void TableModelGame::updateGamePos(int from)
+{
+    // Update the GamePos SQL column, used to apply order in the view.
+    if (from < 0)
+        from = 0;
+    
+    for (int i = from; i < size(); i++)
+    {
+        if (m_data.at(i).gamePos == i)
+            m_data[i].gamePos = i;
+    }
+}
+
+QItemSelection TableModelGame::moveItemsUp(const QModelIndexList& indexList)
+{
+    // Move the selected items in the view up by one row.
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() < index2.row();
+        });
+    
+    QItemSelection selectedIndex;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   GamePos = %2\n"
+        "WHERE GameID = %3;");
+    
+    foreach (const QModelIndex& index, indexListCpy)
+    {
+        // If index is equal to 0, ignore
+        if (index.row() == 0)
+            continue;
+
+        QString statement = baseStatement
+            .arg(m_tableName)
+            .arg(m_data.at(index.row()).gamePos-1)
+            .arg(m_data.at(index.row()).gameID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
+        {
+            // Store the game and delete it from the game list.
+            beginRemoveRows(QModelIndex(), index.row(), index.row());
+            endRemoveRows();
+            // Move the item to the new position
+            m_data.move(index.row(), index.row()-1);
+            beginInsertRows(QModelIndex(), index.row()-1, index.row()-1);
+            endInsertRows();
+            emit listEdited();
+
+            // Store the index of the moved item into a list to be selected in the view.
+            selectedIndex.append(QItemSelectionRange(
+                this->index(index.row()-1, 0),
+                this->index(index.row()-1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+
+            updateGamePos(index.row()-1);
+            m_query.clear();
+        }
+        else
+        {
+            std::cerr << QString("Error: failed to move up items in the table %1.\n\t%2")
+                .arg(m_tableName)
+                .arg(m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    return selectedIndex;
+}
+
+QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
+{
+    // Move the selected items in the view down by one row.
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() > index2.row();
+        });
+
+    QItemSelection selectedIndex;
+    
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   GamePos = %2\n"
+        "WHERE GameID = %3;");
+    
+    foreach (const QModelIndex& index, indexListCpy)
+    {
+        // If index is equal to size() - 1, ignore.
+        if (index.row() == size()-1)
+            continue;
+        
+        QString statement = baseStatement
+            .arg(m_tableName)
+            .arg(m_data.at(index.row()).gamePos+1)
+            .arg(m_data.at(index.row()).gameID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;        // If index is equal to 0, ignore
+#endif
+
+        if (m_query.exec(statement))
+        {
+            beginRemoveRows(QModelIndex(), index.row(), index.row());
+            endRemoveRows();
+            // Move the item to the new position
+            m_data.move(index.row(), index.row()+1);
+            beginInsertRows(QModelIndex(), index.row()+1, index.row()+1);
+            endInsertRows();
+            emit listEdited();
+
+            // Store the index of the moved item into a list to be selected in the view.
+            selectedIndex.append(QItemSelectionRange(
+                this->index(index.row()+1, 0),
+                this->index(index.row()+1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+
+            updateGamePos(index.row()+1);
+            m_query.clear();
+        }
+        else
+        {
+            std::cerr << QString("Error: failed to move down items in the table %1.\n\t%2")
+                .arg(m_tableName)
+                .arg(m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    return selectedIndex;
 }

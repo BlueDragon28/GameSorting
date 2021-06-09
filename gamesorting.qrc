@@ -16,5 +16,7 @@
         <file>Images/Update.svg</file>
         <file>Images/Utility.svg</file>
         <file>Images/Url.svg</file>
+        <file>Images/MoveUP.svg</file>
+        <file>Images/MoveDown.svg</file>
     </qresource>
 </RCC>

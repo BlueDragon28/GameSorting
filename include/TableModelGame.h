@@ -20,6 +20,7 @@
 #define GAMESORTING_TABLEMODELGAME_H_
 
 #include "TableModel.h"
+#include <QItemSelection>
 
 class TableModelGame_UtilityInterface;
 
@@ -56,6 +57,9 @@ public:
 
     virtual TableModel_UtilityInterface* utilityInterface();
 
+    QItemSelection moveItemsUp(const QModelIndexList& indexList);
+    QItemSelection moveItemsDown(const QModelIndexList& indexList);
+
 protected:
     virtual void createTable() override;
     virtual void deleteTable() override;
@@ -80,6 +84,8 @@ private:
     void querySensitiveContentField();
     void querySensitiveContentField(long long int gameID);
     int findGamePos(long long int gameID) const;
+
+    void updateGamePos(int from = -1);
 
     TableModelGame_UtilityInterface* m_interface;
     QList<GameItem> m_data;
