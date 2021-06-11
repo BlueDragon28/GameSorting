@@ -59,6 +59,7 @@ public:
 
     QItemSelection moveItemsUp(const QModelIndexList& indexList);
     QItemSelection moveItemsDown(const QModelIndexList& indexList);
+    QItemSelection moveItemsTo(const QModelIndexList& indexList, int to);
 
 protected:
     virtual void createTable() override;

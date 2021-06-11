@@ -56,6 +56,7 @@ private slots:
     void openUrl();
     void moveItemUp();
     void moveItemDown();
+    void moveItemTo();
 
 private:
     void setupWidget();

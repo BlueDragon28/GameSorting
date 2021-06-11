@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="200mm"
+   height="200mm"
+   viewBox="0 0 200 200"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   sodipodi:docname="MoveTo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="true"
+     width="10mm"
+     inkscape:snap-grids="true"
+     inkscape:snap-to-guides="true"
+     inkscape:snap-page="true"
+     inkscape:zoom="0.74208053"
+     inkscape:cx="396.8572"
+     inkscape:cy="374.62242"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid878" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#000000;stroke-width:15.0748;stroke-linejoin:round"
+       id="rect880"
+       width="106.89168"
+       height="26.458336"
+       x="84.666664"
+       y="26.458334" />
+    <rect
+       style="fill:#000000;stroke-width:15.0748;stroke-linejoin:round"
+       id="rect962"
+       width="106.89168"
+       height="26.458336"
+       x="84.666664"
+       y="148.16666" />
+    <rect
+       style="fill:#000000;stroke-width:15;stroke-linejoin:round"
+       id="rect964"
+       width="105.83335"
+       height="26.458336"
+       x="5.2916512"
+       y="89.958328" />
+    <path
+       id="rect1006"
+       style="fill:#00ff00;stroke-width:37.2;stroke-linejoin:round"
+       d="M 124.88333,67.733331 190.5,100.54167 124.88333,133.35 Z"
+       sodipodi:nodetypes="cccc" />
+  </g>
+</svg>

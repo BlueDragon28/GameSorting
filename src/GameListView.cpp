@@ -150,6 +150,12 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         connect(moveDownAct, &QAction::triggered, this, &GameListView::moveItemDown);
         toolBar->addAction(moveDownAct);
 
+        QIcon moveToIcon(":/Images/MoveTo.svg");
+        QAction* moveToAct = new QAction(moveToIcon, tr("Move to"), this);
+        moveToAct->setToolTip(tr("Move the selected items to"));
+        connect(moveToAct, &QAction::triggered, this, &GameListView::moveItemTo);
+        toolBar->addAction(moveToAct);
+
         QIcon updateIcon(":/Images/Update.svg");
         QAction* updateAct = new QAction(updateIcon, tr("Synchronize SQL data with view."), this);
         updateAct->setToolTip(tr("Query all the rows from the list and update the entire view.\n"
@@ -347,5 +353,35 @@ void GameListView::moveItemDown()
 
         selectionModel->clear();
         selectionModel->select(selectedItems, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+}
+
+void GameListView::moveItemTo()
+{
+    // Move the selected items to the position x.
+    // Get the selection model
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    // Check if the selection model has selection
+    if (selectionModel->hasSelection())
+    {
+        // Extract the selection
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+
+        // Ask the user where he want to send the selection.
+        bool result = false;
+        int newPosition = QInputDialog::getInt(
+            this,
+            tr("New Item Pos"),
+            tr("Position"),
+            0,
+            0,
+            m_model->size()-indexList.size(),
+            1, &result);
+        
+        // Send the selection to the model with the new position.
+        QItemSelection selectedItems = m_model->moveItemsTo(indexList, newPosition);
+
+        selectionModel->clear();
+        selectionModel->select(selectedItems, QItemSelectionModel::Select);
     }
 }

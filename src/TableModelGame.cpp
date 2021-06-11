@@ -1204,3 +1204,79 @@ QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
 
     return selectedIndex;
 }
+
+QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int to)
+{
+    // Move the selected items from the view to the position (to).
+    // Sort the list to be able to remove item from the highest index to the lowest index.
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(), 
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() < index2.row();
+        });
+
+    // Removing items and add the valid index to the movingGame list.
+    QList<GameItem> movingGame;
+    for (int i = indexListCpy.size()-1; i >= 0; i--)
+    {
+        if (indexListCpy.at(i).row() < 0 && indexListCpy.at(i).row() >= size() &&
+            indexListCpy.at(i).column() < 0 && indexListCpy.at(i).column() >= columnCount())
+            continue;
+        
+        movingGame.prepend(m_data.at(indexListCpy.at(i).row()));
+        beginRemoveRows(QModelIndex(), indexListCpy.at(i).row(), indexListCpy.at(i).row());
+        m_data.remove(indexListCpy.at(i).row(), 1);
+        endRemoveRows();
+    }
+
+    // The moved items will be store in this list to update the selection model of the view.
+    QItemSelection selectedIndex;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   GamePos = %2\n"
+        "WHERE GameID = %3;");
+    
+    // Moving the items.
+    int i = to;
+    for (GameItem& item : movingGame)
+    {
+        item.gamePos = i;
+
+        if (m_query.exec(baseStatement
+            .arg(m_tableName)
+            .arg(i)
+            .arg(item.gameID)))
+        {
+            m_data.insert(i, item);
+            i++;
+            m_query.clear();
+        }
+        else
+        {
+            std::cerr << QString("Error: failed to replace items of table %1.\n\t%2")
+                .arg(m_tableName)
+                .arg(m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    // If any items has been moved, update the view.
+    if (i > to)
+    {
+        beginInsertRows(QModelIndex(), to, i-1);
+        endInsertRows();
+        updateGamePos(to);
+        selectedIndex.append(QItemSelectionRange(
+            index(to, 0),
+            index(i-1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+        emit listEdited();
+    }
+
+    // Return the list of the moved index.
+    return selectedIndex;
+}
