@@ -486,7 +486,9 @@ void TableModelGame::updateQuery()
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
-        "   \"%1\";")
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   GamePos ASC;")
             .arg(m_tableName);
     
 #ifndef NDEBUG
