@@ -1247,10 +1247,16 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     {
         item.gamePos = i;
 
-        if (m_query.exec(baseStatement
+        QString statement = baseStatement
             .arg(m_tableName)
             .arg(i)
-            .arg(item.gameID)))
+            .arg(item.gameID);
+
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
         {
             m_data.insert(i, item);
             i++;
