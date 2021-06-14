@@ -1068,11 +1068,41 @@ void TableModelGame::updateGamePos(int from)
     // Update the GamePos SQL column, used to apply order in the view.
     if (from < 0)
         from = 0;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET GamePos = %2\n"
+        "WHERE GameID = %3;");
     
     for (int i = from; i < size(); i++)
     {
-        if (m_data.at(i).gamePos == i)
-            m_data[i].gamePos = i;
+        if (m_data.at(i).gamePos != i)
+        {
+            QString statement = baseStatement
+                .arg(m_tableName)
+                .arg(i)
+                .arg(m_data.at(i).gameID);
+
+#ifndef NDEBUG
+            std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+            if (m_query.exec(statement))
+            {
+                m_data[i].gamePos = i;
+                m_query.clear();
+            }
+            else
+            {
+                std::cerr << QString("Failed to update game position of game %1 of the table %2.\n\t%3")
+                    .arg(m_data.at(i).gameID)
+                    .arg(m_tableName)
+                    .arg(m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
+                m_query.clear();
+            }
+        }
     }
 }
 
