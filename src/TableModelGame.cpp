@@ -25,6 +25,19 @@
 #define GAME_TABLE_COLUMN_COUNT 8
 #define NUMBER_GAME_TABLE_COLUMN_COUNT 7
 
+#define SORTING_ORDER(order, string) \
+    switch (order) \
+    { \
+    case Qt::AscendingOrder: \
+    { \
+        string = string.arg("ASC"); \
+    } break; \
+    case Qt::DescendingOrder: \
+    { \
+        string = string.arg("DESC"); \
+    } break; \
+    }
+
 template<typename T>
 bool TableModelGame::updateField(const QString& columnName, int rowNB, T value)
 {
@@ -97,7 +110,9 @@ bool TableModelGame::updateField(const QString& columnName, int rowNB, const QSt
 
 TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(tableName, db, utilityTable, parent),
-    m_interface(nullptr)
+    m_interface(nullptr),
+    m_sortingColumnID(-1),
+    m_sortingOrder(Qt::AscendingOrder)
 {
     createTable();
     m_interface = new TableModelGame_UtilityInterface(rawTableName(), m_db);
@@ -107,7 +122,9 @@ TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUt
 
 TableModelGame::TableModelGame(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(db, utilityTable, parent),
-    m_interface(nullptr)
+    m_interface(nullptr),
+    m_sortingColumnID(-1),
+    m_sortingOrder(Qt::AscendingOrder)
 {
     setItemData(data);
     connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged,  this, &TableModelGame::utilityChanged);
@@ -488,8 +505,22 @@ void TableModelGame::updateQuery()
         "FROM\n"
         "   \"%1\"\n"
         "ORDER BY\n"
-        "   GamePos ASC;")
+        "   %2 %3;")
             .arg(m_tableName);
+    
+    // Sorting view.
+    if (m_sortingColumnID == 0)
+    {
+        statement = statement.arg("Name");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else if (m_sortingColumnID == 7)
+    {
+        statement = statement.arg("Rate");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else
+        statement = statement.arg("GamePos").arg("ASC");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -521,10 +552,12 @@ void TableModelGame::updateQuery()
             queryServicesField();
             querySensitiveContentField();
 
+            if (m_sortingColumnID > 0 && m_sortingColumnID < 7)
+                sortUtility(m_sortingColumnID);
+
             beginInsertRows(QModelIndex(), 0, size()-1);
             endInsertRows();
         }
-        m_query.clear();
     }
 #ifndef NDEBUG
     else
@@ -744,10 +777,24 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
         "GROUP BY\n"
         "   \"%1\".GameID\n"
         "ORDER BY\n"
-        "   \"%1\".GameID;")
+        "   \"%1\".%4 %5;")
             .arg(m_tableName)
             .arg(m_utilityTable.tableName(tableName))
             .arg(m_interface->tableName(tableName));
+    
+    // Sorting order.
+    if (m_sortingColumnID == 0)
+    {
+        statement = statement.arg("Name");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else if (m_sortingColumnID == 7)
+    {
+        statement = statement.arg("Rate");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else
+        statement = statement.arg("GamePos").arg("ASC");
         
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -805,9 +852,7 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName, long long int
         "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
         "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
         "WHERE\n"
-        "   \"%1\".GameID = %4\n"
-        "GROUP BY\n"
-        "   \"%1\".GameID;")
+        "   \"%1\".GameID = %4;")
             .arg(m_tableName)
             .arg(m_utilityTable.tableName(tableName))
             .arg(m_interface->tableName(tableName))
@@ -924,18 +969,34 @@ void TableModelGame::querySensitiveContentField()
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
-        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\"\n"
+        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\",\n"
+        "   \"%8\".GameID\n"
         "FROM\n"
-        "   \"%1\"\n"
+        "   \"%1\", \"%8\"\n"
         "ORDER BY\n"
-        "   ItemID;")
+        "   \"%9\".%10 %11;")
             .arg(m_interface->tableName(UtilityTableName::SENSITIVE_CONTENT))
             .arg(tr("Explicit Content"))
             .arg("ExplicitContent")
             .arg(tr("Violence Content"))
             .arg("ViolenceContent")
             .arg(tr("Bad Language"))
-            .arg("BadLanguage");
+            .arg("BadLanguage")
+            .arg(m_tableName);
+
+    // Sorting order
+    if (m_sortingColumnID == 0)
+    {
+        statement = statement.arg(m_tableName).arg("Name");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else if (m_sortingColumnID == 7)
+    {
+        statement = statement.arg(m_tableName).arg("Rate");
+        SORTING_ORDER(m_sortingOrder, statement)
+    }
+    else
+        statement = statement.arg(m_tableName).arg("GamePos").arg("ASC");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl;
@@ -1317,4 +1378,58 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
 
     // Return the list of the moved index.
     return selectedIndex;
+}
+
+void TableModelGame::sort(int column, Qt::SortOrder order)
+{
+    // Sorting the table of the column (column) in the order (order).
+    if (column >= 0 && (m_sortingColumnID != column || order != m_sortingOrder))
+    {
+        m_sortingOrder = order;
+        m_sortingColumnID = column;
+        updateQuery();
+        emit sortingChanged(true);
+    }
+    else if (column < 0 && m_sortingColumnID >= 0)
+    {
+        m_sortingColumnID = column;
+        updateQuery();
+        emit sortingChanged(false);
+    }
+}
+
+void TableModelGame::sortUtility(int column)
+{
+    // Sorting games by there utilities.
+    if (column == 0 || column == 7)
+        return;
+
+    auto compareString =
+        [this] (const QString& str1, const QString& str2) -> bool
+        {
+            if (this->m_sortingOrder == Qt::AscendingOrder)
+                return str1.compare(str2) < 0;
+            else
+                return str1.compare(str2) > 0;
+        };
+    
+    auto sortTemplate =
+        [column, compareString] (const GameItem& item1, const GameItem& item2) -> bool
+        {
+            if (column == 1)
+                return compareString(item1.categories, item2.categories);
+            else if (column == 2)
+                return compareString(item1.developpers, item2.developpers);
+            else if (column == 3)
+                return compareString(item1.publishers, item2.publishers);
+            else if (column == 4)
+                return compareString(item1.platform, item2.platform);
+            else if (column == 5)
+                return compareString(item1.services, item2.services);
+            else if (column == 6)
+                return compareString(item1.sensitiveContent, item2.sensitiveContent);
+            return false;
+        };
+    
+    std::stable_sort(m_data.begin(), m_data.end(), sortTemplate);
 }

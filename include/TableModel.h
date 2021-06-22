@@ -56,6 +56,7 @@ public:
 signals:
     void listEdited();
     void tableNameChanged(const QString& tableName);
+    void sortingChanged(bool value);
 
 protected:
     virtual void createTable() = 0;

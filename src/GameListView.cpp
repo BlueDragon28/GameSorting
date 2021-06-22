@@ -19,6 +19,7 @@
 #include "GameListView.h"
 #include "TableModelGame.h"
 #include <QTableView>
+#include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QSqlQuery>
 #include <QVBoxLayout>
@@ -86,6 +87,9 @@ void GameListView::setupWidget()
     // Allow the user to only select all a row.
     m_view->setSelectionBehavior(QTableView::SelectRows);
     m_view->setSelectionMode(QTableView::ExtendedSelection);
+    m_view->horizontalHeader()->setSortIndicatorClearable(true);
+    m_view->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
+    m_view->setSortingEnabled(true);
 
     // Setting the custom item delegate ListViewDelegate.
     QAbstractItemDelegate* oldDelegate = m_view->itemDelegate();
@@ -142,18 +146,21 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         QAction* moveUpAct = new QAction(moveUPIcon, tr("Move up"), this);
         moveUpAct->setToolTip(tr("Move the selected items up by one row."));
         connect(moveUpAct, &QAction::triggered, this, &GameListView::moveItemUp);
+        connect(m_model, &TableModelGame::sortingChanged, [moveUpAct](bool value) { moveUpAct->setEnabled(!value); });
         toolBar->addAction(moveUpAct);
 
         QIcon moveDownIcon(":/Images/MoveDown.svg");
         QAction* moveDownAct = new QAction(moveDownIcon, tr("Move down"), this);
         moveDownAct->setToolTip(tr("Move the selected items down by one row."));
         connect(moveDownAct, &QAction::triggered, this, &GameListView::moveItemDown);
+        connect(m_model, &TableModelGame::sortingChanged, [moveDownAct] (bool value) { moveDownAct->setEnabled(!value); });
         toolBar->addAction(moveDownAct);
 
         QIcon moveToIcon(":/Images/MoveTo.svg");
         QAction* moveToAct = new QAction(moveToIcon, tr("Move to"), this);
         moveToAct->setToolTip(tr("Move the selected items to"));
         connect(moveToAct, &QAction::triggered, this, &GameListView::moveItemTo);
+        connect(m_model, &TableModelGame::sortingChanged, [moveToAct] (bool value) { moveToAct->setEnabled(!value); });
         toolBar->addAction(moveToAct);
 
         QIcon updateIcon(":/Images/Update.svg");

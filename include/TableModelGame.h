@@ -41,6 +41,7 @@ public:
     virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
     virtual void appendRows(int count = 1) override;
     virtual void deleteRows(const QModelIndexList& indexList) override;
@@ -85,11 +86,14 @@ private:
     void querySensitiveContentField();
     void querySensitiveContentField(long long int gameID);
     int findGamePos(long long int gameID) const;
+    void sortUtility(int column);
 
     void updateGamePos(int from = -1);
 
     TableModelGame_UtilityInterface* m_interface;
     QList<GameItem> m_data;
+    int m_sortingColumnID;
+    Qt::SortOrder m_sortingOrder;
 };
 
 #endif // GAMESORTING_TABLEMODELGAME_H_
