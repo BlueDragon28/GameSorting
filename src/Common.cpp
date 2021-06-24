@@ -145,3 +145,4 @@ T inRange(T value, T min, T max)
 		return value;
 }
 template int inRange(int value, int min, int max);
+template float inRange(float value, float min, float max);

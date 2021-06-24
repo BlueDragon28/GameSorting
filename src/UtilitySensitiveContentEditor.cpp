@@ -18,6 +18,7 @@
 
 #include "UtilitySensitiveContentEditor.h"
 #include "TableModel_UtilityInterface.h"
+#include "StarWidget.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -55,26 +56,20 @@ void UtilitySensitiveContentEditor::createWidgets()
     QFormLayout* formLayout = new QFormLayout(this);
 
     // Creating the three spin boxes.
-    QSpinBox* explicitSpin = new QSpinBox(this);
-    explicitSpin->setMinimum(0);
-    explicitSpin->setMaximum(5);
-    QSpinBox* violenceSpin = new QSpinBox(this);
-    violenceSpin->setMinimum(0);
-    violenceSpin->setMaximum(5);
-    QSpinBox* languageSpin = new QSpinBox(this);
-    languageSpin->setMinimum(0);
-    languageSpin->setMaximum(5);
+    StarWidget* explicitStar = new StarWidget(this);
+    StarWidget* violenceStar = new StarWidget(this);
+    StarWidget* languageStar = new StarWidget(this);
 
     // Every time the value of the spinboxes are modified,
     // update the member variable of this class.
-    connect(explicitSpin, qOverload<int>(&QSpinBox::valueChanged), [this](int nb){this->m_nExplicitContent = nb;});
-    connect(violenceSpin, qOverload<int>(&QSpinBox::valueChanged), [this](int nb){this->m_nViolenceContent = nb;});
-    connect(languageSpin, qOverload<int>(&QSpinBox::valueChanged), [this](int nb){this->m_nBadLanguageContent = nb;});
+    connect(explicitStar, &StarWidget::valueChanged, [this](int value){this->m_nExplicitContent = value;});
+    connect(violenceStar, &StarWidget::valueChanged, [this](int value){this->m_nViolenceContent = value;});
+    connect(languageStar, &StarWidget::valueChanged, [this](int value){this->m_nBadLanguageContent = value;});
 
     // Adding the three spin boxes into the form layout.
-    formLayout->addRow(tr("Explicit Content:"), explicitSpin);
-    formLayout->addRow(tr("Violence Content:"), violenceSpin);
-    formLayout->addRow(tr("Bad Language Content:"), languageSpin);
+    formLayout->addRow(tr("Explicit Content:"), explicitStar);
+    formLayout->addRow(tr("Violence Content:"), violenceStar);
+    formLayout->addRow(tr("Bad Language Content:"), languageStar);
 
     // Adding the form layout into the main vertical layout
     vLayout->addLayout(formLayout);
