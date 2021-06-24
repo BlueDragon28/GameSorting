@@ -99,7 +99,9 @@ void StarEditor::paintEvent(QPaintEvent* event)
 void StarEditor::mouseMoveEvent(QMouseEvent* event)
 {
 	// Capturing the mouse position and determine how many star if there.
-	int stars = inRange(int((event->position().x() / (width() / m_maxStars)) + 1), 0, m_maxStars);
+	float nb = inRange((float)event->position().x() / ((float)width() / (float)m_maxStars), 0.f, (float)m_maxStars);
+
+	int stars = int(nb+0.5f);
 
 	m_stars = stars;
 	update();

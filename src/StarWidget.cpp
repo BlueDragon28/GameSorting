@@ -60,7 +60,7 @@ void StarWidget::mousePressEvent(QMouseEvent* e)
 {
     // Calculate the number of stars when the user press on the widget.
     float nb = inRange((float)e->position().x() / ((float)width() / (float)m_max), 0.f, (float)m_max);
-    int stars = int(nb+0.5);
+    int stars = int(nb+0.5f);
 
     m_value = stars;
     emit valueChanged(m_value);
