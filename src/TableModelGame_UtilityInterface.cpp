@@ -366,9 +366,9 @@ bool TableModelGame_UtilityInterface::setData(const QVariant& variant)
 		for (long long int j = 0; j < pItem->size(); j+=10)
 		{
 			QString strData;
-			for (long long int k = 0; k < j+10 && k < pItem->size(); k++)
+			for (long long int k = j; k < j+10 && k < pItem->size(); k++)
 			{
-				if (k > 0)
+				if (k > j)
 					strData += ',';
 				
 				strData += QString("\n\t(%1, %2)")
@@ -406,9 +406,9 @@ bool TableModelGame_UtilityInterface::setData(const QVariant& variant)
 	for (long long int i = 0; i < data.sensitiveContent.size(); i+=10)
 	{
 		QString strData;
-		for (long long int j = 0; j < i+10 && j < data.sensitiveContent.size(); j++)
+		for (long long int j = i; j < i+10 && j < data.sensitiveContent.size(); j++)
 		{
-			if (j > 0)
+			if (j > i)
 				strData += ',';
 			
 			strData += QString("\n\t(%1, %2, %3, %4, %5)")
