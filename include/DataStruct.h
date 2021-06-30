@@ -41,6 +41,14 @@ enum class ViewType
     UTILITY,
 };
 
+struct SensitiveContent
+{
+    int explicitContent = 0;
+    int violenceContent = 0;
+    int badLanguageContent = 0;
+};
+Q_DECLARE_METATYPE(SensitiveContent);
+
 struct GameItem
 {
     long long int gameID;
@@ -51,7 +59,7 @@ struct GameItem
     QString publishers;
     QString platform;
     QString services;
-    QString sensitiveContent;
+    SensitiveContent sensitiveContent;
     QString url;
     int rate;
 };

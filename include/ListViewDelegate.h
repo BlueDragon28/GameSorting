@@ -45,6 +45,7 @@ public:
 
 private:
 	void commitAndCloseEditor(QWidget* editor);
+	void paintSensitiveStars(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const;
 
 	TableModel* m_tableModel;
 	SqlUtilityTable& m_utilityTable;

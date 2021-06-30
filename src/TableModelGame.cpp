@@ -178,7 +178,7 @@ QVariant TableModelGame::data(const QModelIndex& index, int role) const
             case Game::SERVICES:
                 return m_data.at(index.row()).services;
             case Game::SENSITIVE_CONTENT:
-                return m_data.at(index.row()).sensitiveContent;
+                return QVariant::fromValue(m_data.at(index.row()).sensitiveContent);
             case Game::RATE:
                 return m_data.at(index.row()).rate;
             }
@@ -969,19 +969,15 @@ void TableModelGame::querySensitiveContentField()
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
-        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\",\n"
-        "   \"%8\".GameID\n"
+        "   ExplicitContent,\n"
+        "   ViolenceContent,\n"
+        "   BadLanguage,\n"
+        "   \"%2\".GameID\n"
         "FROM\n"
-        "   \"%1\", \"%8\"\n"
+        "   \"%1\", \"%2\"\n"
         "ORDER BY\n"
-        "   \"%9\".%10 %11;")
+        "   \"%3\".%4 %5;")
             .arg(m_interface->tableName(UtilityTableName::SENSITIVE_CONTENT))
-            .arg(tr("Explicit Content"))
-            .arg("ExplicitContent")
-            .arg(tr("Violence Content"))
-            .arg("ViolenceContent")
-            .arg(tr("Bad Language"))
-            .arg("BadLanguage")
             .arg(m_tableName);
 
     // Sorting order
@@ -1007,13 +1003,16 @@ void TableModelGame::querySensitiveContentField()
         while (m_query.next())
         {
             long long int gameID = m_query.value(0).toLongLong();
-            QString sensitiveContent = m_query.value(1).toString();
+            SensitiveContent sensData = {};
+            sensData.explicitContent = m_query.value(1).toInt();
+            sensData.violenceContent = m_query.value(2).toInt();
+            sensData.badLanguageContent = m_query.value(3).toInt();
 
             for (int i = 0; i < size(); i++)
             {
                 if (m_data.at(i).gameID == gameID)
                 {
-                    m_data[i].sensitiveContent = sensitiveContent;
+                    m_data[i].sensitiveContent = sensData;
                     break;
                 }
             }
@@ -1034,18 +1033,14 @@ void TableModelGame::querySensitiveContentField(long long int gameID)
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
-        "   '%2 ' || \"%3\" || ', %4 ' || \"%5\" || ', %6 ' || \"%7\"\n"
+        "   ExplicitContent,\n"
+        "   ViolenceContent,\n"
+        "   BadLanguage\n"
         "FROM\n"
         "   \"%1\"\n"
         "WHERE\n"
-        "   ItemID = %8;")
+        "   ItemID = %2;")
             .arg(m_interface->tableName(UtilityTableName::SENSITIVE_CONTENT))
-            .arg(tr("Explicit Content"))
-            .arg("ExplicitContent")
-            .arg(tr("Violence Content"))
-            .arg("ViolenceContent")
-            .arg(tr("Bad Language"))
-            .arg("BadLanguage")
             .arg(gameID);
 
 #ifndef NDEBUG
@@ -1058,7 +1053,11 @@ void TableModelGame::querySensitiveContentField(long long int gameID)
         int pos = findGamePos(gameID);
         if (pos >= 0 && pos < rowCount() && m_query.next())
         {
-            m_data[pos].sensitiveContent = m_query.value(1).toString();
+            SensitiveContent sensData = {};
+            sensData.explicitContent = m_query.value(1).toInt();
+            sensData.violenceContent = m_query.value(2).toInt();
+            sensData.badLanguageContent = m_query.value(3).toInt();
+            m_data[pos].sensitiveContent = sensData;
             emit dataChanged(index(pos, Game::SENSITIVE_CONTENT), index(pos, Game::SENSITIVE_CONTENT));
         }
         m_query.clear();
@@ -1412,9 +1411,46 @@ void TableModelGame::sortUtility(int column)
             else
                 return str1.compare(str2) > 0;
         };
+
+    auto compareSens = 
+        [this] (const SensitiveContent& data1, const SensitiveContent& data2) -> bool
+        {
+            if (this->m_sortingOrder == Qt::AscendingOrder)
+            {
+                if (data1.explicitContent < data2.explicitContent)
+                    return true;
+                else if (data1.explicitContent == data2.explicitContent)
+                {
+                    if (data1.violenceContent < data2.violenceContent)
+                        return true;
+                    else if (data1.violenceContent == data2.violenceContent)
+                    {
+                        if (data1.badLanguageContent < data2.badLanguageContent)
+                            return true;
+                    }
+                }
+            }
+            else 
+            {
+                if (data1.explicitContent > data2.explicitContent)
+                    return true;
+                else if (data1.explicitContent == data2.explicitContent)
+                {
+                    if (data1.violenceContent > data2.violenceContent)
+                        return true;
+                    else if (data1.violenceContent == data2.violenceContent)
+                    {
+                        if (data1.badLanguageContent > data2.badLanguageContent)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        };
     
     auto sortTemplate =
-        [column, compareString] (const GameItem& item1, const GameItem& item2) -> bool
+        [column, compareString, compareSens] (const GameItem& item1, const GameItem& item2) -> bool
         {
             if (column == 1)
                 return compareString(item1.categories, item2.categories);
@@ -1427,7 +1463,7 @@ void TableModelGame::sortUtility(int column)
             else if (column == 5)
                 return compareString(item1.services, item2.services);
             else if (column == 6)
-                return compareString(item1.sensitiveContent, item2.sensitiveContent);
+                return compareSens(item1.sensitiveContent, item2.sensitiveContent);
             return false;
         };
     

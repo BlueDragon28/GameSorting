@@ -146,3 +146,8 @@ void StarEditor::setMaxStars(int maxStars)
 		m_stars = inRange(m_stars, 0, m_maxStars);
 	}
 }
+
+const QPolygonF& StarEditor::polygonData()
+{
+	return starPolygonData;
+}

@@ -25,6 +25,10 @@
 #include "StarEditor.h"
 #include <iostream>
 
+#include <QPainter>
+#include <QBrush>
+#include <QColor>
+
 ListViewDelegate::ListViewDelegate(
 	TableModel* tableModel,
 	SqlUtilityTable& utilityTable,
@@ -51,6 +55,11 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 			StarEditor::paintStars(index.data().toInt(), painter, option.rect, option.palette);
 			return;
 		}
+		else if (index.column() == Game::SENSITIVE_CONTENT)
+		{
+			paintSensitiveStars(painter, option, index);
+			return;
+		}
 	}
 
 	QStyledItemDelegate::paint(painter, option, index);
@@ -64,6 +73,10 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 		if (index.column() == Game::RATE)
 		{
 			return StarEditor::sizeHint(5);
+		}
+		else if (index.column() == Game::SENSITIVE_CONTENT)
+		{
+			return QSize((int)StarEditor::paintFactor() * 15, 1);
 		}
 	}
 
@@ -184,4 +197,67 @@ void ListViewDelegate::commitAndCloseEditor(QWidget* editor)
 		emit commitData(editor);
 		emit closeEditor(editor);
 	}
+}
+
+void ListViewDelegate::paintSensitiveStars(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const
+{
+	// Paint the stars of the three categories of sensitive content items.
+	painter->setRenderHint(QPainter::Antialiasing, true);
+	painter->save();
+
+	if (options.rect.width() >= 15 * StarEditor::paintFactor())
+	{
+		QPolygonF starPolygons = StarEditor::polygonData();
+
+		// Sensitive Content
+		painter->setPen(Qt::NoPen);
+		painter->setBrush(QBrush(QColor(255, 0, 0)));
+		QRect rect = options.rect;
+		painter->translate(rect.x() + StarEditor::paintFactor() * 0.55, rect.y() + (rect.height() / 2.));
+		painter->scale(StarEditor::paintFactor(), StarEditor::paintFactor());
+
+		for (int i = 0; i < 3; i++)
+		{
+			QColor color;
+			if (i == 0)
+				color = QColor(255, 0, 0);
+			else if (i == 1)
+				color = QColor(0, 255, 0);
+			else
+				color = QColor(0, 0, 255);
+			
+			painter->setBrush(QBrush(color));
+
+			int numStars;
+			if (i == 0)
+				numStars = qvariant_cast<SensitiveContent>(index.data()).explicitContent;
+			else if (i == 1)
+				numStars = qvariant_cast<SensitiveContent>(index.data()).violenceContent;
+			else if (i == 2)
+				numStars = qvariant_cast<SensitiveContent>(index.data()).badLanguageContent;
+
+			for (int j = 0; j < 5; j++)
+			{
+				if (j < numStars)
+					painter->drawPolygon(starPolygons, Qt::WindingFill);
+				painter->translate(1, 0);
+			}
+		}
+	}
+	else
+	{
+		QString sensText = QString("%1 %2 %3")
+			.arg(qvariant_cast<SensitiveContent>(index.data()).explicitContent)
+			.arg(qvariant_cast<SensitiveContent>(index.data()).violenceContent)
+			.arg(qvariant_cast<SensitiveContent>(index.data()).badLanguageContent);
+		
+		QFont font = painter->font();
+		font.setPixelSize(20);
+		painter->setFont(font);
+
+		painter->setPen(Qt::SolidLine);
+		painter->drawText(options.rect, sensText);
+	}
+
+	painter->restore();
 }

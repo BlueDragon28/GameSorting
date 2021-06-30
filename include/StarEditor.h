@@ -32,6 +32,7 @@ public:
 	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false);
 	static QSize sizeHint(int maxStars);
 	static double paintFactor();
+	static const QPolygonF& polygonData();
 
 	int stars() const;
 	int maxStars() const;
