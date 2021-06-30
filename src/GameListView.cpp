@@ -385,6 +385,9 @@ void GameListView::moveItemTo()
             m_model->size()-indexList.size(),
             1, &result);
         
+        if (!result)
+            return;
+        
         // Send the selection to the model with the new position.
         QItemSelection selectedItems = m_model->moveItemsTo(indexList, newPosition);
 
