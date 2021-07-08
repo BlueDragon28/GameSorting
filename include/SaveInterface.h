@@ -32,7 +32,8 @@
 
 // Type identifier and version of a GLD file.
 #define GLD_IDENTIFIER "GLD"
-#define GLD_VERSION (int)(400)
+#define GLD_VERSION (int)(500)
+#define GLD_VERSION_MAX_SUPPORT (int)(600)
 
 class QDataStream;
 

@@ -157,6 +157,8 @@ namespace Game
         QList<SaveItem> gameList;
         SaveUtilityInterfaceData interface;
         ColumnsSize viewColumnsSize;
+        signed char columnSort;
+        unsigned char sortOrder;
     };
 
     struct SaveData

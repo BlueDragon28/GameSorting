@@ -608,6 +608,9 @@ QVariant TableModelGame::retrieveData() const
     
     data.interface = qvariant_cast<Game::SaveUtilityInterfaceData>(utilityInterface);
 
+    data.columnSort = (signed char)m_sortingColumnID;
+    data.sortOrder = (unsigned char)(m_sortingOrder == Qt::AscendingOrder ? 0 : 1);
+
     return QVariant::fromValue(data);
 }
 

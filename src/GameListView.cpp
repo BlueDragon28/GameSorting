@@ -62,7 +62,7 @@ GameListView::GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTab
     m_type = m_model->listType();
     setupWidget();
     setupView();
-    setColumnsSize(data);
+    setColumnsSizeAndSortingOrder(data);
     connect(m_model, &TableModel::listEdited, this, &GameListView::listEdited);
 }
 
@@ -243,7 +243,7 @@ ListType GameListView::listType() const
         return ListType::UNKNOWN;
 }
 
-void GameListView::setColumnsSize(const QVariant& variant)
+void GameListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
 {
     // Set the size of the columns inside the table view.
     if (m_type == ListType::GAMELIST)
@@ -259,6 +259,8 @@ void GameListView::setColumnsSize(const QVariant& variant)
             m_view->setColumnWidth(Game::SERVICES, data.viewColumnsSize.services);
             m_view->setColumnWidth(Game::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);
             m_view->setColumnWidth(Game::RATE, data.viewColumnsSize.rate);
+
+            m_view->horizontalHeader()->setSortIndicator(data.columnSort, (data.sortOrder == 0 ? Qt::AscendingOrder : Qt::DescendingOrder));
         }
     }
 }

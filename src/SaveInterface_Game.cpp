@@ -83,7 +83,7 @@ bool SaveInterface::openGame(QDataStream* in, QVariant& variant)
     int fileVersion;
     *in >> fileVersion;
     // Checking if the version of the file is a valid version.
-    if (fileVersion >= GLD_VERSION && fileVersion < GLD_VERSION+100)
+    if (fileVersion >= GLD_VERSION && fileVersion < GLD_VERSION_MAX_SUPPORT)
     {
         if (in->atEnd())
             return false;
@@ -362,6 +362,10 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveDataTable& data)
     // Writing the size of the columns of the table view.
     out << data.viewColumnsSize;
 
+    // Write the column sorted (-1 if none) and the sorting order.
+    out << data.columnSort;
+    out << data.sortOrder;
+
     return out;
 }
 
@@ -388,6 +392,10 @@ QDataStream& operator>>(QDataStream& in, Game::SaveDataTable& data)
 
     // Reading the size of the columns of the table view.
     in >> data.viewColumnsSize;
+
+    // Reading the sorting column.
+    in >> data.columnSort;
+    in >> data.sortOrder;
 
     return in;
 }
