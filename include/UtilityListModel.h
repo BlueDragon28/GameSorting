@@ -26,6 +26,7 @@
 #include <QVariant>
 #include <QSqlQuery>
 #include <QSqlDatabase>
+#include <QItemSelection>
 
 class SqlUtilityTable;
 
@@ -48,8 +49,13 @@ public:
     void queryTable();
     void appendRow();
     void deleteIndexs(const QModelIndexList& indexList);
+    QItemSelection moveItemUp(const QModelIndexList& indexList);
+    QItemSelection moveItemDown(const QModelIndexList& indexList);
+    QItemSelection moveItemTo(const QModelIndexList& indexList, int to);
 
 private:
+    void updateOrder(int from = -1);
+
     SqlUtilityTable* m_utility;
     UtilityTableName m_tableName;
     QList<ItemUtilityData> m_data;

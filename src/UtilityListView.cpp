@@ -24,6 +24,7 @@
 #include <QIcon>
 #include <QItemSelectionModel>
 #include <QHeaderView>
+#include <QInputDialog>
 
 UtilityListView::UtilityListView(SqlUtilityTable* utility, UtilityTableName tableName, QSqlDatabase& db, QWidget* parent) :
     AbstractListView(parent),
@@ -62,6 +63,24 @@ void UtilityListView::createMenu()
     connect(delAct, &QAction::triggered, this, &UtilityListView::deleteSelectedRows);
     menuBar->addAction(delAct);
 
+    QIcon moveUPIcon(":/Images/MoveUP.svg");
+    QAction* moveUPAct = new QAction(moveUPIcon, tr("Move up"), this);
+    moveUPAct->setToolTip(tr("Move the selected items up by one row."));
+    connect(moveUPAct, &QAction::triggered, this, &UtilityListView::moveItemUp);
+    menuBar->addAction(moveUPAct);
+
+    QIcon moveDownIcon(":/Images/MoveDown.svg");
+    QAction* moveDownAct = new QAction(moveDownIcon, tr("Move down"), this);
+    moveDownAct->setToolTip(tr("Move the selected items down by one row."));
+    connect(moveDownAct, &QAction::triggered, this, &UtilityListView::moveItemDown);
+    menuBar->addAction(moveDownAct);
+
+    QIcon moveToIcon(":/Images/MoveTo.svg");
+    QAction* moveToAct = new QAction(moveToIcon, tr("Move to"), this);
+    moveToAct->setToolTip(tr("Move the selected items to"));
+    connect(moveToAct, &QAction::triggered, this, &UtilityListView::moveItemTo);
+    menuBar->addAction(moveToAct);
+
     QIcon updateIcon(":/Images/Update.svg");
     QAction* updateAct = new QAction(updateIcon, tr("Update the list"), this);
     updateAct->setToolTip(tr("Synchronising the list between the view and the SQL table."));
@@ -98,5 +117,56 @@ void UtilityListView::deleteSelectedRows()
         QModelIndexList indexList = selectionModel->selectedRows();
         // Send the list to the model.
         m_model->deleteIndexs(indexList);
+    }
+}
+
+void UtilityListView::moveItemUp()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        QItemSelection selectedIndex = m_model->moveItemUp(indexList);
+        selectionModel->clear();
+        selectionModel->select(selectedIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+}
+
+void UtilityListView::moveItemDown()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        QItemSelection selectedIndex = m_model->moveItemDown(indexList);
+        selectionModel->clear();
+        selectionModel->select(selectedIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+}
+
+void UtilityListView::moveItemTo()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+
+        bool result = false;
+        int newPosition = QInputDialog::getInt(
+            this,
+            tr("New Item Pos"),
+            tr("Position"),
+            0,
+            0,
+            m_model->rowCount()-indexList.size(),
+            1,
+            &result);
+        
+        if (!result)
+            return;
+        
+        QItemSelection selectedIndex = m_model->moveItemTo(indexList, newPosition);
+        selectionModel->clear();
+        selectionModel->select(selectedIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 }

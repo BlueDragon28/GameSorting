@@ -108,12 +108,12 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
     if (row > -1 && row <= rowCount() && count > 0)
     {
         QString statement = QString(
-            "INSERT INTO \"%1\" (Name)\n"
+            "INSERT INTO \"%1\" (OrderID, Name)\n"
             "VALUES")
             .arg(SqlUtilityTable::tableName(m_tableName));
         
         for (int i = 0; i < count; i++)
-            statement += QString("\n\t(\"New %1\"),").arg(SqlUtilityTable::tableName(m_tableName));
+            statement += QString("\n\t(0, \"New %1\"),").arg(SqlUtilityTable::tableName(m_tableName));
         statement[statement.size()-1] = ';';
 
 #ifndef NDEBUG
@@ -127,6 +127,7 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
             statement = QString(
                 "SELECT\n"
                 "   \"%1ID\",\n"
+                "   OrderID,\n"
                 "   Name\n"
                 "FROM\n"
                 "   \"%1\"\n"
@@ -149,7 +150,8 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
                 {
                     ItemUtilityData data = {};
                     data.utilityID = m_query.value(0).toLongLong();
-                    data.name = m_query.value(1).toString();
+                    data.order = m_query.value(1).toInt();
+                    data.name = m_query.value(2).toString();
                     newData.prepend(data);
                 }
 
@@ -158,6 +160,7 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
                     beginInsertRows(QModelIndex(), 0, newData.size()-1);
                     m_data.append(newData);
                     endInsertRows();
+                    updateOrder(row);
                 }
             }
             else
@@ -274,7 +277,7 @@ void UtilityListModel::queryTable()
         "FROM\n"
         "   \"%1\"\n"
         "ORDER BY\n"
-        "   \"%1ID\";")
+        "   OrderID ASC;")
         .arg(SqlUtilityTable::tableName(m_tableName));
 
 #ifndef NDEBUG
@@ -329,4 +332,239 @@ void UtilityListModel::deleteIndexs(const QModelIndexList& indexList)
     // Then, delete the rows.
     for (int i = 0; i < cpyIndexList.size(); i++)
         removeRow(cpyIndexList.at(i).row());
+}
+
+void UtilityListModel::updateOrder(int from)
+{
+    // Update the position of the utility.
+    if (from < 0)
+        from = 0;
+    
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET OrderID = %2\n"
+        "WHERE \"%1ID\" = %3;");
+
+    for (int i = from; i < m_data.size(); i++)
+    {
+        if (m_data.at(i).order != i)
+        {
+            QString statement = baseStatement
+                .arg(SqlUtilityTable::tableName(m_tableName))
+                .arg(i)
+                .arg(m_data.at(i).utilityID);
+            
+#ifndef NDEBUG
+            std::cout << statement.toLocal8Bit().constData() << std::endl;
+#endif
+
+            if (m_query.exec(statement))
+            {
+                m_data[i].order = i;
+                m_query.clear();
+            }
+            else
+            {
+                std::cerr << QString("Failed to update position of Utility %1.\n\t%2")
+                    .arg(SqlUtilityTable::tableName(m_tableName), m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
+                m_query.clear();
+            }
+        }
+    }
+}
+
+QItemSelection UtilityListModel::moveItemUp(const QModelIndexList& indexList)
+{
+    // Move selected items up by one row.
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() < index2.row();
+        });
+    
+    QItemSelection selectedIndex;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   OrderID = %2\n"
+        "WHERE \"%1ID\" = %3;");
+    
+    foreach (const QModelIndex& index, indexListCpy)
+    {
+        if (index.row() == 0)
+            continue;
+        
+        QString statement = baseStatement
+            .arg(SqlUtilityTable::tableName(m_tableName))
+            .arg(m_data.at(index.row()).order-1)
+            .arg(m_data.at(index.row()).utilityID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
+        {
+            beginRemoveRows(QModelIndex(), index.row(), index.row());
+            endRemoveRows();
+            m_data.move(index.row(), index.row()-1);
+            beginInsertRows(QModelIndex(), index.row()-1, index.row()-1);
+            endInsertRows();
+            
+            selectedIndex.append(QItemSelectionRange(
+                this->index(index.row()-1, 0),
+                this->index(index.row()-1, 0)));
+
+            updateOrder(index.row()-1);
+            m_query.clear();
+        }
+        else
+        {
+            std::cerr << QString("Failed to move items up from table %1;\n\t%2")
+                .arg(SqlUtilityTable::tableName(m_tableName), m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    return selectedIndex;
+}
+
+QItemSelection UtilityListModel::moveItemDown(const QModelIndexList& indexList)
+{
+    // Move selected items down by one row.
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
+        [] (const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() > index2.row();
+        });
+    
+    QItemSelection selectedIndex;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   OrderID = %2\n"
+        "WHERE \"%1ID\" = %3;");
+    
+    foreach (const QModelIndex& index, indexListCpy)
+    {
+        if (index.row() == m_data.size()-1)
+            continue;
+
+        QString statement = baseStatement
+            .arg(SqlUtilityTable::tableName(m_tableName))
+            .arg(m_data.at(index.row()).order+1)
+            .arg(m_data.at(index.row()).utilityID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
+        {
+            beginRemoveRows(QModelIndex(), index.row(), index.row());
+            endRemoveRows();
+            m_data.move(index.row(), index.row()+1);
+            beginInsertRows(QModelIndex(), index.row()+1, index.row()+1);
+            endInsertRows();
+
+            selectedIndex.append(QItemSelectionRange(
+                this->index(index.row()+1, 0),
+                this->index(index.row()+1, 0)));
+            
+            updateOrder(index.row());
+            m_query.clear();
+        }
+        else
+        {
+            std::cout << QString("Failed to move item down from table %1.\n\t%2")
+                .arg(SqlUtilityTable::tableName(m_tableName), m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    return selectedIndex;
+}
+
+QItemSelection UtilityListModel::moveItemTo(const QModelIndexList& indexList, int to)
+{
+    // Move selected items to (to).
+    QModelIndexList indexListCpy(indexList);
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
+        [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+        {
+            return index1.row() < index2.row();
+        });
+
+    QList<ItemUtilityData> movingItem;
+    for (int i = indexListCpy.size()-1; i >= 0; i--)
+    {
+        if (indexListCpy.at(i).row() < 0 || indexListCpy.at(i).row() >= m_data.size() ||
+            indexListCpy.at(i).column() < 0 || indexListCpy.at(i).column() >= 1)
+            continue;
+        
+        movingItem.prepend(m_data.at(indexListCpy.at(i).row()));
+        beginRemoveRows(QModelIndex(), indexListCpy.at(i).row(), indexListCpy.at(i).row());
+        m_data.remove(indexListCpy.at(i).row(), 1);
+        endRemoveRows();
+    }
+    
+    QItemSelection selectedIndex;
+
+    QString baseStatement = QString(
+        "UPDATE \"%1\"\n"
+        "SET\n"
+        "   OrderID = %2\n"
+        "WHERE \"%1ID\" = %3;");
+    
+    int i = to;
+    for (ItemUtilityData& item : movingItem)
+    {
+        item.order = i;
+
+        QString statement = baseStatement
+            .arg(SqlUtilityTable::tableName(m_tableName))
+            .arg(i)
+            .arg(item.utilityID);
+        
+#ifndef NDEBUG
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement))
+        {
+            m_data.insert(i, item);
+            i++;
+            m_query.clear();
+        }
+        else
+        {
+            std::cerr << QString("Error: failed to replace items of table %1.\n\t%2")
+                .arg(SqlUtilityTable::tableName(m_tableName), m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+    }
+
+    if (i > to)
+    {
+        beginInsertRows(QModelIndex(), to, i-1);
+        endInsertRows();
+        updateOrder(to);
+        selectedIndex.append(QItemSelectionRange(
+            this->index(to, 0),
+            this->index(i-1, 0)));
+    }
+
+    return selectedIndex;
 }

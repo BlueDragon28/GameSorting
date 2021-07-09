@@ -26,6 +26,7 @@
 struct ItemUtilityData
 {
     long long int utilityID;
+    int order;
     QString name;
 };
 

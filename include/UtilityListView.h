@@ -38,6 +38,11 @@ public:
     virtual ViewType viewType() const override;
     UtilityTableName tableName() const;
 
+private slots:
+    void moveItemUp();
+    void moveItemDown();
+    void moveItemTo();
+
 private:
     void createMenu();
     void createView();

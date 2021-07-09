@@ -121,6 +121,7 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 	QString statement = QString(
 		"SELECT\n"
 		"	\"%1ID\",\n"
+		"	OrderID,\n"
 		"	\"Name\"\n"
 		"FROM\n"
 		"	\"%1\";")
@@ -136,8 +137,9 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		while (query.next())
 		{
 			long long int utilityID = query.value(0).toLongLong();
-			QString name = query.value(1).toString();
-			tableData.append({utilityID, name});
+			int order = m_query.value(1).toInt();
+			QString name = query.value(2).toString();
+			tableData.append({utilityID, order, name});
 		}
 		return tableData;
 	}
@@ -183,6 +185,7 @@ void SqlUtilityTable::standardTableCreation(UtilityTableName tableName)
 	QString statement = QString(
 		"CREATE TABLE \"%1\" (\n"
 		"	\"%1ID\" INTEGER PRIMARY KEY,\n"
+		"	OrderID INTEGER,\n"
 		"	Name TEXT);")
 			.arg(this->tableName(tableName));
 	
