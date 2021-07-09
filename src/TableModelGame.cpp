@@ -1283,7 +1283,7 @@ QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
                 this->index(index.row()+1, 0),
                 this->index(index.row()+1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
 
-            updateGamePos(index.row()+1);
+            updateGamePos(index.row());
             m_query.clear();
         }
         else
@@ -1315,8 +1315,8 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     QList<GameItem> movingGame;
     for (int i = indexListCpy.size()-1; i >= 0; i--)
     {
-        if (indexListCpy.at(i).row() < 0 && indexListCpy.at(i).row() >= size() &&
-            indexListCpy.at(i).column() < 0 && indexListCpy.at(i).column() >= columnCount())
+        if (indexListCpy.at(i).row() < 0 || indexListCpy.at(i).row() >= size() ||
+            indexListCpy.at(i).column() < 0 || indexListCpy.at(i).column() >= columnCount())
             continue;
         
         movingGame.prepend(m_data.at(indexListCpy.at(i).row()));
