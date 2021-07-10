@@ -82,7 +82,7 @@ bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<It
 {
 	// Convenient member function to set the data into the SQL Table.
 	QString statement = QString(
-		"INSERT INTO \"%1\" (\"%1ID\", Name)\n"
+		"INSERT INTO \"%1\" (\"%1ID\", OrderID, Name)\n"
 		"VALUES")
 		.arg(tableName(tName));
 	
@@ -92,8 +92,9 @@ bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<It
 		for (long long int j = i; j < i+10 && j < data.size(); j++)
 		{
 			strData +=
-				QString("\n\t(%1, \"%2\"),")
+				QString("\n\t(%1, %2, \"%3\"),")
 					.arg(data.at(j).utilityID)
+					.arg(data.at(j).order)
 					.arg(data.at(j).name);
 		}
 		if (strData.size() > 0)

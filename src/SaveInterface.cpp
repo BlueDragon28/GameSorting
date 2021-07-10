@@ -83,6 +83,8 @@ QDataStream& operator<<(QDataStream& out, const ItemUtilityData& data)
     // Writing ItemUtilityData into a data stream.
     // Writing the long long int utilityID
     out << data.utilityID;
+    // Writing the position of the item in the list.
+    out << data.order;
     // Then, writing the QString name;
     out << data.name;
 
@@ -95,6 +97,8 @@ QDataStream& operator>>(QDataStream& in, ItemUtilityData& data)
     // Reading ItemUtilityData from the data stream.
     // Reading the long long int utilityID
     in >> data.utilityID;
+    // Reading the position of the item in the list.
+    in >> data.order;
     // Reading the QString name.
     in >> data.name;
 

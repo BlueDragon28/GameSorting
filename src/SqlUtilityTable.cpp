@@ -124,7 +124,9 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		"	OrderID,\n"
 		"	\"Name\"\n"
 		"FROM\n"
-		"	\"%1\";")
+		"	\"%1\"\n"
+		"ORDER BY\n"
+		"	OrderID ASC;")
 			.arg(this->tableName(tableName));
 	
 #ifndef NDEBUG
