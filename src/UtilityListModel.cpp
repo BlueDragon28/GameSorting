@@ -362,6 +362,7 @@ void UtilityListModel::updateOrder(int from)
             {
                 m_data[i].order = i;
                 m_query.clear();
+                emit m_utility->utilityEdited();
             }
             else
             {
@@ -432,6 +433,9 @@ QItemSelection UtilityListModel::moveItemUp(const QModelIndexList& indexList)
         }
     }
 
+    if (indexListCpy.size() > 0)
+        emit m_utility->utilityEdited();
+
     return selectedIndex;
 }
 
@@ -491,6 +495,9 @@ QItemSelection UtilityListModel::moveItemDown(const QModelIndexList& indexList)
             m_query.clear();
         }
     }
+
+    if (indexListCpy.size() > 0)
+        emit m_utility->utilityEdited();
 
     return selectedIndex;
 }
@@ -564,6 +571,7 @@ QItemSelection UtilityListModel::moveItemTo(const QModelIndexList& indexList, in
         selectedIndex.append(QItemSelectionRange(
             this->index(to, 0),
             this->index(i-1, 0)));
+        emit m_utility->utilityEdited();
     }
 
     return selectedIndex;
