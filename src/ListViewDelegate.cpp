@@ -28,6 +28,7 @@
 #include <QPainter>
 #include <QBrush>
 #include <QColor>
+#include <QSpinBox>
 
 ListViewDelegate::ListViewDelegate(
 	TableModel* tableModel,
@@ -52,7 +53,19 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 		if (index.column() == Game::RATE)
 		{
 			// Painting the stars.
-			StarEditor::paintStars(index.data().toInt(), painter, option.rect, option.palette);
+			if (option.rect.width() >= 5 * StarEditor::paintFactor())
+				StarEditor::paintStars(index.data().toInt(), painter, option.rect, option.palette);
+			else
+			{
+				QString starNB = QString::number(index.data().toInt());
+
+				QFont font = painter->font();
+				font.setPixelSize(20);
+				painter->setFont(font);
+
+				painter->setPen(Qt::SolidLine);
+				painter->drawText(option.rect, starNB);
+			}
 			return;
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
@@ -91,9 +104,20 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 		if (index.column() == Game::RATE)
 		{
 			// Creating the editor for the edition of the rate column.
-			StarEditor* editor = new StarEditor(parent);
-			connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
-			return editor;
+			if (option.rect.width() >= 5 * StarEditor::paintFactor())
+			{
+				StarEditor* editor = new StarEditor(parent);
+				connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
+				return editor;
+			}
+			else
+			{
+				QSpinBox* editor = new QSpinBox(parent);
+				editor->setRange(0, 5);
+				editor->setSingleStep(1);
+				connect(editor, &QSpinBox::destroyed, [](){std::cout << "QSpinBox: destroyed." << std::endl;});
+				return editor;
+			}
 		}
 		else if (index.column() == Game::CATEGORIES ||
 				 index.column() == Game::DEVELOPPERS ||
@@ -164,8 +188,18 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 	{
 		if (index.column() == Game::RATE)
 		{
-			StarEditor* editor = reinterpret_cast<StarEditor*>(e);
-			editor->setStars(index.data().toInt());
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				starEditor->setStars(index.data().toInt());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				spinEditor->setValue(index.data().toInt());
+				return;
+			}
 		}
 	}
 
@@ -181,8 +215,18 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 	{
 		if (index.column() == Game::RATE)
 		{
-			StarEditor* editor = reinterpret_cast<StarEditor*>(e);
-			model->setData(index, editor->stars());
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				model->setData(index, starEditor->stars());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				model->setData(index, spinEditor->value());
+				return;
+			}
 		}
 	}
 
