@@ -174,4 +174,10 @@ Q_DECLARE_METATYPE(Game::SaveDataTable);
 Q_DECLARE_METATYPE(Game::SaveData);
 Q_DECLARE_METATYPE(Game::SensitiveContentData);
 
+struct RecentFileData
+{
+    QString filePath;
+    QString fileName;
+};
+
 #endif // GAMESORTING_DATASTRUCT_H_

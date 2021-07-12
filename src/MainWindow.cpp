@@ -20,6 +20,7 @@
 #include "TabAndList.h"
 #include "LicenceDialog.h"
 #include "AboutDialog.h"
+#include "Common.h"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -50,6 +51,7 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, bool doNotSa
 	m_fileMenu(nullptr),
 	m_utilityMenu(nullptr),
 	m_helpMenu(nullptr),
+	m_recentFileMenu(nullptr),
 	m_licenceDialog(nullptr),
 	m_aboutDialog(nullptr)
 {
@@ -134,6 +136,10 @@ void MainWindow::createMenu()
 	saveAsListAct->setToolTip(tr("Save a list into a new file."));
 	connect(saveAsListAct, &QAction::triggered, m_tabAndList, &TabAndList::saveAs);
 	m_fileMenu->addAction(saveAsListAct);
+
+	// Open recent file.
+	m_recentFileMenu = new QMenu(tr("Recent file"), this);
+	m_fileMenu->addMenu(m_recentFileMenu);
 
 	// Exitting the application.
 	QIcon quitIcon = QIcon(":/Images/Exit.svg");
@@ -241,6 +247,7 @@ void MainWindow::listFilePathChanged(const QString& filePath)
 	m_listFilePath = filePath;
 	m_listChanged = false;
 	updateWindowTitle();
+	updateRecentFileMenu();
 }
 
 void MainWindow::listChanged(bool isChanged)
@@ -305,6 +312,17 @@ void MainWindow::writeSettings()
 		settings.setValue("core/currentdir", m_tabAndList->currentDirectory());
 	else
 		settings.remove("core/currentdir");
+
+	// Save the recent file list.
+	if (!m_recentFileData.isEmpty())
+	{
+		QList<QString> recentFileList(m_recentFileData.size());
+		for (int i = 0; i < m_recentFileData.size(); i++)
+			recentFileList[i] = m_recentFileData.at(i).filePath;
+		settings.setValue("core/recentfiles", recentFileList);
+	}
+	else
+		settings.remove("core/recentfiles");
 }
 
 void MainWindow::readSettings()
@@ -338,6 +356,17 @@ void MainWindow::readSettings()
 	QVariant vCurrentDir = settings.value("core/currentdir");
 	if (vCurrentDir.isValid() && !m_isResetSettings)
 		m_tabAndList->setCurrentDit(vCurrentDir.toString());
+
+	// Read the recent file list.
+	QVariant vRecentFile = settings.value("core/recentfiles");
+	if (vRecentFile.isValid() && !m_isResetSettings)
+	{
+		QList<QString> recentFileList = vRecentFile.toStringList();
+		m_recentFileData.resize(recentFileList.size());
+		for (int i = 0; i < recentFileList.size(); i++)
+			m_recentFileData[i] = getRecentFileData(recentFileList.at(i));
+		updateRecentFileMenu();
+	}
 }
 
 void MainWindow::showLicence()
@@ -374,4 +403,49 @@ void MainWindow::reinsertMenu()
 	if (m_utilityMenu)
 		menuBar()->addMenu(m_utilityMenu);
 	menuBar()->addMenu(m_helpMenu);
+}
+
+void MainWindow::updateRecentFileMenu()
+{
+	// Update the recent file menu.
+	if (!m_listFilePath.isEmpty())
+	{
+		bool found = false;
+		for (int i = 0; i < m_recentFileData.size(); i++)
+		{
+			if (m_recentFileData.at(i).filePath.compare(m_listFilePath) == 0)
+			{
+				RecentFileData recentFile = m_recentFileData.at(i);
+				m_recentFileData.remove(i);
+				m_recentFileData.prepend(recentFile);
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			m_recentFileData.prepend(getRecentFileData(m_listFilePath));
+			removeOldRecentFile();
+		}
+	}
+
+	m_recentFileMenu->clear();
+
+	foreach (const RecentFileData& file, m_recentFileData)
+	{
+		QAction* recentFileAct = new QAction(file.fileName, m_recentFileMenu);
+		connect(recentFileAct, &QAction::triggered, [this, file](){this->m_tabAndList->open(file.filePath);});
+		m_recentFileMenu->addAction(recentFileAct);
+	}
+}
+
+void MainWindow::removeOldRecentFile()
+{
+	if (m_recentFileData.size() > 10)
+	{
+		int number = m_recentFileData.size() - 10;
+		if (number > 0)
+			m_recentFileData.remove(10, number);
+	}
 }

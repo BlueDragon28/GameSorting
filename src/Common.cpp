@@ -17,6 +17,7 @@
 */
 
 #include "Common.h"
+#include <QFileInfo>
 
 QString removeFirstSpaces(const QString& str)
 {
@@ -146,3 +147,12 @@ T inRange(T value, T min, T max)
 }
 template int inRange(int value, int min, int max);
 template float inRange(float value, float min, float max);
+
+RecentFileData getRecentFileData(const QString& filePath)
+{
+	// Return a struct with the file path and the file name of (filePath).
+	RecentFileData data = {};
+	data.filePath = filePath;
+	data.fileName = QFileInfo(filePath).fileName();
+	return data;
+}

@@ -19,6 +19,7 @@
 #ifndef GAMESORTING_COMMON_H_
 #define GAMESORTING_COMMON_H_
 
+#include "DataStruct.h"
 #include <QString>
 
 #define GAMESORTING_VERSION "1.0-alpha1"
@@ -29,6 +30,7 @@ QString removeFirtAndLastSpaces(const QString& str);
 QString replaceSpaceByUnderscore(const QString& str);
 QString replaceUnderscoreBySpace(const QString& str);
 QString replaceMultipleSpaceByOne(const QString& str);
+RecentFileData getRecentFileData(const QString& filePath);
 
 template<typename T>
 T inRange(T value, T min, T max);

@@ -53,6 +53,8 @@ private:
 	void showLicence();
 	void about();
 	void reinsertMenu();
+	void updateRecentFileMenu();
+	void removeOldRecentFile();
 
 	TabAndList* m_tabAndList;
 	QSqlDatabase m_db;
@@ -66,6 +68,8 @@ private:
 	QMenu* m_fileMenu;
 	QMenu* m_utilityMenu;
 	QMenu* m_helpMenu;
+	QMenu* m_recentFileMenu;
+	QList<RecentFileData> m_recentFileData;
 	LicenceDialog* m_licenceDialog;
 	AboutDialog* m_aboutDialog;
 };
