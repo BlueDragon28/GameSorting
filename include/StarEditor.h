@@ -29,7 +29,7 @@ public:
 	StarEditor(int maxStars, QWidget* parent = nullptr);
 	virtual ~StarEditor();
 
-	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false);
+	static void paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode = false, bool showHidenStars = false, int maxStars = 5);
 	static QSize sizeHint(int maxStars);
 	static double paintFactor();
 	static const QPolygonF& polygonData();
@@ -55,6 +55,7 @@ private:
 	int m_cursorXPos;
 
 	static QPolygonF starPolygonData;
+	static QList<QLineF> starLineData;
 	static double staticPaintFactor;
 };
 

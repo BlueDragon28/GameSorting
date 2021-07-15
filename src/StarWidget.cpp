@@ -71,7 +71,7 @@ void StarWidget::paintEvent(QPaintEvent* e)
 {
     // Calling the static paintStars from the StarEditor class
     QPainter painter(this);
-    StarEditor::paintStars(m_value, &painter, rect(), palette(), false);
+    StarEditor::paintStars(m_value, &painter, rect(), palette(), false, true);
 }
 
 void StarWidget::mousePressEvent(QMouseEvent* e)

@@ -39,6 +39,20 @@ QPolygonF StarEditor::starPolygonData =
 	QPointF(-0.294f, -0.405f) * .5f
 };
 
+QList<QLineF> StarEditor::starLineData =
+{
+	{QPointF(-0.294f, -0.405f) * .5f, QPointF(0.0f, -1.0f) * .5f },
+	{QPointF(0.0f, -1.0f) * .5f, QPointF(0.294f, -0.405f) * .5f},
+	{QPointF(0.294f, -0.405f) * .5f, QPointF(0.951f, -0.309f) * .5f},
+	{QPointF(0.951f, -0.309f) * .5f, QPointF(0.476f, 0.155f) * .5f},
+	{QPointF(0.476f, 0.155f) * .5f, QPointF(0.588f, 0.809f) * .5f},
+	{QPointF(0.588f, 0.809f) * .5f, QPointF(0.0f, 0.5f) * .5f},
+	{QPointF(0.0f, 0.5f) * .5f, QPointF(-0.588f, 0.809f) * .5f},
+	{QPointF(-0.588f, 0.809f) * .5f, QPointF(-0.476f, 0.155f) * .5f},
+	{QPointF(-0.476f, 0.155f) * .5f, QPointF(-0.951f, -0.309f) * .5f},
+	{QPointF(-0.951f, -0.309f) * .5f, QPointF(-0.294f, -0.405f) * .5f}
+};
+
 double StarEditor::staticPaintFactor = 19.;
 
 StarEditor::StarEditor(QWidget* parent) :
@@ -59,7 +73,7 @@ StarEditor::StarEditor(int maxStars, QWidget* parent) :
 StarEditor::~StarEditor()
 {}
 
-void StarEditor::paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode)
+void StarEditor::paintStars(int starNB, QPainter* painter, QRect rect, QPalette palette, bool isEditMode, bool showHidenStars, int maxStars)
 {
 	// Painting the stars.
 	painter->setRenderHint(QPainter::Antialiasing, true);
@@ -74,6 +88,20 @@ void StarEditor::paintStars(int starNB, QPainter* painter, QRect rect, QPalette 
 	{
 		painter->drawPolygon(starPolygonData, Qt::WindingFill);
 		painter->translate(1, 0);
+	}
+
+	// Drawing the stars with lines, to indicate to the user where the stars are.
+	if (showHidenStars)
+	{
+		QPen pen;
+		pen.setWidthF(1.1 / paintFactor());
+		pen.setBrush(palette.windowText());
+		painter->setPen(pen);
+		for (int i = starNB; i < maxStars; i++)
+		{
+			painter->drawLines(starLineData);
+			painter->translate(1, 0);
+		}
 	}
 
 	painter->restore();
