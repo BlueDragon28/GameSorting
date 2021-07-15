@@ -64,6 +64,7 @@ void UtilityInterfaceEditor::createWidgets()
     m_tableView = new QTableView(this);
     m_tableView->setModel(m_model);
     m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tableView->verticalHeader()->hide();
 
     // The buttons used apply change and cancel it.
     QPushButton* applyButton = new QPushButton(tr("Apply"), this);

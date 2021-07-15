@@ -110,9 +110,7 @@ bool TableModelGame::updateField(const QString& columnName, int rowNB, const QSt
 
 TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(tableName, db, utilityTable, parent),
-    m_interface(nullptr),
-    m_sortingColumnID(-1),
-    m_sortingOrder(Qt::AscendingOrder)
+    m_interface(nullptr)
 {
     createTable();
     m_interface = new TableModelGame_UtilityInterface(rawTableName(), m_db);
@@ -122,9 +120,7 @@ TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUt
 
 TableModelGame::TableModelGame(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(db, utilityTable, parent),
-    m_interface(nullptr),
-    m_sortingColumnID(-1),
-    m_sortingOrder(Qt::AscendingOrder)
+    m_interface(nullptr)
 {
     setItemData(data);
     connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged,  this, &TableModelGame::utilityChanged);
@@ -499,11 +495,12 @@ void TableModelGame::updateQuery()
         "SELECT\n"
         "   GameID,\n"
         "   GamePos,\n"
-        "   Name,\n"
+        "   \"%1\".Name as gName,\n"
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
         "   \"%1\"\n"
+        "%4"
         "ORDER BY\n"
         "   %2 %3;")
             .arg(m_tableName);
@@ -511,7 +508,7 @@ void TableModelGame::updateQuery()
     // Sorting view.
     if (m_sortingColumnID == 0)
     {
-        statement = statement.arg("Name");
+        statement = statement.arg("gName");
         SORTING_ORDER(m_sortingOrder, statement)
     }
     else if (m_sortingColumnID == 7)
@@ -521,6 +518,61 @@ void TableModelGame::updateQuery()
     }
     else
         statement = statement.arg("GamePos").arg("ASC");
+
+    // Filtering the view.
+    if (m_listFilter.column == Game::NAME)
+    {
+        QString where = QString(
+            "WHERE\n"
+            "   gName LIKE \"%%1%\"\n")
+            .arg(m_listFilter.pattern);
+        statement = statement.arg(where);
+    }
+    else if (m_listFilter.column >= Game::CATEGORIES &&
+        m_listFilter.column <= Game::SERVICES)
+    {
+        UtilityTableName tName;
+        if (m_listFilter.column == Game::CATEGORIES)
+            tName = UtilityTableName::CATEGORIES;
+        else if (m_listFilter.column == Game::DEVELOPPERS)
+            tName = UtilityTableName::DEVELOPPERS;
+        else if (m_listFilter.column == Game::PUBLISHERS)
+            tName = UtilityTableName::PUBLISHERS;
+        else if (m_listFilter.column == Game::PLATFORMS)
+            tName = UtilityTableName::PLATFORM;
+        else if (m_listFilter.column == Game::SERVICES)
+            tName = UtilityTableName::SERVICES;
+
+        QString where = QString(
+            "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
+            "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
+            "WHERE\n"
+            "   \"%2\".\"%2ID\" IN (%4)\n"
+            "GROUP BY\n"
+            "   GameID\n")
+            .arg(m_tableName, m_utilityTable.tableName(tName), m_interface->tableName(tName));
+        
+        QString utilList;
+        for (int i = 0; i < m_listFilter.utilityList.size(); i++)
+        {
+            if (i > 0)
+                utilList += ',';
+            
+            utilList += QString::number(m_listFilter.utilityList.at(i));
+        }
+        where = where.arg(utilList);
+        statement = statement.arg(where);
+    }
+    else if (m_listFilter.column == Game::RATE)
+    {
+        QString where = QString(
+            "WHERE\n"
+            "   Rate = %1\n")
+            .arg(m_listFilter.rate);
+        statement = statement.arg(where);
+    }
+    else
+        statement = statement.arg("");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -777,6 +829,7 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".\"UtilityID\"\n"
         "INNER JOIN \"%3\" ON \"%3\".\"ItemID\" = \"%1\".GameID\n"
+        "%6"
         "GROUP BY\n"
         "   \"%1\".GameID\n"
         "ORDER BY\n"
@@ -798,6 +851,72 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
     }
     else
         statement = statement.arg("GamePos").arg("ASC");
+
+    // Filtering the view.
+    if (m_listFilter.column == Game::NAME)
+    {
+        QString where = QString(
+            "WHERE\n"
+            "   \"%1\".Name LIKE \"%%2%\"\n")
+            .arg(m_tableName, m_listFilter.pattern);
+        statement = statement.arg(where);
+    }
+    else if (m_listFilter.column >= Game::CATEGORIES &&
+        m_listFilter.column <= Game::SERVICES)
+    {
+        UtilityTableName tName;
+        if (m_listFilter.column == Game::CATEGORIES)
+            tName = UtilityTableName::CATEGORIES;
+        else if (m_listFilter.column == Game::DEVELOPPERS)
+            tName = UtilityTableName::DEVELOPPERS;
+        else if (m_listFilter.column == Game::PUBLISHERS)
+            tName = UtilityTableName::PUBLISHERS;
+        else if (m_listFilter.column == Game::PLATFORMS)
+            tName = UtilityTableName::PLATFORM;
+        else if (m_listFilter.column == Game::SERVICES)
+            tName = UtilityTableName::SERVICES;
+        
+        QString gamesID;
+        for (int i = 0; i < m_data.size(); i++)
+        {
+            if (i > 0)
+                gamesID += ',';
+            gamesID += QString::number(m_data.at(i).gameID);
+        }
+        
+        /*if (tableName != tName)
+        {
+            QString where = QString(
+                "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
+                "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
+                "WHERE\n"
+                "   \"%1\".GameID IN (%4)\n")
+                .arg(m_tableName, 
+                     m_utilityTable.tableName(tName), 
+                     m_interface->tableName(tName),
+                     gamesID);
+            statement = statement.arg(where);
+        }
+        else
+        {*/
+            QString where = QString(
+                "WHERE\n"
+                "   \"%1\".GameID IN (%2)\n")
+                .arg(m_tableName, gamesID);
+            statement = statement.arg(where);
+        //}
+    }
+    else if (m_listFilter.column == Game::RATE)
+    {
+        QString where = QString(
+            "WHERE\n"
+            "   \"%1\".Rate = %2\n")
+            .arg(m_tableName)
+            .arg(m_listFilter.rate);
+        statement = statement.arg(where);
+    }
+    else
+        statement = statement.arg("");
         
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -1380,24 +1499,6 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
 
     // Return the list of the moved index.
     return selectedIndex;
-}
-
-void TableModelGame::sort(int column, Qt::SortOrder order)
-{
-    // Sorting the table of the column (column) in the order (order).
-    if (column >= 0 && (m_sortingColumnID != column || order != m_sortingOrder))
-    {
-        m_sortingOrder = order;
-        m_sortingColumnID = column;
-        updateQuery();
-        emit sortingChanged(true);
-    }
-    else if (column < 0 && m_sortingColumnID >= 0)
-    {
-        m_sortingColumnID = column;
-        updateQuery();
-        emit sortingChanged(false);
-    }
 }
 
 void TableModelGame::sortUtility(int column)

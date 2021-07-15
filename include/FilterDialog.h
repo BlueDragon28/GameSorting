@@ -16,61 +16,52 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_GAMELISTVIEW_H
-#define GAMESORTING_GAMELISTVIEW_H
+#ifndef GAMESORTING_FILTERDIALOG_H_
+#define GAMESORTING_FILTERDIALOG_H_
 
-#include "AbstractListView.h"
 #include "DataStruct.h"
 #include "SqlUtilityTable.h"
 
-#include <QWidget>
+#include <QDialog>
 #include <QSqlDatabase>
 
-class TableModelGame;
-class QTableView;
 class QVBoxLayout;
+class UtilityInterfaceEditorModel;
+class StarWidget;
+class TableModel_UtilityInterface;
+class TableModel;
+class QTableView;
+class QLineEdit;
+class QStackedLayout;
 
-class GameListView : public AbstractListView
+class FilterDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit GameListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
-    explicit GameListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
-    virtual ~GameListView();
-
-    QString tableName() const;
-    void setTableName(const QString& tableName);
-    ListType listType() const;
-    QVariant listData() const;
-    virtual ViewType viewType() const override;
-
-signals:
-    void listEdited();
-
-public slots:
-    void addingItem();
-    void deletingItems();
+    explicit FilterDialog(
+        TableModel* model,
+        TableModel_UtilityInterface* interface,
+        SqlUtilityTable& utility,
+        QSqlDatabase& db,
+        QWidget* parent = nullptr);
     
-private slots:
-    void setUrl();
-    void openUrl();
-    void moveItemUp();
-    void moveItemDown();
-    void moveItemTo();
-    void filter();
+    void createWidget();
+    void applyFilter();
 
 private:
-    void setupWidget();
-    void setupView();
-    void createMenu(QVBoxLayout* vLayout);
-    void setColumnsSizeAndSortingOrder(const QVariant& data);
-    void enableAction(QAction* action, bool value) const;
+    void comboBoxChanged(int index);
 
+    TableModel* m_model;
+    TableModel_UtilityInterface* m_interface;
+    SqlUtilityTable& m_utility;
     QSqlDatabase& m_db;
-    ListType m_type;
-    QTableView* m_view;
-    TableModelGame* m_model;
-    SqlUtilityTable& m_utilityTable;
+    QStackedLayout* m_stackedLayout;
+    QLineEdit* m_nameText;
+    QVBoxLayout* m_utilityVLayout;
+    UtilityInterfaceEditorModel* m_utilityModel;
+    QTableView* m_utilityView;
+    StarWidget* m_starWidget;
+    int m_lastIndex;
 };
 
-#endif // GAMESORTING_GAMELISTVIEW_H
+#endif // GAMESORTING_FILTERDIALOG_H_

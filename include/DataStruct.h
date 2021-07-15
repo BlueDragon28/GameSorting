@@ -180,4 +180,15 @@ struct RecentFileData
     QString fileName;
 };
 
+// Struct used to specify item to filter.
+// pattern and utilityList are not link, there
+// are used depending on the column used.
+struct ListFilter
+{
+    int column = -1;
+    QString pattern;
+    QList<long long int> utilityList;
+    int rate;
+};
+
 #endif // GAMESORTING_DATASTRUCT_H_

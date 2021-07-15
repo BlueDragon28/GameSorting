@@ -31,7 +31,9 @@ TableModel::TableModel(const QString& tableName, QSqlDatabase& db, SqlUtilityTab
     m_utilityTable(utilityTable),
     m_query(m_db),
     m_isTableCreated(false),
-    m_isTableChanged(false)
+    m_isTableChanged(false),
+    m_sortingColumnID(-1),
+    m_sortingOrder(Qt::AscendingOrder)
 {
     m_tableName = checkingIfNameFree(replaceSpaceByUnderscore(replaceMultipleSpaceByOne(removeFirtAndLastSpaces(tableName))));
 }
@@ -42,7 +44,9 @@ TableModel::TableModel(QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject*
     m_utilityTable(utilityTable),
     m_query(m_db),
     m_isTableCreated(false),
-    m_isTableChanged(false)
+    m_isTableChanged(false),
+    m_sortingColumnID(-1),
+    m_sortingOrder(Qt::AscendingOrder)
 {}
 
 TableModel::~TableModel()
@@ -126,4 +130,49 @@ QString TableModel::checkingIfNameFree(const QString& name, int n) const
 
     // Otherwise, the name is free, we can use it.
     return cName;
+}
+
+void TableModel::sort(int column, Qt::SortOrder order)
+{
+    // Sorting the table of the column (column) in the order (order).
+    if (column >= 0 && (m_sortingColumnID != column || order != m_sortingOrder))
+    {
+        m_sortingOrder = order;
+        m_sortingColumnID = column;
+        updateQuery();
+        emit sortingChanged(true);
+    }
+    else if (column < 0 && m_sortingColumnID >= 0)
+    {
+        m_sortingColumnID = column;
+        updateQuery();
+        emit sortingChanged(false);
+    }
+}
+
+void TableModel::setFilter(const ListFilter& filter)
+{
+    // Setting the filter.
+    m_listFilter = filter;
+    if (m_listFilter.column >= 0 && m_listFilter.column < columnCount())
+        emit filterChanged(true);
+    else
+        emit filterChanged(false);
+    updateQuery();
+}
+
+bool TableModel::isSortingEnabled() const
+{
+    if (m_sortingColumnID >= 0)
+        return true;
+    else
+        return false;
+}
+
+bool TableModel::isFilterEnabled() const
+{
+    if (m_listFilter.column >= 0)
+        return true;
+    else
+        return false;
 }

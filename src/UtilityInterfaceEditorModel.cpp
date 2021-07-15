@@ -32,14 +32,33 @@ UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
     SqlUtilityTable& utilityData,
     QSqlDatabase& db,
     QObject* parent) :
+        QAbstractListModel(parent),
         m_db(db),
         m_query(m_db),
-        QAbstractListModel(parent),
         m_utilityTableName(utilityTableName),
         m_itemID(itemID),
         m_tableModel(tableModel),
         m_dataInterface(dataInterface),
         m_utilityData(utilityData)
+{
+    retrieveUtilityData();
+}
+
+UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
+    UtilityTableName utilityTableName,
+    TableModel* tableModel,
+    TableModel_UtilityInterface* dataInterface,
+    SqlUtilityTable& utilityData,
+    QSqlDatabase& db,
+    QObject* parent) :
+    QAbstractListModel(parent),
+    m_db(db),
+    m_query(m_db),
+    m_utilityTableName(utilityTableName),
+    m_itemID(-1),
+    m_tableModel(tableModel),
+    m_dataInterface(dataInterface),
+    m_utilityData(utilityData)
 {
     retrieveUtilityData();
 }
@@ -118,6 +137,9 @@ void UtilityInterfaceEditorModel::retrieveUtilityData()
 void UtilityInterfaceEditorModel::applyChange()
 {
     // Apply the change made in the model into the SQL utility interface table.
+    if (m_itemID < 0)
+        return;
+
     m_query.clear();
 
     QList<long long int> interfaceData;
@@ -142,4 +164,9 @@ void UtilityInterfaceEditorModel::removeCheckedUtilityID(long long int utilityID
     for (int i = m_checkedIDList.size()-1; i >= 0; i--)
         if (m_checkedIDList.at(i) == utilityID)
             m_checkedIDList.remove(i, 1);
+}
+
+QList<long long int> UtilityInterfaceEditorModel::getSelectedUtilities() const
+{
+    return m_checkedIDList;
 }

@@ -18,6 +18,7 @@
 
 #include "GameListView.h"
 #include "TableModelGame.h"
+#include "FilterDialog.h"
 #include <QTableView>
 #include <QHeaderView>
 #include <QItemSelectionModel>
@@ -90,6 +91,7 @@ void GameListView::setupWidget()
     m_view->horizontalHeader()->setSortIndicatorClearable(true);
     m_view->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
     m_view->setSortingEnabled(true);
+    m_view->verticalHeader()->hide();
 
     // Setting the custom item delegate ListViewDelegate.
     QAbstractItemDelegate* oldDelegate = m_view->itemDelegate();
@@ -133,12 +135,14 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         QAction* addAct = new QAction(addIcon, tr("Add New Game"), this);
         addAct->setToolTip(tr("Adding a new game into the current game list."));
         connect(addAct, &QAction::triggered, this, &GameListView::addingItem);
+        connect(m_model, &TableModelGame::filterChanged, [addAct](bool value){addAct->setEnabled(!value);});
         toolBar->addAction(addAct);
 
         QIcon delIcon(":/Images/Del.svg");
         QAction* delAct = new QAction(delIcon, tr("Delete Games"), this);
         delAct->setToolTip(tr("Deleting selected games in the current game list."));
         connect(delAct, &QAction::triggered, this, &GameListView::deletingItems);
+        connect(m_model, &TableModelGame::filterChanged, [delAct](bool value){delAct->setEnabled(!value);});
         toolBar->addAction(delAct);
 
         // Move item up and down
@@ -146,21 +150,24 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         QAction* moveUpAct = new QAction(moveUPIcon, tr("Move up"), this);
         moveUpAct->setToolTip(tr("Move the selected items up by one row."));
         connect(moveUpAct, &QAction::triggered, this, &GameListView::moveItemUp);
-        connect(m_model, &TableModelGame::sortingChanged, [moveUpAct](bool value) { moveUpAct->setEnabled(!value); });
+        connect(m_model, &TableModelGame::sortingChanged, [moveUpAct, this](bool value) { this->enableAction(moveUpAct, !value); });
+        connect(m_model, &TableModelGame::filterChanged, [moveUpAct, this] (bool value) { this->enableAction(moveUpAct, !value); });
         toolBar->addAction(moveUpAct);
 
         QIcon moveDownIcon(":/Images/MoveDown.svg");
         QAction* moveDownAct = new QAction(moveDownIcon, tr("Move down"), this);
         moveDownAct->setToolTip(tr("Move the selected items down by one row."));
         connect(moveDownAct, &QAction::triggered, this, &GameListView::moveItemDown);
-        connect(m_model, &TableModelGame::sortingChanged, [moveDownAct] (bool value) { moveDownAct->setEnabled(!value); });
+        connect(m_model, &TableModelGame::sortingChanged, [moveDownAct, this] (bool value) { this->enableAction(moveDownAct, !value); });
+        connect(m_model, &TableModelGame::filterChanged, [moveDownAct, this] (bool value) { this->enableAction(moveDownAct, !value);  });
         toolBar->addAction(moveDownAct);
 
         QIcon moveToIcon(":/Images/MoveTo.svg");
         QAction* moveToAct = new QAction(moveToIcon, tr("Move to"), this);
         moveToAct->setToolTip(tr("Move the selected items to"));
         connect(moveToAct, &QAction::triggered, this, &GameListView::moveItemTo);
-        connect(m_model, &TableModelGame::sortingChanged, [moveToAct] (bool value) { moveToAct->setEnabled(!value); });
+        connect(m_model, &TableModelGame::sortingChanged, [moveToAct, this] (bool value) { this->enableAction(moveToAct, !value); });
+        connect(m_model, &TableModelGame::filterChanged, [moveToAct, this] (bool value) { this->enableAction(moveToAct, !value); });
         toolBar->addAction(moveToAct);
 
         QIcon updateIcon(":/Images/Update.svg");
@@ -188,6 +195,12 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         urlToolButton->setPopupMode(QToolButton::InstantPopup);
         urlToolButton->setMenu(urlMenu);
         toolBar->addWidget(urlToolButton);
+
+        QIcon filterIcon(":/Images/Filter.svg");
+        QAction* filterAct = new QAction(filterIcon, tr("Filter"), this);
+        filterAct->setToolTip(tr("Applying a filter on the list."));
+        connect(filterAct, &QAction::triggered, this, &GameListView::filter);
+        toolBar->addAction(filterAct);
 
         vLayout->setMenuBar(toolBar);
     }
@@ -396,4 +409,19 @@ void GameListView::moveItemTo()
         selectionModel->clear();
         selectionModel->select(selectedItems, QItemSelectionModel::Select);
     }
+}
+
+void GameListView::filter()
+{
+    // Opening the filter dialog.
+    FilterDialog filterDialog(m_model, m_model->utilityInterface(), m_utilityTable, m_db, this);
+    filterDialog.exec();
+}
+
+void GameListView::enableAction(QAction* action, bool value) const
+{
+    if (this->m_model->isSortingEnabled() || this->m_model->isFilterEnabled())
+        action->setEnabled(false);
+    else
+        action->setEnabled(true);
 }

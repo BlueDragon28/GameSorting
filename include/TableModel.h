@@ -38,6 +38,8 @@ public:
     TableModel(QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     virtual ~TableModel();
 
+    virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
     virtual void appendRows(int count = 1) = 0;
     virtual void deleteRows(const QModelIndexList& indexList) = 0;
     virtual int size() const = 0;
@@ -50,6 +52,9 @@ public:
     virtual void updateQuery() = 0;
     virtual QVariant retrieveData() const = 0;
     virtual bool setItemData(const QVariant& data) = 0;
+    virtual void setFilter(const ListFilter& filter);
+    virtual bool isSortingEnabled() const;
+    virtual bool isFilterEnabled() const;
 
     virtual TableModel_UtilityInterface* utilityInterface() = 0;
 
@@ -57,6 +62,7 @@ signals:
     void listEdited();
     void tableNameChanged(const QString& tableName);
     void sortingChanged(bool value);
+    void filterChanged(bool value);
 
 protected:
     virtual void createTable() = 0;
@@ -69,6 +75,9 @@ protected:
     QSqlQuery m_query;
     QString m_tableName;
     bool m_isTableCreated, m_isTableChanged;
+    ListFilter m_listFilter;
+    int m_sortingColumnID;
+    Qt::SortOrder m_sortingOrder;
 };
 
 #endif // GAMESORTING_TABLEMODEL_H_

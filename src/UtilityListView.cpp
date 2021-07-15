@@ -99,6 +99,7 @@ void UtilityListView::createView()
     m_view = new QTableView(this);
     m_view->setModel(m_model);
     m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_view->verticalHeader()->hide();
 }
 
 UtilityTableName UtilityListView::tableName() const

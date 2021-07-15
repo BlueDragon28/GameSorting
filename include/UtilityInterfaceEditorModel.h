@@ -42,6 +42,13 @@ public:
         SqlUtilityTable& utilityData,
         QSqlDatabase& db,
         QObject* parent = nullptr);
+    explicit UtilityInterfaceEditorModel(
+        UtilityTableName utilityTableName,
+        TableModel* tableModel,
+        TableModel_UtilityInterface* dataInterface,
+        SqlUtilityTable& utilityData,
+        QSqlDatabase& db,
+        QObject* parent = nullptr);
     virtual ~UtilityInterfaceEditorModel();
 
     // Interface between the view and the model.
@@ -53,6 +60,8 @@ public:
 
     // Apply the change made in the model into the utilityInterfaceTable.
     void applyChange();
+    // Return the selected utilities.
+    QList<long long int> getSelectedUtilities() const;
 
 private:
     void retrieveUtilityData();
