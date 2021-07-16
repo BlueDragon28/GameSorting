@@ -57,6 +57,7 @@ public:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+    virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
     // Apply the change made in the model into the utilityInterfaceTable.
     void applyChange();
@@ -78,6 +79,8 @@ private:
     TableModel* m_tableModel;
     TableModel_UtilityInterface* m_dataInterface;
     SqlUtilityTable& m_utilityData;
+    bool m_isSortingEnabled;
+    Qt::SortOrder m_sortOrder;
 
     // Data
     QList<ItemUtilityData> m_utilityListData;

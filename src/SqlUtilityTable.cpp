@@ -113,7 +113,7 @@ void SqlUtilityTable::destroyTableByName(const QString& tableName)
 	m_query.clear();
 }
 
-QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName) const
+QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName, bool sort, Qt::SortOrder order) const
 {
 	// Retrive all the data containing in the table tableName.
 	QSqlQuery query(m_db);
@@ -126,8 +126,13 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		"FROM\n"
 		"	\"%1\"\n"
 		"ORDER BY\n"
-		"	OrderID ASC;")
+		"	%2 %3;")
 			.arg(this->tableName(tableName));
+
+	if (sort)
+		statement = statement.arg("Name", (order == Qt::AscendingOrder ? "ASC" : "DESC"));
+	else
+		statement = statement.arg("OrderID", "ASC");
 	
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;

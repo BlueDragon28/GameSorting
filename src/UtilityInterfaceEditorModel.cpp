@@ -123,7 +123,7 @@ Qt::ItemFlags UtilityInterfaceEditorModel::flags(const QModelIndex& index) const
 void UtilityInterfaceEditorModel::retrieveUtilityData()
 {
     // Retrieving all the data of the utility data for the editing.
-    QList<ItemUtilityData> utilityData = m_utilityData.retrieveTableData(m_utilityTableName);
+    QList<ItemUtilityData> utilityData = m_utilityData.retrieveTableData(m_utilityTableName, m_isSortingEnabled, m_sortOrder);
     if (utilityData.size() > 0)
     {
         m_utilityListData.resize(utilityData.size());
@@ -169,4 +169,29 @@ void UtilityInterfaceEditorModel::removeCheckedUtilityID(long long int utilityID
 QList<long long int> UtilityInterfaceEditorModel::getSelectedUtilities() const
 {
     return m_checkedIDList;
+}
+
+void UtilityInterfaceEditorModel::sort(int column, Qt::SortOrder order)
+{
+    // Sorting the utilies list.
+    if ((column == -1 ? false : true) != m_isSortingEnabled || order != m_sortOrder)
+    {
+        m_isSortingEnabled = column == -1 ? false : true;
+        m_sortOrder = order;
+
+        if (m_utilityListData.size() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_utilityListData.size()-1);
+            m_utilityListData.clear();
+            endRemoveRows();
+        }
+
+        retrieveUtilityData();
+
+        if (m_utilityListData.size() > 0)
+        {
+            beginInsertRows(QModelIndex(), 0, m_utilityListData.size()-1);
+            endInsertRows();
+        }
+    }
 }

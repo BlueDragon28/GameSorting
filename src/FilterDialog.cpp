@@ -238,6 +238,9 @@ void FilterDialog::comboBoxChanged(int index)
             m_utilityView = new QTableView(this);
             m_utilityView->setModel(m_utilityModel);
             m_utilityView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+            m_utilityView->horizontalHeader()->setSortIndicatorClearable(true);
+            m_utilityView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
+            m_utilityView->setSortingEnabled(true);
             m_utilityView->verticalHeader()->hide();
             m_utilityVLayout->addWidget(m_utilityView);
             m_stackedLayout->setCurrentIndex(2);

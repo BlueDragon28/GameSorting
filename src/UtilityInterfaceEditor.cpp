@@ -64,6 +64,9 @@ void UtilityInterfaceEditor::createWidgets()
     m_tableView = new QTableView(this);
     m_tableView->setModel(m_model);
     m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tableView->horizontalHeader()->setSortIndicatorClearable(true);
+    m_tableView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
+    m_tableView->setSortingEnabled(true);
     m_tableView->verticalHeader()->hide();
 
     // The buttons used apply change and cancel it.
