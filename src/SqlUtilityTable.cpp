@@ -144,7 +144,7 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		while (query.next())
 		{
 			long long int utilityID = query.value(0).toLongLong();
-			int order = m_query.value(1).toInt();
+			int order = query.value(1).toInt();
 			QString name = query.value(2).toString();
 			tableData.append({utilityID, order, name});
 		}

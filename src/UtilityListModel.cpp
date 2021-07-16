@@ -107,13 +107,43 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
     // Inserting rows into the model.
     if (row > -1 && row <= rowCount() && count > 0)
     {
+        // OrderID statement
+        QString orderIDStatement = QString(
+            "SELECT\n"
+            "   MAX(OrderID)\n"
+            "FROM\n"
+            "   \"%1\";")
+                .arg(SqlUtilityTable::tableName(m_tableName));
+
+#ifndef NDEBUG
+        std::cout << orderIDStatement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        int maxOrderID = 0;
+        if (m_query.exec(orderIDStatement))
+        {
+            if (m_query.next())
+            {
+                maxOrderID = m_query.value(0).toInt();
+                m_query.clear();
+            }
+        }
+        else
+        {
+            std::cerr << QString("Failed to query max orderID from table %1.\n\t%2")
+                .arg(SqlUtilityTable::tableName(m_tableName), maxOrderID)
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+
         QString statement = QString(
             "INSERT INTO \"%1\" (OrderID, Name)\n"
             "VALUES")
             .arg(SqlUtilityTable::tableName(m_tableName));
         
         for (int i = 0; i < count; i++)
-            statement += QString("\n\t(0, \"New %1\"),").arg(SqlUtilityTable::tableName(m_tableName));
+            statement += QString("\n\t(%1, \"New %2\"),").arg(++maxOrderID).arg(SqlUtilityTable::tableName(m_tableName));
         statement[statement.size()-1] = ';';
 
 #ifndef NDEBUG
@@ -123,6 +153,7 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
         m_query.clear();
         if (m_query.exec(statement))
         {
+
             // query back the new inserted row.
             statement = QString(
                 "SELECT\n"
@@ -228,6 +259,7 @@ bool UtilityListModel::removeRows(int row, int count, const QModelIndex& parent)
             beginRemoveRows(QModelIndex(), row, row+count-1);
             m_data.remove(row, count);
             endRemoveRows();
+            updateOrder(row);
             emit m_utility->utilityEdited();
         }
         else
@@ -273,6 +305,7 @@ void UtilityListModel::queryTable()
     QString statement = QString(
         "SELECT\n"
         "   \"%1ID\",\n"
+        "   OrderID,\n"
         "   Name\n"
         "FROM\n"
         "   \"%1\"\n"
@@ -292,7 +325,8 @@ void UtilityListModel::queryTable()
         {
             ItemUtilityData data = {};
             data.utilityID = m_query.value(0).toLongLong();
-            data.name = m_query.value(1).toString();
+            data.order = m_query.value(1).toInt();
+            data.name = m_query.value(2).toString();
             m_data.append(data);
         }
 
