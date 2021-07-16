@@ -243,6 +243,35 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
     if (row >= 0 && row <= rowCount() &&
         count > 0 && m_isTableCreated)
     {
+        // GamePos Statement
+        QString posStatement = QString(
+            "SELECT\n"
+            "   MAX(GamePos)\n"
+            "FROM\n"
+            "   \"%1\";").arg(m_tableName);
+
+#ifndef NDEBUG
+        std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        int maxPos;
+        if (m_query.exec(posStatement))
+        {
+            if (m_query.next())
+            {
+                maxPos = m_query.value(0).toInt();
+                m_query.clear();
+            }
+        }
+        else
+        {
+            std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+                .arg(m_tableName, m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
+            m_query.clear();
+        }
+
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
             "INSERT INTO \"%1\" (\n"
@@ -255,8 +284,9 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
 
         for (int i = 0; i < count; i++)
         {
-            statement += 
-                "\n   (NULL, \"New Game\", NULL, NULL),";
+            statement += QString(
+                "\n   (%1, \"New Game\", NULL, NULL),")
+                .arg(++maxPos);
         }
         statement[statement.size() - 1] = ';';
 
