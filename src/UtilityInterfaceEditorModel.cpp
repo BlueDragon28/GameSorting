@@ -110,7 +110,7 @@ bool UtilityInterfaceEditorModel::setData(const QModelIndex& index, const QVaria
 
 QVariant UtilityInterfaceEditorModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (section == 0)
+    if (section == 0 && role == Qt::DisplayRole && orientation == Qt::Horizontal)
         return "Name";
     return QVariant();
 }

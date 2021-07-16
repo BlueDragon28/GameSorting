@@ -247,7 +247,7 @@ bool UtilityListModel::removeRows(int row, int count, const QModelIndex& parent)
 QVariant UtilityListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     // There is only one column, returning the name of that column.
-    if (section == 0 && orientation == Qt::Horizontal)
+    if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return "Name";
     return QVariant();
 }
