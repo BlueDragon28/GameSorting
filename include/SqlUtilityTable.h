@@ -36,7 +36,7 @@ public:
 
 	void newList(ListType type);
 	static QString tableName(UtilityTableName tableName);
-	QList<ItemUtilityData> retrieveTableData(UtilityTableName tableName, bool sort = false, Qt::SortOrder order = Qt::AscendingOrder) const;
+	QList<ItemUtilityData> retrieveTableData(UtilityTableName tableName, bool sort = false, Qt::SortOrder order = Qt::AscendingOrder, const QString& searchPattern = QString()) const;
 
 	QVariant data() const;
 	bool setData(const QVariant& data);

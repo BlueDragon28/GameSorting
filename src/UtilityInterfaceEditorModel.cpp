@@ -123,7 +123,7 @@ Qt::ItemFlags UtilityInterfaceEditorModel::flags(const QModelIndex& index) const
 void UtilityInterfaceEditorModel::retrieveUtilityData()
 {
     // Retrieving all the data of the utility data for the editing.
-    QList<ItemUtilityData> utilityData = m_utilityData.retrieveTableData(m_utilityTableName, m_isSortingEnabled, m_sortOrder);
+    QList<ItemUtilityData> utilityData = m_utilityData.retrieveTableData(m_utilityTableName, m_isSortingEnabled, m_sortOrder, m_strFilter);
     if (utilityData.size() > 0)
     {
         m_utilityListData.resize(utilityData.size());
@@ -144,7 +144,16 @@ void UtilityInterfaceEditorModel::applyChange()
 
     QList<long long int> interfaceData;
     for (int i = 0; i < m_checkedIDList.size(); i++)
-        interfaceData.append(m_checkedIDList.at(i));
+    {
+        for (int j = 0; j < m_utilityListData.size(); j++)
+        {
+            if (m_checkedIDList.at(i) == m_utilityListData.at(j).utilityID)
+            {
+                interfaceData.append(m_checkedIDList.at(i));
+                break;
+            }
+        }
+    }
     
     m_dataInterface->updateItemUtility(m_itemID, m_utilityTableName, QVariant::fromValue(interfaceData));
 }
@@ -178,6 +187,29 @@ void UtilityInterfaceEditorModel::sort(int column, Qt::SortOrder order)
     {
         m_isSortingEnabled = column == -1 ? false : true;
         m_sortOrder = order;
+
+        if (m_utilityListData.size() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_utilityListData.size()-1);
+            m_utilityListData.clear();
+            endRemoveRows();
+        }
+
+        retrieveUtilityData();
+
+        if (m_utilityListData.size() > 0)
+        {
+            beginInsertRows(QModelIndex(), 0, m_utilityListData.size()-1);
+            endInsertRows();
+        }
+    }
+}
+
+void UtilityInterfaceEditorModel::setFilter(const QString& pattern)
+{
+    if (m_strFilter.compare(pattern) != 0)
+    {
+        m_strFilter = pattern;
 
         if (m_utilityListData.size() > 0)
         {

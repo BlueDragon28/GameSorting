@@ -26,6 +26,8 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
 
 UtilityInterfaceEditor::UtilityInterfaceEditor(
     UtilityTableName utilityTableName,
@@ -60,6 +62,18 @@ UtilityInterfaceEditor::~UtilityInterfaceEditor()
 void UtilityInterfaceEditor::createWidgets()
 {
     // Create the widget inside the dialog.
+    // Search field.
+    QLabel* searchLabel = new QLabel(tr("Search:"), this);
+    QLineEdit* searchLine = new QLineEdit(this);
+    QIcon searchIcon(":/Images/Search.svg");
+    QPushButton* searchBtn = new QPushButton(this);
+    searchBtn->setIcon(searchIcon);
+    connect(searchBtn, &QPushButton::clicked, 
+        [this, searchLine]() -> void
+        {
+            this->m_model->setFilter(searchLine->text());
+        });
+
     // The table view used to display the available utility to the user.
     m_tableView = new QTableView(this);
     m_tableView->setModel(m_model);
@@ -75,7 +89,7 @@ void UtilityInterfaceEditor::createWidgets()
 
     // The layout to display correctly the content.
     QVBoxLayout* vLayout = new QVBoxLayout(this);
-    vLayout->setContentsMargins(0, 0, 0, 5);
+    vLayout->setContentsMargins(0, 5, 0, 5);
 
     QHBoxLayout* hButtonLayout = new QHBoxLayout(this);
     hButtonLayout->addStretch(1);
@@ -83,6 +97,13 @@ void UtilityInterfaceEditor::createWidgets()
     hButtonLayout->addWidget(cancelButton);
     hButtonLayout->addSpacing(5);
 
+    QHBoxLayout* hSearchLayout = new QHBoxLayout(this);
+    hSearchLayout->addWidget(searchLabel, 0);
+    hSearchLayout->addWidget(searchLine, 1);
+    hSearchLayout->addWidget(searchBtn, 0);
+    hSearchLayout->setContentsMargins(5, 0, 5, 0);
+
+    vLayout->addLayout(hSearchLayout);
     vLayout->addWidget(m_tableView);
     vLayout->addLayout(hButtonLayout);
 

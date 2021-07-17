@@ -113,7 +113,7 @@ void SqlUtilityTable::destroyTableByName(const QString& tableName)
 	m_query.clear();
 }
 
-QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName, bool sort, Qt::SortOrder order) const
+QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName tableName, bool sort, Qt::SortOrder order, const QString& searchPattern) const
 {
 	// Retrive all the data containing in the table tableName.
 	QSqlQuery query(m_db);
@@ -125,6 +125,7 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		"	\"Name\"\n"
 		"FROM\n"
 		"	\"%1\"\n"
+		"%4"
 		"ORDER BY\n"
 		"	%2 %3;")
 			.arg(this->tableName(tableName));
@@ -133,6 +134,17 @@ QList<ItemUtilityData> SqlUtilityTable::retrieveTableData(UtilityTableName table
 		statement = statement.arg("Name", (order == Qt::AscendingOrder ? "ASC" : "DESC"));
 	else
 		statement = statement.arg("OrderID", "ASC");
+	
+	if (!searchPattern.isEmpty())
+	{
+		QString searchStatement = QString(
+			"WHERE\n"
+			"	Name LIKE \"%%1%\"\n")
+			.arg(searchPattern);
+		statement = statement.arg(searchStatement);
+	}
+	else
+		statement = statement.arg("");
 	
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;

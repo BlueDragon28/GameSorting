@@ -59,6 +59,9 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
+    // Filtering by pattern.
+    void setFilter(const QString& pattern);
+
     // Apply the change made in the model into the utilityInterfaceTable.
     void applyChange();
     // Return the selected utilities.
@@ -81,6 +84,7 @@ private:
     SqlUtilityTable& m_utilityData;
     bool m_isSortingEnabled;
     Qt::SortOrder m_sortOrder;
+    QString m_strFilter;
 
     // Data
     QList<ItemUtilityData> m_utilityListData;
