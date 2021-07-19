@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.16.0)
 
-project(GameSorting VERSION 0.13 LANGUAGES CXX)
+project(gamesorting VERSION 0.13 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -55,11 +55,11 @@ else()
 	set(WIN32_PROGRAM "")
 endif()
 
-add_executable(GameSorting 
+add_executable(gamesorting 
 	${WIN32_PROGRAM}
 	${SOURCES}
 	${HEADERS}
 	${RESOURCES})
-target_link_libraries(GameSorting PRIVATE Qt6::Widgets Qt6::Sql)
-set_target_properties(GameSorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-install(TARGETS GameSorting RUNTIME DESTINATION bin)
+target_link_libraries(gamesorting PRIVATE Qt6::Widgets Qt6::Sql)
+set_target_properties(gamesorting PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+install(TARGETS gamesorting RUNTIME DESTINATION bin)
