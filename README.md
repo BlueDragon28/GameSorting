@@ -1,7 +1,5 @@
 ﻿# About Game Sorting
  
-**IT IS NOT READY TO BE USED, ONLY FOR TESTING PURPOSE.**
-
 Game Sorting is a little application to help classify wished games. It is in development and there is a lot of lacking features need to be added.
 
 Some data added to the list needs to be inserted into a separated list called utility (the name isn't good, I didn't find anything better) and then added to the main list. The purpose is to help searching and filtering the list.
