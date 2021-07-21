@@ -39,6 +39,7 @@ UtilitySensitiveContentEditor::UtilitySensitiveContentEditor(
         m_nViolenceContent(0),
         m_nBadLanguageContent(0)
 {
+    setWindowTitle(tr("Sensitive content selection"));
     createWidgets();
 }
 
