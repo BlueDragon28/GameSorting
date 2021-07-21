@@ -144,16 +144,7 @@ void UtilityInterfaceEditorModel::applyChange()
 
     QList<long long int> interfaceData;
     for (int i = 0; i < m_checkedIDList.size(); i++)
-    {
-        for (int j = 0; j < m_utilityListData.size(); j++)
-        {
-            if (m_checkedIDList.at(i) == m_utilityListData.at(j).utilityID)
-            {
-                interfaceData.append(m_checkedIDList.at(i));
-                break;
-            }
-        }
-    }
+        interfaceData.append(m_checkedIDList.at(i));
     
     m_dataInterface->updateItemUtility(m_itemID, m_utilityTableName, QVariant::fromValue(interfaceData));
 }
