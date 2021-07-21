@@ -52,6 +52,7 @@ FilterDialog::FilterDialog(
     m_lastIndex(0)
 {
     resize(480, 380);
+    setWindowTitle(tr("Filter selection"));
     createWidget();
 }
 
