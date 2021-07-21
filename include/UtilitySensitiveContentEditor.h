@@ -36,6 +36,7 @@ public:
     virtual ~UtilitySensitiveContentEditor();
 
 private:
+    void retrieveSensitiveContentOnItem();
     void createWidgets();
     void applyChange();
 

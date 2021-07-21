@@ -19,12 +19,15 @@
 #include "UtilitySensitiveContentEditor.h"
 #include "TableModel_UtilityInterface.h"
 #include "StarWidget.h"
+#include "Common.h"
 
+#include <iostream>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QSpinBox>
 #include <QPushButton>
+#include <QSqlError>
 
 UtilitySensitiveContentEditor::UtilitySensitiveContentEditor(
     long long int itemID,
@@ -40,6 +43,7 @@ UtilitySensitiveContentEditor::UtilitySensitiveContentEditor(
         m_nBadLanguageContent(0)
 {
     setWindowTitle(tr("Sensitive content selection"));
+    retrieveSensitiveContentOnItem();
     createWidgets();
 }
 
@@ -60,6 +64,11 @@ void UtilitySensitiveContentEditor::createWidgets()
     StarWidget* explicitStar = new StarWidget(this);
     StarWidget* violenceStar = new StarWidget(this);
     StarWidget* languageStar = new StarWidget(this);
+
+    // Set the value of the retrieved value (if any)
+    explicitStar->setValue(m_nExplicitContent);
+    violenceStar->setValue(m_nViolenceContent);
+    languageStar->setValue(m_nBadLanguageContent);
 
     // Every time the value of the spinboxes are modified,
     // update the member variable of this class.
@@ -107,4 +116,41 @@ void UtilitySensitiveContentEditor::applyChange()
     data.badLanguageContent = m_nBadLanguageContent;
     m_dataInterface->updateItemUtility(m_itemID, UtilityTableName::SENSITIVE_CONTENT, QVariant::fromValue(data));
     deleteLater();
+}
+
+void UtilitySensitiveContentEditor::retrieveSensitiveContentOnItem()
+{
+    // Retrieve the sensitive content of the item (m_itemID).
+    QString statement = QString(
+        "SELECT\n"
+        "   ExplicitContent,\n"
+        "   ViolenceContent,\n"
+        "   BadLanguage\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "WHERE\n"
+        "   ItemID = %2;")
+        .arg(m_dataInterface->tableName(UtilityTableName::SENSITIVE_CONTENT))
+        .arg(m_itemID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    QSqlQuery query(m_db);
+    if (query.exec(statement))
+    {
+        if (query.next())
+        {
+            m_nExplicitContent = inRange(query.value(0).toInt(), 0, 5);
+            m_nViolenceContent = inRange(query.value(1).toInt(), 0, 5);
+            m_nBadLanguageContent = inRange(query.value(2).toInt(), 0, 5);
+        }
+    }
+    else
+        std::cerr << QString("Failed to extract sensitive content of the item %1 from the table %2.\n\t%3")
+            .arg(m_itemID)
+            .arg(m_dataInterface->tableName(UtilityTableName::SENSITIVE_CONTENT), query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
 }
