@@ -48,8 +48,12 @@ public:
     void createWidget();
     void applyFilter();
 
+signals:
+    void tabChanged();
+
 private:
     void comboBoxChanged(int index);
+    void searchUtilities(const QString& pattern);
 
     TableModel* m_model;
     TableModel_UtilityInterface* m_interface;

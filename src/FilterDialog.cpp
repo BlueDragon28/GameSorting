@@ -103,6 +103,21 @@ void FilterDialog::createWidget()
     QWidget* utilitiesBaseWidget = new QWidget(this);
     m_utilityVLayout = new QVBoxLayout(utilitiesBaseWidget);
     m_utilityVLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLabel* searchUtlitiesLabel = new QLabel(tr("Search:"), this);
+    QLineEdit* searchUtilities = new QLineEdit(this);
+    connect(this, &FilterDialog::tabChanged, searchUtilities, &QLineEdit::clear);
+    QPushButton* searchUtilitiesBtn = new QPushButton(this);
+    connect(searchUtilitiesBtn, &QPushButton::clicked, [this, searchUtilities](){this->searchUtilities(searchUtilities->text());});
+    QIcon searchIcon(":/Images/Search.svg");
+    searchUtilitiesBtn->setIcon(searchIcon);
+    QHBoxLayout* searchLayout = new QHBoxLayout(this);
+    searchLayout->setContentsMargins(0, 0, 0, 0);
+    searchLayout->addWidget(searchUtlitiesLabel, 0);
+    searchLayout->addWidget(searchUtilities, 1);
+    searchLayout->addWidget(searchUtilitiesBtn, 0);
+    m_utilityVLayout->addLayout(searchLayout, 0);
+
     m_stackedLayout->addWidget(utilitiesBaseWidget);
 
     // Rate
@@ -201,6 +216,17 @@ void FilterDialog::comboBoxChanged(int index)
     if (!m_model || !m_interface) return;
     if (index == m_lastIndex) return;
 
+    if (m_utilityView)
+    {
+        delete m_utilityView;
+        m_utilityView = nullptr;
+    }
+    if (m_utilityModel)
+    {
+        delete m_utilityModel;
+        m_utilityModel = nullptr;
+    }
+
     if (m_model->listType() == ListType::GAMELIST)
     {
         if (index == 0)
@@ -224,11 +250,6 @@ void FilterDialog::comboBoxChanged(int index)
             else if (index == 6)
                 tableName = UtilityTableName::SERVICES;
             
-            if (m_utilityView)
-                delete m_utilityView;
-            if (m_utilityModel)
-                delete m_utilityModel;
-            
             m_utilityModel = new UtilityInterfaceEditorModel(
                 tableName,
                 m_model,
@@ -243,8 +264,10 @@ void FilterDialog::comboBoxChanged(int index)
             m_utilityView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
             m_utilityView->setSortingEnabled(true);
             m_utilityView->verticalHeader()->hide();
-            m_utilityVLayout->addWidget(m_utilityView);
+            m_utilityVLayout->addWidget(m_utilityView, 1);
             m_stackedLayout->setCurrentIndex(2);
+
+            emit tabChanged();
         }
         else
         {
@@ -256,4 +279,10 @@ void FilterDialog::comboBoxChanged(int index)
         m_stackedLayout->setCurrentIndex(0);
 
     m_lastIndex = index;
+}
+
+void FilterDialog::searchUtilities(const QString& pattern)
+{
+    if (m_utilityModel)
+        m_utilityModel->setFilter(pattern);
 }
