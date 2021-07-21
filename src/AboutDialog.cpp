@@ -22,6 +22,8 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 AboutDialog::AboutDialog(QWidget* parent) :
     QDialog(parent)
@@ -44,5 +46,14 @@ AboutDialog::AboutDialog(QWidget* parent) :
 
     QScrollArea* scrollArea = new QScrollArea(this);
     scrollArea->setWidget(aboutText);
-    vLayout->addWidget(scrollArea);
+
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    hLayout->setContentsMargins(0, 0, 6, 6);
+    QPushButton* okBtn = new QPushButton(tr("Ok"), this);
+    connect(okBtn, &QPushButton::clicked, this, &AboutDialog::accept);
+    hLayout->addStretch(1);
+    hLayout->addWidget(okBtn, 0);
+
+    vLayout->addWidget(scrollArea, 1);
+    vLayout->addLayout(hLayout, 0);
 }
