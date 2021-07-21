@@ -20,13 +20,15 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QScrollArea>
+#include <QPushButton>
 
 LicenceDialog::LicenceDialog(QWidget* parent) :
     QDialog(parent)
 {
     // Create the licence dialog.
-    resize(725, 428);
+    resize(725, 470);
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
@@ -53,5 +55,14 @@ LicenceDialog::LicenceDialog(QWidget* parent) :
 
     QScrollArea* scrollArea = new QScrollArea(this);
     scrollArea->setWidget(licenceText);
-    vLayout->addWidget(scrollArea);
+
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    hLayout->setContentsMargins(0, 0, 6, 6);
+    QPushButton* okBtn = new QPushButton(tr("Ok"), this);
+    connect(okBtn, &QPushButton::clicked, this, &LicenceDialog::accept);
+    hLayout->addStretch(1);
+    hLayout->addWidget(okBtn, 0);
+
+    vLayout->addWidget(scrollArea, 1);
+    vLayout->addLayout(hLayout, 0);
 }
