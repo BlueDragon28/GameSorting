@@ -68,6 +68,7 @@ public:
     QList<long long int> getSelectedUtilities() const;
 
 private:
+    void retrieveSelectedUtilitiesOnItem();
     void retrieveUtilityData();
     bool isUtilityIDChecked(long long int utilityID) const;
     void removeCheckedUtilityID(long long int utilityID);

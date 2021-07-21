@@ -42,6 +42,7 @@ UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
         m_utilityData(utilityData)
 {
     retrieveUtilityData();
+    retrieveSelectedUtilitiesOnItem();
 }
 
 UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
@@ -216,5 +217,52 @@ void UtilityInterfaceEditorModel::setFilter(const QString& pattern)
             beginInsertRows(QModelIndex(), 0, m_utilityListData.size()-1);
             endInsertRows();
         }
+    }
+}
+
+void UtilityInterfaceEditorModel::retrieveSelectedUtilitiesOnItem()
+{
+    // When the user open the dialog on an item, this member function extract the already existing and apply then to the list.
+    QString statement = QString(
+        "SELECT\n"
+        "   UtilityID\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "WHERE\n"
+        "   ItemID = %2\n"
+        "GROUP BY\n"
+        "   UtilityID;")
+        .arg(m_dataInterface->tableName(m_utilityTableName))
+        .arg(m_itemID);
+    
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        while (m_query.next())
+        {
+            long long int utilityID = m_query.value(0).toLongLong();
+            // Check if the utility is in the utility list, if not, it means it has been removed.
+            foreach (const ItemUtilityData& data, m_utilityListData)
+            {
+                if (data.utilityID == utilityID)
+                {
+                    m_checkedIDList.append(utilityID);
+                    break;
+                }
+            }
+        }
+        m_query.clear();
+    }
+    else
+    {
+        std::cout << QString("Failed to extract utilities of item %1 of the table %2.\n\t%3")
+            .arg(m_itemID)
+            .arg(m_dataInterface->tableName(m_utilityTableName), m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+        m_query.clear();
     }
 }
