@@ -52,6 +52,7 @@ UtilityInterfaceEditor::UtilityInterfaceEditor(
             db,
             this))
 {
+    setWindowTitle(tr("Utilities selection"));
     createWidgets();
     setModal(false);
 }
