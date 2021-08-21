@@ -78,62 +78,16 @@ QVariant SqlUtilityTable::queryGameData() const
 	return QVariant::fromValue(data);
 }
 
-bool SqlUtilityTable::setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data)
-{
-	// Convenient member function to set the data into the SQL Table.
-	QString statement = QString(
-		"INSERT INTO \"%1\" (\"%1ID\", OrderID, Name)\n"
-		"VALUES")
-		.arg(tableName(tName));
-	
-	for (long long int i = 0; i < data.size(); i+=10)
-	{
-		QString strData;
-		for (long long int j = i; j < i+10 && j < data.size(); j++)
-		{
-			strData +=
-				QString("\n\t(%1, %2, \"%3\"),")
-					.arg(data.at(j).utilityID)
-					.arg(data.at(j).order)
-					.arg(data.at(j).name);
-		}
-		if (strData.size() > 0)
-		{
-			strData[strData.size()-1] = ';';
-
-#ifndef NDEBUG
-			std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-			if (!m_query.exec(statement + strData))
-			{
-#ifndef NDEBUG
-				std::cerr << QString("Failed to insert data into %1.\n\t%2")
-					.arg(tableName(tName))
-					.arg(m_query.lastError().text())
-					.toLocal8Bit().constData()
-					<< std::endl;
-#endif
-				m_query.clear();
-				return false;
-			}
-			m_query.clear();
-		}
-	}
-
-	return true;
-}
-
 bool SqlUtilityTable::setGameData(const QVariant& variant)
 {
 	// Set the data into the SQL tables.
 	Game::SaveUtilityData data = qvariant_cast<Game::SaveUtilityData>(variant);
 
-	if (!setGameStandardData(UtilityTableName::CATEGORIES, data.categories) ||
-		!setGameStandardData(UtilityTableName::DEVELOPPERS, data.developpers) ||
-		!setGameStandardData(UtilityTableName::PUBLISHERS, data.publishers) ||
-		!setGameStandardData(UtilityTableName::PLATFORM, data.platform) ||
-		!setGameStandardData(UtilityTableName::SERVICES, data.services))
+	if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+		!setStandardData(UtilityTableName::DEVELOPPERS, data.developpers) ||
+		!setStandardData(UtilityTableName::PUBLISHERS, data.publishers) ||
+		!setStandardData(UtilityTableName::PLATFORM, data.platform) ||
+		!setStandardData(UtilityTableName::SERVICES, data.services))
 		return false;
 	
 	return true;

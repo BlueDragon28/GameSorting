@@ -18,6 +18,7 @@
 
 #include "TabAndList.h"
 #include "GameListView.h"
+#include "MoviesListView.h"
 #include "Common.h"
 #include "SaveInterface.h"
 #include "UtilityListView.h"
@@ -106,12 +107,24 @@ void TabAndList::addTable()
     if (ok && !tableName.isEmpty())
     {
         // Creating a new table using the tableName got from the user.
-        GameListView* newList = new GameListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
-        m_stackedViews->addWidget(newList);
-        m_tabBar->addTab(newList->tableName());
-        m_isListModified = true;
-        emit listChanged(true);
-        connect(newList, &GameListView::listEdited, this, &TabAndList::listUpdated);
+        if (m_listType == ListType::GAMELIST)
+        {
+            GameListView* newList = new GameListView(tableName, ListType::GAMELIST, m_db, m_sqlUtilityTable, this);
+            m_stackedViews->addWidget(newList);
+            m_tabBar->addTab(newList->tableName());
+            m_isListModified = true;
+            emit listChanged(true);
+            connect(newList, &GameListView::listEdited, this, &TabAndList::listUpdated);
+        }
+        else if (m_listType == ListType::MOVIESLIST)
+        {
+            MoviesListView* newList = new MoviesListView(tableName, ListType::MOVIESLIST, m_db, m_sqlUtilityTable, this);
+            m_stackedViews->addWidget(newList);
+            m_tabBar->addTab(newList->tableName());
+            m_isListModified = true;
+            emit listChanged(true);
+            connect(newList, &MoviesListView::listEdited, this, &TabAndList::listUpdated);
+        }
     }
 }
 
@@ -139,7 +152,7 @@ void TabAndList::removeTable(int index)
 
         m_stackedViews->removeWidget(widget);
         m_tabBar->removeTab(index);
-        if (widget->viewType() == ViewType::GAME)
+        if (widget->viewType() == ViewType::GAME || widget->viewType() == ViewType::MOVIE)
         {
             m_isListModified = true;
             emit listChanged(true);
@@ -172,6 +185,30 @@ void TabAndList::newGameList()
     emit newListFileName(QString());
 }
 
+void TabAndList::newMoviesList()
+{
+    // Deleting tge existing list and creating a new list.
+    // First, check if there is any unsaved change.
+    if (!maybeSave())
+        return;
+    
+    for (int i = m_tabBar->count()-1; i >= 0; i--)
+        m_tabBar->removeTab(i);
+    for (int i = m_stackedViews->count()-1; i >= 0; i--)
+    {
+        AbstractListView* listView = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+        m_stackedViews->removeWidget(listView);
+        delete listView;
+    }
+
+    m_sqlUtilityTable.newList(ListType::MOVIESLIST);
+    m_listType = ListType::MOVIESLIST;
+    m_isListModified = false;
+    m_filePath = QString();
+    emit newList(ListType::MOVIESLIST);
+    emit newListFileName(QString());
+}
+
 void TabAndList::open()
 {
     // Opening a list from a file.
@@ -183,8 +220,10 @@ void TabAndList::open()
             this,
             tr("Open list"),
             m_currentDirectory,
-            tr("List File (*.gld);;"
-            "All Files (*)"));
+            tr("List File (*.gld *.mld);;"
+               "Game List File (*.gld);;"
+               "Movies List File (*.mld);;"
+               "All Files (*)"));
         
     if (!filePath.isEmpty())
     {
@@ -273,14 +312,21 @@ void TabAndList::saveAs()
     // Saving the list into a new file
     // or by writing over an existing file.
     // Game list.
-    if (m_listType == ListType::GAMELIST)
+    if (m_listType == ListType::GAMELIST || m_listType == ListType::MOVIESLIST)
     {
+        QString filter;
+        if (m_listType == ListType::GAMELIST)
+            filter = tr("Games List Data (*.gld);;"
+                        "All Files (*)");
+        else if (m_listType == ListType::MOVIESLIST)
+            filter = tr("Movies List Data (*.mld);;"
+                        "All Files (*)");
+
         QString filePath = QFileDialog::getSaveFileName(
             this,
             tr("Save Game List"),
             m_currentDirectory,
-            tr("Game List Data (*.gld);;"
-               "All Files (*)"));
+            filter);
         
         if (!filePath.isEmpty())
         {
@@ -294,8 +340,8 @@ void TabAndList::saveAs()
             else
                 QMessageBox::critical(
                     this,
-                    tr("Save Game List"),
-                    tr("Saving the game list into the file %1 failed.").arg(filePath),
+                    tr("Save List"),
+                    tr("Saving the list into the file %1 failed.").arg(filePath),
                     QMessageBox::Ok,
                     QMessageBox::Ok);
         }
@@ -343,6 +389,37 @@ bool TabAndList::saveFile(const QString& filePath) const
         // Save to a file.
         return SaveInterface::save(filePath, QVariant::fromValue(data));
     }
+    else if (m_listType == ListType::MOVIESLIST)
+    {
+        // Saving the movies list into a file.
+        Movie::SaveData data = {};
+
+        QVariant variant;
+
+        // Retrieving the list data.
+        for (int i = 0; i < m_tabBar->count(); i++)
+        {
+            AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+
+            if (view->viewType() == ViewType::MOVIE)
+            {
+                MoviesListView* moviesView = reinterpret_cast<MoviesListView*>(view);
+                variant = moviesView->listData();
+                if (!variant.canConvert<Movie::SaveDataTable>())
+                    return false;
+                data.movieTables.append(qvariant_cast<Movie::SaveDataTable>(variant));
+            }
+        }
+
+        // Retrieving the utility data.
+        variant = m_sqlUtilityTable.data();
+        if (!variant.canConvert<Movie::SaveUtilityData>())
+            return false;
+        data.utilityData = qvariant_cast<Movie::SaveUtilityData>(variant);
+
+        // Save into a file.
+        return SaveInterface::save(filePath, QVariant::fromValue(data));
+    }
 
     return false;
 }
@@ -375,6 +452,28 @@ bool TabAndList::openFile(const QString& filePath)
             m_stackedViews->addWidget(view);
             m_tabBar->addTab(view->tableName());
             connect(view, &GameListView::listEdited, this, &TabAndList::listUpdated);
+        }
+
+        return true;
+    }
+    else if (variant.canConvert<Movie::SaveData>())
+    {
+        // Creating a new empty movies list data.
+        newEmptyList();
+        newMoviesList();
+        Movie::SaveData data = qvariant_cast<Movie::SaveData>(variant);
+        result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
+        if (!result)
+            return false;
+        
+        for (int i = 0; i < data.movieTables.size(); i++)
+        {
+            MoviesListView* view = new MoviesListView(QVariant::fromValue(data.movieTables.at(i)), m_db, m_sqlUtilityTable, this);
+            if (view->listType() == ListType::UNKNOWN)
+                return false;
+            m_stackedViews->addWidget(view);
+            m_tabBar->addTab(view->tableName());
+            connect(view, &MoviesListView::listEdited, this, &TabAndList::listUpdated);
         }
 
         return true;
@@ -451,6 +550,12 @@ void TabAndList::tabChangeApplying(int tabIndex, const QString& tabName)
         GameListView* gameView = reinterpret_cast<GameListView*>(view);
         gameView->setTableName(tabName);
         m_tabBar->setTabText(tabIndex, gameView->tableName());
+    }
+    else if (view->viewType() == ViewType::MOVIE)
+    {
+        MoviesListView* movieView = reinterpret_cast<MoviesListView*>(view);
+        movieView->setTableName(tabName);
+        m_tabBar->setTabText(tabIndex, movieView->tableName());
     }
 }
 

@@ -98,6 +98,11 @@ void MainWindow::createMenu()
 	newGameListAct->setToolTip(tr("Creating a game list."));
 	newListMenu->addAction(newGameListAct);
 	connect(newGameListAct, &QAction::triggered, m_tabAndList, &TabAndList::newGameList);
+	// Movies list.
+	QAction* newMovieListAct = new QAction(tr("Movie list"), this);
+	newMovieListAct->setToolTip(tr("Creating a movie list."));
+	newListMenu->addAction(newMovieListAct);
+	connect(newMovieListAct, &QAction::triggered, m_tabAndList, &TabAndList::newMoviesList);
 	m_fileMenu->addMenu(newListMenu);
 
 	// Adding the newListMenu into the toolbar
@@ -224,6 +229,59 @@ void MainWindow::createGameToolBar()
 	m_listToolBar->addWidget(utilityToolButton);
 }
 
+void MainWindow::createMovieToolBar()
+{
+	// Creating the toolbar next to the file toolbar.
+	// This toolbar is used to open the utility editor.
+	m_listToolBar = addToolBar(tr("Movie ToolBar"));
+	m_listToolBar->setMovable(false);
+
+	// Create the utility menu.
+	m_utilityMenu = new QMenu(tr("Movie Utility"), m_listToolBar);
+	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
+	reinsertMenu();
+
+	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
+	catAct->setToolTip(tr("Open the categories editor."));
+	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
+	m_utilityMenu->addAction(catAct);
+
+	QAction* directorsAct = new QAction(tr("Directors"), m_listToolBar);
+	directorsAct->setToolTip(tr("Open the directors editor."));
+	connect(directorsAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::DIRECTOR);});
+	m_utilityMenu->addAction(directorsAct);
+
+	QAction* actorsAct = new QAction(tr("Actors"), m_listToolBar);
+	actorsAct->setToolTip(tr("Open the actors editor."));
+	connect(actorsAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::ACTORS);});
+	m_utilityMenu->addAction(actorsAct);
+
+	QAction* producAct = new QAction(tr("Productions"), m_listToolBar);
+	producAct->setToolTip(tr("Open the productions editor."));
+	connect(producAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PRODUCTION);});
+	m_utilityMenu->addAction(producAct);
+
+	QAction* musicAct = new QAction(tr("Music"), m_listToolBar);
+	musicAct->setToolTip(tr("Open the music editor."));
+	connect(musicAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::MUSIC);});
+	m_utilityMenu->addAction(musicAct);
+
+	QAction* servAct = new QAction(tr("Services"), m_listToolBar);
+	servAct->setToolTip(tr("Open the services editor."));
+	connect(servAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
+	m_utilityMenu->addAction(servAct);
+
+	// Creating the toolButton  used to open the utilityMenu.
+	QIcon utilityIcon(":/Images/Utility.svg");
+	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
+	utilityToolButton->setText(tr("Movie Utility"));
+	utilityToolButton->setIcon(utilityIcon);
+	utilityToolButton->setMenu(m_utilityMenu);
+	utilityToolButton->setToolTip(tr("Set the Cagegories, Directors, Actors, Productions, Music and Services of the movies list."));
+	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_listToolBar->addWidget(utilityToolButton);
+}
+
 void MainWindow::newListCreated(ListType type)
 {
 	// Recreating the menu when a new list is created.
@@ -240,6 +298,8 @@ void MainWindow::newListCreated(ListType type)
 
 	if (type == ListType::GAMELIST)
 		createGameToolBar();
+	else if (type == ListType::MOVIESLIST)
+		createMovieToolBar();
 }
 
 void MainWindow::listFilePathChanged(const QString& filePath)

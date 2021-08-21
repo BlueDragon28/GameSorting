@@ -16,44 +16,42 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "TableModelGame.h"
-#include "TableModelGame_UtilityInterface.h"
+#include "TableModelMovies.h"
+#include "TableModelMovies_UtilityInterface.h"
 #include <QSqlError>
 #include <iostream>
 #include <algorithm>
 
-#define GAME_TABLE_COLUMN_COUNT 8
-#define NUMBER_GAME_TABLE_COLUMN_COUNT 7
+#define MOVIES_TABLE_COLUMN_COUNT 9
+#define NUMBER_MOVIES_TABLE_COLUMN_COUNT 8
 
 template<typename T>
-bool TableModelGame::updateField(const QString& columnName, int rowNB, T value)
+bool TableModelMovies::updateField(const QString& columnName, int rowNB, T value)
 {
-    // Helper member function to help update field on SQLite side.
+    // Helper member functin to help update field on SQLite side.
     QString statement = QString(
         "UPDATE \"%1\"\n"
         "SET\n"
         "   \"%2\" = %3\n"
         "WHERE\n"
-        "   GameID = %4;")
-            .arg(m_tableName, columnName)
-            .arg(value)
-            .arg(m_data.at(rowNB).gameID);
-    
+        "   MovieID = %4")
+        .arg(m_tableName, columnName)
+        .arg(value)
+        .arg(m_data.at(rowNB).movieID);
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
     if (!m_query.exec(statement))
     {
-#ifndef NDEBUG
-        std::cerr << QString("Failed to update field %1 of GameID: %2 of the table %3.\n\t%4")
+        std::cerr << QString("Failed to update field %1 of MovieID: %2 of the table %3.\n\t%4")
             .arg(columnName)
-            .arg(m_data.at(rowNB).gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text())
+            .arg(m_data.at(rowNB).movieID)
+            .arg(m_tableName, m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
-#endif
+        m_query.clear();
         return false;
     }
     m_query.clear();
@@ -61,108 +59,108 @@ bool TableModelGame::updateField(const QString& columnName, int rowNB, T value)
 }
 
 template<>
-bool TableModelGame::updateField(const QString& columnName, int rowNB, const QString& value)
+bool TableModelMovies::updateField(const QString& columnName, int rowNB, const QString& value)
 {
-    // Helper member function to help update field on SQLite side.
+    // Helper member functin to help update field on SQLite side.
     QString statement = QString(
         "UPDATE \"%1\"\n"
         "SET\n"
         "   \"%2\" = \"%3\"\n"
         "WHERE\n"
-        "   GameID = %4;")
-            .arg(m_tableName, columnName)
-            .arg(value)
-            .arg(m_data.at(rowNB).gameID);
-    
+        "   MovieID = %4")
+        .arg(m_tableName, columnName)
+        .arg(value)
+        .arg(m_data.at(rowNB).movieID);
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
     if (!m_query.exec(statement))
     {
-#ifndef NDEBUG
-        std::cerr << QString("Failed to update field %1 of GameID: %2 of the table %3.\n\t%4")
+        std::cerr << QString("Failed to update field %1 of MovieID: %2 of the table %3.\n\t%4")
             .arg(columnName)
-            .arg(m_data.at(rowNB).gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text())
+            .arg(m_data.at(rowNB).movieID)
+            .arg(m_tableName, m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
-#endif
+        m_query.clear();
         return false;
     }
     m_query.clear();
     return true;
 }
 
-TableModelGame::TableModelGame(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
+TableModelMovies::TableModelMovies(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(tableName, db, utilityTable, parent),
     m_interface(nullptr)
 {
     createTable();
-    m_interface = new TableModelGame_UtilityInterface(rawTableName(), m_db);
-    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::utilityChanged);
-    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
+    m_interface = new TableModelMovies_UtilityInterface(rawTableName(), m_db);
+    connect(m_interface, &TableModelMovies_UtilityInterface::interfaceChanged, this, &TableModelMovies::utilityChanged);
+    connect(m_interface, &TableModelMovies_UtilityInterface::interfaceChanged, this, &TableModelMovies::listEdited);
 }
 
-TableModelGame::TableModelGame(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
+TableModelMovies::TableModelMovies(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent) :
     TableModel(db, utilityTable, parent),
     m_interface(nullptr)
 {
     setItemData(data);
-    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged,  this, &TableModelGame::utilityChanged);
-    connect(m_interface, &TableModelGame_UtilityInterface::interfaceChanged, this, &TableModelGame::listEdited);
+    connect(m_interface, &TableModelMovies_UtilityInterface::interfaceChanged, this, &TableModelMovies::utilityChanged);
+    connect(m_interface, &TableModelMovies_UtilityInterface::interfaceChanged, this, &TableModelMovies::listEdited);
 }
 
-TableModelGame::~TableModelGame()
+TableModelMovies::~TableModelMovies()
 {
     deleteTable();
     if (m_interface)
         delete m_interface;
 }
 
-int TableModelGame::columnCount(const QModelIndex& parent) const
+int TableModelMovies::columnCount(const QModelIndex& parent) const
 {
     if (m_isTableCreated)
-        return GAME_TABLE_COLUMN_COUNT;
-    else 
-        return 0;
-}
-
-int TableModelGame::rowCount(const QModelIndex& parent) const
-{
-    if (m_isTableCreated)
-        return m_data.size();
+        return MOVIES_TABLE_COLUMN_COUNT;
     else
         return 0;
 }
 
-QVariant TableModelGame::data(const QModelIndex& index, int role) const
+int TableModelMovies::rowCount(const QModelIndex& parent) const
 {
-    // Returning the game table data into the view.
+    if (m_isTableCreated)
+        return m_data.size();
+    else 
+        return 0;
+}
+
+QVariant TableModelMovies::data(const QModelIndex& index, int role) const
+{
+    // returning the game table data into the view.
     if ((role == Qt::EditRole || role == Qt::DisplayRole) && m_isTableCreated)
     {
         if (index.column() >= 0 && index.column() < columnCount() &&
             index.row() >= 0 && index.row() < rowCount())
         {
-            // Returning to the tableView the data from the list.
+            // Returning to the tableView the data from list.
             switch (index.column())
             {
-            case Game::NAME:
+            case Movie::NAME:
                 return m_data.at(index.row()).name;
-            case Game::CATEGORIES:
+            case Movie::CATEGORIES:
                 return m_data.at(index.row()).categories;
-            case Game::DEVELOPPERS:
-                return m_data.at(index.row()).developpers;
-            case Game::PUBLISHERS:
-                return m_data.at(index.row()).publishers;
-            case Game::PLATFORMS:
-                return m_data.at(index.row()).platform;
-            case Game::SERVICES:
+            case Movie::DIRECTORS:
+                return m_data.at(index.row()).directors;
+            case Movie::ACTORS:
+                return m_data.at(index.row()).actors;
+            case Movie::PRODUCTIONS:
+                return m_data.at(index.row()).productions;
+            case Movie::MUSIC:
+                return m_data.at(index.row()).music;
+            case Movie::SERVICES:
                 return m_data.at(index.row()).services;
-            case Game::SENSITIVE_CONTENT:
+            case Movie::SENSITIVE_CONTENT:
                 return QVariant::fromValue(m_data.at(index.row()).sensitiveContent);
-            case Game::RATE:
+            case Movie::RATE:
                 return m_data.at(index.row()).rate;
             }
         }
@@ -171,7 +169,7 @@ QVariant TableModelGame::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool TableModelGame::setData(const QModelIndex& index, const QVariant& data, int role)
+bool TableModelMovies::setData(const QModelIndex& index, const QVariant& data, int role)
 {
     // Setting field data.
     // Each column is different, so we working on each column independently.
@@ -181,14 +179,14 @@ bool TableModelGame::setData(const QModelIndex& index, const QVariant& data, int
     {
         switch (index.column())
         {
-        case Game::NAME:
+        case Movie::NAME:
         {
             if (data.canConvert<QString>())
             {
-                QString gameName = data.toString();
-                m_data[index.row()].name = gameName;
+                QString movieName = data.toString();
+                m_data[index.row()].name = movieName;
 
-                bool result = updateField<const QString&>("Name", index.row(), gameName);
+                bool result = updateField<const QString&>("Name", index.row(), movieName);
                 if (result)
                 {
                     emit dataChanged(index, index, {Qt::EditRole});
@@ -196,11 +194,8 @@ bool TableModelGame::setData(const QModelIndex& index, const QVariant& data, int
                 }
                 return result;
             }
-            else
-                return false;
         } break;
-
-        case Game::RATE:
+        case Movie::RATE:
         {
             if (data.canConvert<int>())
             {
@@ -215,8 +210,6 @@ bool TableModelGame::setData(const QModelIndex& index, const QVariant& data, int
                 }
                 return result;
             }
-            else
-                return false;
         } break;
         }
     }
@@ -224,16 +217,16 @@ bool TableModelGame::setData(const QModelIndex& index, const QVariant& data, int
     return true;
 }
 
-bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
+bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
 {
     // Inserting new rows into the table.
     if (row >= 0 && row <= rowCount() &&
         count > 0 && m_isTableCreated)
     {
-        // GamePos Statement
+        // MoviePos  statement
         QString posStatement = QString(
             "SELECT\n"
-            "   MAX(GamePos)\n"
+            "   MAX(MoviePos)\n"
             "FROM\n"
             "   \"%1\";").arg(m_tableName);
 
@@ -241,7 +234,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-        int maxPos;
+        int maxPos = 0;
         if (m_query.exec(posStatement))
         {
             if (m_query.next())
@@ -262,20 +255,23 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
             "INSERT INTO \"%1\" (\n"
-            "   GamePos,\n"
+            "   MoviePos,\n"
             "   Name,\n"
             "   Url,\n"
             "   Rate )\n"
             "VALUES")
                 .arg(m_tableName);
-
+        
         for (int i = 0; i < count; i++)
         {
+            if (i > 0)
+                statement += ',';
+
             statement += QString(
-                "\n   (%1, \"New Game\", NULL, NULL),")
+                "\n\t(%1, \"New Movie\", NULL, NULL)")
                 .arg(++maxPos);
         }
-        statement[statement.size() - 1] = ';';
+        statement += ';';
 
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -284,23 +280,22 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         // Then, querying the new inserted data and add it to the m_listData
         if (m_query.exec(statement))
         {
-            m_query.clear();
             statement = QString(
                 "SELECT\n"
-                "   GameID,\n"
-                "   GamePos,\n"
+                "   MovieID,\n"
+                "   MoviePos,\n"
                 "   Name,\n"
                 "   Url,\n"
                 "   Rate\n"
                 "FROM\n"
                 "   \"%1\"\n"
                 "ORDER BY\n"
-                "   GameID DESC\n"
+                "   MovieID DESC\n"
                 "LIMIT\n"
                 "   %2;")
                     .arg(m_tableName)
                     .arg(count);
-                
+            
 #ifndef NDEBUG
             std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
@@ -311,26 +306,26 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
                     beginInsertRows(QModelIndex(), rowCount(), rowCount());
                 else
                     beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
-
-                QList<GameItem> gameList;
-                while(m_query.next())
+                
+                QList<MovieItem> movieList;
+                while (m_query.next())
                 {
-                    GameItem game = {};
-                    game.gameID = m_query.value(0).toLongLong();
-                    game.gamePos = m_query.value(1).toLongLong();
-                    game.name = m_query.value(2).toString();
-                    game.url = m_query.value(3).toString();
-                    game.rate = m_query.value(4).toInt();
-                    gameList.prepend(game);
+                    MovieItem movie = {};
+                    movie.movieID = m_query.value(0).toLongLong();
+                    movie.moviePos = m_query.value(1).toLongLong();
+                    movie.name = m_query.value(2).toString();
+                    movie.url = m_query.value(3).toString();
+                    movie.rate = m_query.value(4).toInt();
+                    movieList.prepend(movie);
                 }
-                m_data.append(gameList.cbegin(), gameList.cend());
+                m_data.append(movieList);
 
                 endInsertRows();
             }
             else
                 updateQuery();
-            
-            // Emit the signal listEdited, this signal is used to tell that the list has been edited.
+
+            // Emit the signal lsitEdited, this signal is used to tell that the list has been edited.
             emit listEdited();
             m_query.clear();
         }
@@ -339,9 +334,10 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
 #ifndef NDEBUG
             std::cerr << QString("Failed to insert row of table %1\n\t%2")
                 .arg(m_tableName)
-                .arg(m_query.lastError().text()).toLocal8Bit().constData() << std::endl;
+                .arg(m_query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
 #endif
-            
             return false;
         }
     }
@@ -349,24 +345,24 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
+bool TableModelMovies::removeRows(int row, int count, const QModelIndex& parent)
 {
-        // Removing rows from the table.
-    if (row >= 0 && row < rowCount() &&
+    // Removing rows from the table.
+    if (row >= 0 && row < rowCount() &
         row + (count - 1) < rowCount() && m_isTableCreated)
     {
         // Defining the SQL statement.
-        QString statement  = QString(
+        QString statement = QString(
             "DELETE FROM \"%1\"\n"
-            "WHERE GameID ")
+            "WHERE MovieID ")
             .arg(m_tableName);
         QList<long long int> itemsID(count);
-        
+
         if (count == 1)
         {
             statement += QString("= %1;")
-                .arg(m_data.at(row).gameID);
-                itemsID[0] = m_data.at(row).gameID;
+                .arg(m_data.at(row).movieID);
+            itemsID[0] = m_data.at(row).movieID;
         }
         else
         {
@@ -374,17 +370,16 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
             for (int i = 0; i < count; i++)
             {
                 if (i > 0)
-                    statement += ", ";
-                statement += QString::number(m_data.at(row+i).gameID);
-                itemsID[i] = m_data.at(row+i).gameID;
+                    statement += ';';
+                statement += QString::number(m_data.at(row+i).movieID);
+                itemsID[i] = m_data.at(row+i).movieID;
             }
-            statement += ");";
         }
 
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
-
+        
         // Execute the SQL statement.
         // If the statement success, then
         // removing the data from the list
@@ -398,7 +393,6 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
             
             m_data.remove(row, count);
             m_interface->rowRemoved(itemsID);
-
             endRemoveRows();
 
             emit listEdited();
@@ -417,49 +411,48 @@ bool TableModelGame::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-Qt::ItemFlags TableModelGame::flags(const QModelIndex& index) const
+Qt::ItemFlags TableModelMovies::flags(const QModelIndex& index) const
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-QVariant TableModelGame::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TableModelMovies::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
     {
         // Setting the headers' name.
-    switch (section)
-    {
-    case Game::NAME:
-        return "Name";
-    case Game::CATEGORIES:
-        return "Categories";
-    case Game::DEVELOPPERS:
-        return "Developpers";
-    case Game::PUBLISHERS:
-        return "Publishers";
-    case Game::PLATFORMS:
-        return "Platform";
-    case Game::SERVICES:
-        return "Services";
-    case Game::SENSITIVE_CONTENT:
-        return "Sensitive Content";
-    case Game::RATE:
-        return "Rate";
-    default:
-        return QVariant();
+        switch (section)
+        {
+        case Movie::NAME:
+            return "Name";
+        case Movie::CATEGORIES:
+            return "Categories";
+        case Movie::DIRECTORS:
+            return "Directors";
+        case Movie::ACTORS:
+            return "Actors";
+        case Movie::PRODUCTIONS:
+            return "Production";
+        case Movie::MUSIC:
+            return "Music";
+        case Movie::SERVICES:
+            return "Services";
+        case Movie::SENSITIVE_CONTENT:
+            return "Sensitive content";
+        case Movie::RATE:
+            return "Rate";
+        }
     }
-    }
-
     return QVariant();
 }
 
-void TableModelGame::appendRows(int count)
+void TableModelMovies::appendRows(int count)
 {
     if (count > 0 && m_isTableCreated)
         insertRows(rowCount(), count);
 }
 
-void TableModelGame::deleteRows(const QModelIndexList& indexList)
+void TableModelMovies::deleteRows(const QModelIndexList& indexList)
 {
     // Used to delete selected rows in the view.
     QModelIndexList indexListCopy(indexList);
@@ -468,7 +461,7 @@ void TableModelGame::deleteRows(const QModelIndexList& indexList)
         {
             return index1.row() > index2.row();
         });
-
+    
     for (QModelIndexList::const_iterator it = indexListCopy.cbegin();
         it != indexListCopy.cend();
         it++)
@@ -478,26 +471,26 @@ void TableModelGame::deleteRows(const QModelIndexList& indexList)
         emit listEdited();
 }
 
-int TableModelGame::size() const
+int TableModelMovies::size() const
 {
     return rowCount();
 }
 
-ListType TableModelGame::listType() const
+ListType TableModelMovies::listType() const
 {
-    return ListType::GAMELIST;
+    return ListType::MOVIESLIST;
 }
 
-long long int TableModelGame::itemID(const QModelIndex& index) const
+long long int TableModelMovies::itemID(const QModelIndex& index) const
 {
     if (m_isTableCreated &&
-        index.column() >= 0 && index.column() < columnCount() &&
+        index.column() >= 0 && index.row() < columnCount() &&
         index.row() >= 0 && index.row() < rowCount())
-        return m_data.at(index.row()).gameID;
+        return m_data.at(index.row()).movieID;
     return -1;
 }
 
-void TableModelGame::updateQuery()
+void TableModelMovies::updateQuery()
 {
     // Retrieve the entrire game data of the table and 
     // and put it into the view.
@@ -507,12 +500,11 @@ void TableModelGame::updateQuery()
         endRemoveRows();
     }
 
-    // Getting the new data from the table.
     QString statement = QString(
         "SELECT\n"
-        "   GameID,\n"
-        "   GamePos,\n"
-        "   \"%1\".Name as gName,\n"
+        "   MovieID,\n"
+        "   MoviePos,\n"
+        "   \"%1\".Name as mName,\n"
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
@@ -523,214 +515,227 @@ void TableModelGame::updateQuery()
             .arg(m_tableName);
     
     // Sorting view.
-    if (m_sortingColumnID == 0)
+    if (m_sortingColumnID == Movie::NAME)
     {
-        statement = statement.arg("gName");
-        SORTING_ORDER(m_sortingOrder, statement)
+        statement = statement.arg("mName");
+        SORTING_ORDER(m_sortingOrder, statement);
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Movie::RATE)
     {
         statement = statement.arg("Rate");
-        SORTING_ORDER(m_sortingOrder, statement)
+        SORTING_ORDER(m_sortingOrder, statement);
     }
     else
-        statement = statement.arg("GamePos").arg("ASC");
-
+        statement = statement.arg("MoviePos", "ASC");
+    
     // Filtering the view.
-    if (m_listFilter.column == Game::NAME)
+    if (m_listFilter.column == Movie::NAME)
     {
         QString where = QString(
             "WHERE\n"
-            "   gName LIKE \"%%1%\"\n")
+            "   mName LIKE \"%%1%\"\n")
             .arg(m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Game::CATEGORIES &&
-        m_listFilter.column <= Game::SERVICES)
+    else if (m_listFilter.column >= Movie::CATEGORIES &&
+        m_listFilter.column <= Movie::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Game::CATEGORIES)
+        if (m_listFilter.column == Movie::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
-        else if (m_listFilter.column == Game::DEVELOPPERS)
-            tName = UtilityTableName::DEVELOPPERS;
-        else if (m_listFilter.column == Game::PUBLISHERS)
-            tName = UtilityTableName::PUBLISHERS;
-        else if (m_listFilter.column == Game::PLATFORMS)
-            tName = UtilityTableName::PLATFORM;
-        else if (m_listFilter.column == Game::SERVICES)
+        else if (m_listFilter.column == Movie::DIRECTORS)
+            tName = UtilityTableName::DIRECTOR;
+        else if (m_listFilter.column == Movie::ACTORS)
+            tName = UtilityTableName::ACTORS;
+        else if (m_listFilter.column == Movie::PRODUCTIONS)
+            tName = UtilityTableName::PRODUCTION;
+        else if (m_listFilter.column == Movie::MUSIC)
+            tName = UtilityTableName::MUSIC;
+        else if (m_listFilter.column == Movie::SERVICES)
             tName = UtilityTableName::SERVICES;
-
+        
         QString where = QString(
             "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
-            "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
+            "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".MovieID\n"
             "WHERE\n"
             "   \"%2\".\"%2ID\" IN (%4)\n"
             "GROUP BY\n"
-            "   GameID\n")
+            "   MovieID\n")
             .arg(m_tableName, m_utilityTable.tableName(tName), m_interface->tableName(tName));
-        
+
         QString utilList;
         for (int i = 0; i < m_listFilter.utilityList.size(); i++)
         {
             if (i > 0)
                 utilList += ',';
-            
             utilList += QString::number(m_listFilter.utilityList.at(i));
         }
-        where = where.arg(utilList);
-        statement = statement.arg(where);
+        statement = statement.arg(where.arg(utilList));
     }
-    else if (m_listFilter.column == Game::RATE)
+    else if (m_listFilter.column == Movie::RATE)
     {
         QString where = QString(
             "WHERE\n"
             "   Rate = %1\n")
-            .arg(m_listFilter.rate);
+                .arg(m_listFilter.rate);
         statement = statement.arg(where);
     }
     else
         statement = statement.arg("");
-    
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-    if(m_query.exec(statement))
+    if (m_query.exec(statement))
     {
         // Putting the queried data into a QList.
         m_data.clear();
-        
+
         while (m_query.next())
         {
-            GameItem game = {};
-            game.gameID = m_query.value(0).toLongLong();
-            game.gamePos = m_query.value(1).toLongLong();
-            game.name = m_query.value(2).toString();
-            game.url = m_query.value(3).toString();
-            game.rate = m_query.value(4).toInt();
-            m_data.append(game);
+            MovieItem movie = {};
+            movie.movieID = m_query.value(0).toLongLong();
+            movie.moviePos = m_query.value(1).toLongLong();
+            movie.name = m_query.value(2).toString();
+            movie.url = m_query.value(3).toString();
+            movie.rate = m_query.value(4).toInt();
+            m_data.append(movie);
         }
 
         if (size() > 0)
         {
             // Quering the util table and set it into the specifics rows.
             queryCategoriesField();
-            queryDeveloppersField();
-            queryPublishersField();
-            queryPlatformField();
+            queryDirectorsField();
+            queryActorsField();
+            queryProductionsField();
+            queryMusicField();
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID > 0 && m_sortingColumnID < 7)
+            if (m_sortingColumnID > 0 && m_sortingColumnID < 8)
                 sortUtility(m_sortingColumnID);
-
+            
             beginInsertRows(QModelIndex(), 0, size()-1);
             endInsertRows();
         }
     }
-#ifndef NDEBUG
     else
         std::cerr << "Failed to update cell values of table " << m_tableName.toLocal8Bit().constData() << "\n\t"
             << m_query.lastError().text().toLocal8Bit().constData() << std::endl;
-#endif
 }
 
-QVariant TableModelGame::retrieveData() const
+QVariant TableModelMovies::retrieveData() const
 {
     // Return the data of the table and the utility interface data.
-    Game::SaveDataTable data = {};
+    Movie::SaveDataTable data = {};
     data.tableName = m_tableName;
 
-    // Retrieve game data.
+    // Retrieve movie data
     QSqlQuery query(m_db);
 
     QString statement = QString(
         "SELECT\n"
-        "   GameID,\n"
-        "   GamePos,\n"
+        "   MovieID,\n"
+        "   MoviePos,\n"
         "   Name,\n"
         "   Url,\n"
         "   Rate\n"
         "FROM\n"
         "   \"%1\"\n"
         "ORDER BY\n"
-        "   GameID ASC;")
+        "   MovieID ASC;")
             .arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
     
     if (!query.exec(statement))
+    {
+        std::cerr << QString("Failed to query table %1\n\t%2")
+            .arg(m_tableName, query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
         return QVariant();
-    
+    }
+
     while (query.next())
     {
-        Game::SaveItem game = {};
-        game.gameID = query.value(0).toLongLong();
-        game.gamePos = query.value(1).toLongLong();
-        game.name = query.value(2).toString();
-        game.url = query.value(3).toString();
-        game.rate = query.value(4).toInt();
-        data.gameList.append(game);
+        Movie::SaveItem movie = {};
+        movie.movieID = query.value(0).toLongLong();
+        movie.moviePos = query.value(1).toLongLong();
+        movie.name = query.value(2).toString();
+        movie.url = query.value(3).toString();
+        movie.rate = query.value(4).toInt();
+        data.movieList.append(movie);
     }
 
     QVariant utilityInterface = m_interface->data();
-    if (!utilityInterface.canConvert<Game::SaveUtilityInterfaceData>())
+    if (!utilityInterface.canConvert<Movie::SaveUtilityInterfaceData>())
+    {
+        std::cerr << "Cannot convert utility QVariant to Movie::SaveUtilityInterfaceData." << std::endl;
         return QVariant();
-    
-    data.interface = qvariant_cast<Game::SaveUtilityInterfaceData>(utilityInterface);
+    }
+
+    data.interface = qvariant_cast<Movie::SaveUtilityInterfaceData>(utilityInterface);
 
     data.columnSort = (signed char)m_sortingColumnID;
-    data.sortOrder = (unsigned char)(m_sortingOrder == Qt::AscendingOrder ? 0 : 1);
+    data.sortOrder = (signed char)(m_sortingOrder == Qt::AscendingOrder ? 0 : 1);
 
     return QVariant::fromValue(data);
 }
 
-bool TableModelGame::setItemData(const QVariant& variant)
+bool TableModelMovies::setItemData(const QVariant& variant)
 {
     // Set the data into the TableModel SQL Tables.
-    Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
+    if (!variant.isValid() || !variant.canConvert<Movie::SaveDataTable>())
+        return false;
+    
+    Movie::SaveDataTable data = qvariant_cast<Movie::SaveDataTable>(variant);
 
-    // Set the table name and create the SQL tables.
     m_tableName = data.tableName;
     if (m_tableName.isEmpty())
         return false;
-    createTable();
-
-    // Set the game list.
-    QString statement = QString(
-        "INSERT INTO \"%1\" (GameID, GamePos, Name, Url, Rate)\n"
-        "VALUES")
-        .arg(m_tableName);
     
-    for (long long int i = 0; i < data.gameList.size(); i+=10)
+    // Set the game list
+    QString statement = QString(
+        "INSERT INTO \"%1\" (MovieID, MoviePos, Name, Url, Rate)\n"
+        "VALUES")
+            .arg(m_tableName);
+    
+    for (long long int i = 0; i < data.movieList.size(); i+=10)
     {
         QString strData;
-        for (long long int j = i; j < i+10 && j < data.gameList.size(); j++)
+        for (long long int j = i; j < i+10 && j < data.movieList.size(); j++)
         {
+            if (j > i)
+                strData += ',';
+            
             strData +=
-                QString("\n\t(%1, %2, \"%3\", \"%4\", %5),")
-                    .arg(data.gameList.at(j).gameID)
-                    .arg(data.gameList.at(j).gamePos)
-                    .arg(data.gameList.at(j).name)
-                    .arg(data.gameList.at(j).url)
-                    .arg(data.gameList.at(j).rate);
+                QString("\n\t(%1, %2, \"%3\", \"%4\", %5)")
+                    .arg(data.movieList.at(j).movieID)
+                    .arg(data.movieList.at(j).moviePos)
+                    .arg(data.movieList.at(j).name)
+                    .arg(data.movieList.at(j).url)
+                    .arg(data.movieList.at(j).rate);
         }
         if (strData.size() > 0)
         {
-            strData[strData.size()-1] = ';';
+            strData += ';';
 
 #ifndef NDEBUG
             std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-            if (!m_query.exec(statement + strData))
+            if (!m_query.exec(statement))
             {
-#ifndef NDEBUG
                 std::cerr << QString("Failed to exec statement for setting data into the table %1.\n\t%2")
-                    .arg(m_tableName)
-                    .arg(m_query.lastError().text())
+                    .arg(m_tableName, m_query.lastError().text())
                     .toLocal8Bit().constData()
                     << std::endl;
-#endif
-
+                m_query.clear();
                 return false;
             }
             m_query.clear();
@@ -742,12 +747,9 @@ bool TableModelGame::setItemData(const QVariant& variant)
         delete m_interface;
         m_interface = nullptr;
     }
-    m_interface = new TableModelGame_UtilityInterface(m_tableName, m_db, QVariant::fromValue(data.interface));
+    m_interface = new TableModelMovies_UtilityInterface(m_tableName, m_db, QVariant::fromValue(data.interface));
     if (!m_interface->isTableReady())
-    {
-        m_isTableCreated = false;
         return false;
-    }
 
     // Then, query the whole table.
     updateQuery();
@@ -755,37 +757,36 @@ bool TableModelGame::setItemData(const QVariant& variant)
     return true;
 }
 
-void TableModelGame::createTable()
+void TableModelMovies::createTable()
 {
-    // Create the Game SQL table
+    // Create the Movies SQL table
     QString statement = QString(
         "CREATE TABLE \"%1\" (\n"
-        "   GameID INTEGER PRIMARY KEY,\n"
-        "   GamePos INTEGER,\n"
+        "   MovieID INTEGER PRIMARY KEY,\n"
+        "   MoviePos INTEGER,\n"
         "   Name TEXT,\n"
         "   SensitiveContent INTEGER,\n"
         "   Url TEXT,\n"
         "   Rate INTEGER);")
             .arg(m_tableName);
-    
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
     if (m_query.exec(statement))
         m_isTableCreated = true;
-#ifndef NDEBUG
     else
+    {
         std::cerr << QString("Failed to create the table %1.\n\t%2")
-            .arg(m_tableName)
-            .arg(m_query.lastError().text())
+            .arg(m_tableName, m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
-#endif
+    }
     m_query.clear();
 }
 
-void TableModelGame::deleteTable()
+void TableModelMovies::deleteTable()
 {
     // Delete the Sql Utility Interface
     if (!m_isTableCreated)
@@ -801,129 +802,115 @@ void TableModelGame::deleteTable()
 
     if (!m_query.exec(statement))
     {
-#ifndef NDEBUG
         std::cerr << QString("Failed to delete table %1.\n\t%2")
             .arg(m_tableName)
             .arg(m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
-#endif
     }
     m_query.clear();
 }
 
-void TableModelGame::utilityChanged(long long int gameID, UtilityTableName tableName)
+void TableModelMovies::utilityChanged(long long int movieID, UtilityTableName tableName)
 {
-    // This member function is called when the utility interface if changed.
-    if (gameID >= 0 && size() > 0 && m_isTableCreated)
+    // This member function is called when the utility interface is changed.
+    if (movieID >= 0 && size() > 0 && m_isTableCreated)
     {
         if (tableName == UtilityTableName::CATEGORIES)
-            queryCategoriesField(gameID);
-        else if (tableName == UtilityTableName::DEVELOPPERS)
-            queryDeveloppersField(gameID);
-        else if (tableName == UtilityTableName::PUBLISHERS)
-            queryPublishersField(gameID);
-        else if (tableName == UtilityTableName::PLATFORM)
-            queryPlatformField(gameID);
+            queryCategoriesField();
+        else if (tableName == UtilityTableName::DIRECTOR)
+            queryDirectorsField();
+        else if (tableName == UtilityTableName::ACTORS)
+            queryActorsField();
+        else if (tableName == UtilityTableName::PRODUCTION)
+            queryProductionsField();
+        else if (tableName == UtilityTableName::MUSIC)
+            queryMusicField();
         else if (tableName == UtilityTableName::SERVICES)
-            queryServicesField(gameID);
-        else if (tableName ==  UtilityTableName::SENSITIVE_CONTENT)
-            querySensitiveContentField(gameID);
+            queryServicesField();
+        else if (tableName == UtilityTableName::SENSITIVE_CONTENT)
+            querySensitiveContentField();
     }
 }
 
-void TableModelGame::queryUtilityField(UtilityTableName tableName)
+void TableModelMovies::queryUtilityField(UtilityTableName tableName)
 {
     // Standard interface to query the utility data except the sensitive data.
     if (!m_isTableCreated)
         return;
-
+    
     QString statement = QString(
         "SELECT\n"
-        "   \"%1\".GameID,\n"
+        "   \"%1\".MovieID,\n"
         "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
-        "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".\"UtilityID\"\n"
-        "INNER JOIN \"%3\" ON \"%3\".\"ItemID\" = \"%1\".GameID\n"
+        "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
+        "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".MovieID\n"
         "%6"
         "GROUP BY\n"
-        "   \"%1\".GameID\n"
+        "   \"%1\".MovieID\n"
         "ORDER BY\n"
         "   \"%1\".%4 %5;")
             .arg(m_tableName)
             .arg(m_utilityTable.tableName(tableName))
             .arg(m_interface->tableName(tableName));
     
-    // Sorting order.
-    if (m_sortingColumnID == 0)
+    // Sorting order
+    if (m_sortingColumnID == Movie::NAME)
     {
         statement = statement.arg("Name");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Movie::RATE)
     {
         statement = statement.arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
     }
     else
-        statement = statement.arg("GamePos").arg("ASC");
-
+        statement = statement.arg("MoviePos").arg("ASC");
+    
     // Filtering the view.
-    if (m_listFilter.column == Game::NAME)
+    if (m_listFilter.column == Movie::NAME)
     {
         QString where = QString(
             "WHERE\n"
-            "   \"%1\".Name LIKE \"%%2%\"\n")
-            .arg(m_tableName, m_listFilter.pattern);
+            "   \"%1\".Name LIKE \"%%2\"\n")
+                .arg(m_tableName, m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Game::CATEGORIES &&
-        m_listFilter.column <= Game::SERVICES)
+    else if (m_listFilter.column >= Movie::CATEGORIES &&
+        m_listFilter.column <= Movie::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Game::CATEGORIES)
+        if (m_listFilter.column == Movie::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
-        else if (m_listFilter.column == Game::DEVELOPPERS)
-            tName = UtilityTableName::DEVELOPPERS;
-        else if (m_listFilter.column == Game::PUBLISHERS)
-            tName = UtilityTableName::PUBLISHERS;
-        else if (m_listFilter.column == Game::PLATFORMS)
-            tName = UtilityTableName::PLATFORM;
-        else if (m_listFilter.column == Game::SERVICES)
+        else if (m_listFilter.column == Movie::DIRECTORS)
+            tName = UtilityTableName::DIRECTOR;
+        else if (m_listFilter.column == Movie::ACTORS)
+            tName = UtilityTableName::ACTORS;
+        else if (m_listFilter.column == Movie::PRODUCTIONS)
+            tName = UtilityTableName::PRODUCTION;
+        else if (m_listFilter.column == Movie::MUSIC)
+            tName = UtilityTableName::MUSIC;
+        else if (m_listFilter.column == Movie::SERVICES)
             tName = UtilityTableName::SERVICES;
         
-        QString gamesID;
+        QString moviesID;
         for (int i = 0; i < m_data.size(); i++)
         {
             if (i > 0)
-                gamesID += ',';
-            gamesID += QString::number(m_data.at(i).gameID);
+                moviesID += ',';
+            moviesID += QString::number(m_data.at(i).movieID);
         }
-        
-        /*if (tableName != tName)
-        {
-            QString where = QString(
-                "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
-                "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
-                "WHERE\n"
-                "   \"%1\".GameID IN (%4)\n")
-                .arg(m_tableName, 
-                     m_utilityTable.tableName(tName), 
-                     m_interface->tableName(tName),
-                     gamesID);
-            statement = statement.arg(where);
-        }
-        else
-        {*/
-            QString where = QString(
-                "WHERE\n"
-                "   \"%1\".GameID IN (%2)\n")
-                .arg(m_tableName, gamesID);
-            statement = statement.arg(where);
-        //}
+
+        QString where = QString(
+            "WHERE\n"
+            "   \"%1\".MovieID IN (%2)\n")
+                .arg(m_tableName, moviesID);
+        statement = statement.arg(where);
     }
-    else if (m_listFilter.column == Game::RATE)
+    else if (m_listFilter.column == Movie::RATE)
     {
         QString where = QString(
             "WHERE\n"
@@ -934,7 +921,7 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
     }
     else
         statement = statement.arg("");
-        
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
@@ -944,174 +931,187 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
         // Apply the queried data into model data.
         while (m_query.next())
         {
-            long long int gameID = m_query.value(0).toLongLong();
+            long long int movieID = m_query.value(0).toLongLong();
             QString utilityName = m_query.value(1).toString();
 
-            for (int i = 0; i < rowCount(); i++)
+            for (int i = 0; i < m_data.size(); i++)
             {
-                if (m_data.at(i).gameID == gameID)
+                if (m_data.at(i).movieID == movieID)
                 {
                     if (tableName == UtilityTableName::CATEGORIES)
                         m_data[i].categories = utilityName;
-                    else if (tableName == UtilityTableName::DEVELOPPERS)
-                        m_data[i].developpers = utilityName;
-                    else if (tableName == UtilityTableName::PUBLISHERS)
-                        m_data[i].publishers = utilityName;
-                    else if (tableName == UtilityTableName::PLATFORM)
-                        m_data[i].platform = utilityName;
+                    else if (tableName == UtilityTableName::DIRECTOR)
+                        m_data[i].directors = utilityName;
+                    else if (tableName == UtilityTableName::ACTORS)
+                        m_data[i].actors = utilityName;
+                    else if (tableName == UtilityTableName::PRODUCTION)
+                        m_data[i].productions = utilityName;
+                    else if (tableName == UtilityTableName::MUSIC)
+                        m_data[i].music = utilityName;
                     else if (tableName == UtilityTableName::SERVICES)
                         m_data[i].services = utilityName;
                     break;
                 }
             }
         }
-        m_query.clear();
     }
-#ifndef NDEBUG
     else
-        std::cerr << QString("Failed to query Categories of the %1 table.\n\t%2")
+    {
+        std::cerr << QString("Failed to query Utilities of the %1 table.\n\t%2")
             .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+            .arg(m_query.lastError().text())
+            .toLocal8Bit().constData()
             << std::endl;
-#endif
+    }
+    m_query.clear();
 }
 
-void TableModelGame::queryUtilityField(UtilityTableName tableName, long long int gameID)
+void TableModelMovies::queryUtilityField(UtilityTableName tableName, long long int movieID)
 {
-    // Stardard interface to update the utility field of the game (gameID).
+    // Standard interface to update the utility field of the movie (movieID).
     if (!m_isTableCreated)
         return;
-
+    
     QString statement = QString(
         "SELECT\n"
-        "   \"%1\".GameID,\n"
-        "   GROUP_CONCAT(\"%2\".Name, \", \")\n"
+        "   \"%1\".MovieID,\n"
+        "   GROUP_CONCACT(\"%2\".Name, \", \")\n"
         "FROM\n"
         "   \"%1\"\n"
         "INNER JOIN \"%2\" ON \"%2\".\"%2ID\" = \"%3\".UtilityID\n"
-        "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".GameID\n"
+        "INNER JOIN \"%3\" ON \"%3\".ItemID = \"%1\".MovieID\n"
         "WHERE\n"
-        "   \"%1\".GameID = %4;")
-            .arg(m_tableName)
-            .arg(m_utilityTable.tableName(tableName))
-            .arg(m_interface->tableName(tableName))
-            .arg(gameID);
-    
+        "   \"%1\".MovieID = %4;")
+            .arg(m_tableName, m_utilityTable.tableName(tableName), m_interface->tableName(tableName))
+            .arg(movieID);
+
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
     if (m_query.exec(statement))
     {
-        // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
-        if (pos >= 0 && pos <= rowCount())
+        // Then, apply the retrived field into the view.
+        int pos = findMoviePos(movieID);
+        if (pos >= 0 && pos <= size())
         {
             QString utilityName;
             if (m_query.next())
                 utilityName = m_query.value(1).toString();
-
+            
             if (tableName == UtilityTableName::CATEGORIES)
                 m_data[pos].categories = utilityName;
-            else if (tableName == UtilityTableName::DEVELOPPERS)
-                m_data[pos].developpers = utilityName;
-            else if (tableName == UtilityTableName::PUBLISHERS)
-                m_data[pos].publishers = utilityName;
-            else if (tableName == UtilityTableName::PLATFORM)
-                m_data[pos].platform = utilityName;
+            else if (tableName == UtilityTableName::DIRECTOR)
+                m_data[pos].directors = utilityName;
+            else if (tableName == UtilityTableName::ACTORS)
+                m_data[pos].actors = utilityName;
+            else if (tableName == UtilityTableName::PRODUCTION)
+                m_data[pos].productions = utilityName;
+            else if (tableName == UtilityTableName::MUSIC)
+                m_data[pos].music = utilityName;
             else if (tableName == UtilityTableName::SERVICES)
                 m_data[pos].services = utilityName;
         }
-        m_query.clear();
     }
-#ifndef NDEBUG
     else
-        std::cerr << QString("Failed to query Categories of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
-            .arg(m_tableName)
-            .arg(m_query.lastError().text()).toLocal8Bit().constData()
+        std::cerr << QString("Fialed to query Utilities of the game %1 in the table %2.\n\t%3")
+            .arg(movieID)
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData()
             << std::endl;
-#endif
+    m_query.clear();
 }
 
-int TableModelGame::findGamePos(long long int gameID) const
+int TableModelMovies::findMoviePos(long long int movieID) const
 {
     for (int i = 0; i < size(); i++)
-        if (m_data.at(i).gameID == gameID)
+        if (m_data.at(i).movieID == movieID)
             return i;
     return -1;
 }
 
-void TableModelGame::queryCategoriesField()
+void TableModelMovies::queryCategoriesField()
 {
     if (m_isTableCreated)
         queryUtilityField(UtilityTableName::CATEGORIES);
 }
 
-void TableModelGame::queryCategoriesField(long long int gameID)
+void TableModelMovies::queryCategoriesField(long long int movieID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::CATEGORIES, gameID);
+        queryUtilityField(UtilityTableName::CATEGORIES, movieID);
 }
 
-void TableModelGame::queryDeveloppersField()
+void TableModelMovies::queryDirectorsField()
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::DEVELOPPERS);
+        queryUtilityField(UtilityTableName::DIRECTOR);
 }
 
-void TableModelGame::queryDeveloppersField(long long int gameID)
+void TableModelMovies::queryDirectorsField(long long int movieID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::DEVELOPPERS, gameID);
+        queryUtilityField(UtilityTableName::DIRECTOR, movieID);
 }
 
-void TableModelGame::queryPublishersField()
+void TableModelMovies::queryActorsField()
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::PUBLISHERS);
+        queryUtilityField(UtilityTableName::ACTORS);
 }
 
-void TableModelGame::queryPublishersField(long long int gameID)
+void TableModelMovies::queryActorsField(long long int movieID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::PUBLISHERS, gameID);
+        queryUtilityField(UtilityTableName::ACTORS, movieID);
 }
 
-void TableModelGame::queryPlatformField()
+void TableModelMovies::queryProductionsField()
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::PLATFORM);
+        queryUtilityField(UtilityTableName::PRODUCTION);
 }
 
-void TableModelGame::queryPlatformField(long long int gameID)
+void TableModelMovies::queryProductionsField(long long int movieID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::PLATFORM, gameID);
+        queryUtilityField(UtilityTableName::PRODUCTION, movieID);
 }
 
-void TableModelGame::queryServicesField()
+void TableModelMovies::queryMusicField()
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::MUSIC);
+}
+
+void TableModelMovies::queryMusicField(long long int movieID)
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::MUSIC, movieID);
+}
+
+void TableModelMovies::queryServicesField()
 {
     if (m_isTableCreated)
         queryUtilityField(UtilityTableName::SERVICES);
 }
 
-void TableModelGame::queryServicesField(long long int gameID)
+void TableModelMovies::queryServicesField(long long int movieID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::SERVICES, gameID);
+        queryUtilityField(UtilityTableName::SERVICES, movieID);
 }
 
-void TableModelGame::querySensitiveContentField()
+void TableModelMovies::querySensitiveContentField()
 {
-    // Getting the Sensitive Content Information for each game.
+    // Getting the Sensitive Content Information for each movie.
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
         "   ExplicitContent,\n"
         "   ViolenceContent,\n"
         "   BadLanguage,\n"
-        "   \"%2\".GameID\n"
+        "   \"%2\".MovieID\n"
         "FROM\n"
         "   \"%1\", \"%2\"\n"
         "ORDER BY\n"
@@ -1131,7 +1131,7 @@ void TableModelGame::querySensitiveContentField()
         SORTING_ORDER(m_sortingOrder, statement)
     }
     else
-        statement = statement.arg(m_tableName).arg("GamePos").arg("ASC");
+        statement = statement.arg(m_tableName).arg("MovieID").arg("ASC");
     
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl;
@@ -1141,7 +1141,7 @@ void TableModelGame::querySensitiveContentField()
     {
         while (m_query.next())
         {
-            long long int gameID = m_query.value(0).toLongLong();
+            long long int movieID = m_query.value(0).toLongLong();
             SensitiveContent sensData = {};
             sensData.explicitContent = m_query.value(1).toInt();
             sensData.violenceContent = m_query.value(2).toInt();
@@ -1149,7 +1149,7 @@ void TableModelGame::querySensitiveContentField()
 
             for (int i = 0; i < size(); i++)
             {
-                if (m_data.at(i).gameID == gameID)
+                if (m_data.at(i).movieID == movieID)
                 {
                     m_data[i].sensitiveContent = sensData;
                     break;
@@ -1166,9 +1166,9 @@ void TableModelGame::querySensitiveContentField()
             << std::endl;
 }
 
-void TableModelGame::querySensitiveContentField(long long int gameID)
+void TableModelMovies::querySensitiveContentField(long long int movieID)
 {
-    // Updating the field sensitive content of the game (gameID).
+    // Updating the field sensitive content of the movie (movieID).
     QString statement = QString(
         "SELECT\n"
         "   ItemID,\n"
@@ -1180,7 +1180,7 @@ void TableModelGame::querySensitiveContentField(long long int gameID)
         "WHERE\n"
         "   ItemID = %2;")
             .arg(m_interface->tableName(UtilityTableName::SENSITIVE_CONTENT))
-            .arg(gameID);
+            .arg(movieID);
 
 #ifndef NDEBUG
     std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -1189,7 +1189,7 @@ void TableModelGame::querySensitiveContentField(long long int gameID)
     if (m_query.exec(statement))
     {
         // Then, apply the retrieved field into the view.
-        int pos = findGamePos(gameID);
+        int pos = findMoviePos(movieID);
         if (pos >= 0 && pos < rowCount() && m_query.next())
         {
             SensitiveContent sensData = {};
@@ -1203,35 +1203,35 @@ void TableModelGame::querySensitiveContentField(long long int gameID)
     }
 #ifndef NDEBUG
     else
-        std::cerr << QString("Failed to query Sensitive Content of the game %1 in the table %2.\n\t%3")
-            .arg(gameID)
+        std::cerr << QString("Failed to query Sensitive Content of the movie %1 in the table %2.\n\t%3")
+            .arg(movieID)
             .arg(m_tableName)
             .arg(m_query.lastError().text()).toLocal8Bit().constData()
             << std::endl;
 #endif
 }
 
-QString TableModelGame::url(const QModelIndex& index) const
+QString TableModelMovies::url(const QModelIndex& index) const
 {
     if (index.row() >= 0 && index.row() < size())
         return m_data.at(index.row()).url;
     return QString();
 }
 
-void TableModelGame::setUrl(const QModelIndex& index, const QString& url)
+void TableModelMovies::setUrl(const QModelIndex& index, const QString& url)
 {
-    // Set the url of a game.
+    // Set the url of a movie.
     if (index.isValid() && index.row() > 0 && index.row() < size())
     {
-        long long int gameID = m_data.at(index.row()).gameID;
+        long long int movieID = m_data.at(index.row()).movieID;
 
         QString statement = QString(
             "UPDATE \"%1\"\n"
             "SET Url = \"%2\"\n"
-            "WHERE GameID = %3;")
+            "WHERE MovieID = %3;")
                 .arg(m_tableName)
                 .arg(url)
-                .arg(m_data.at(index.row()).gameID);
+                .arg(m_data.at(index.row()).movieID);
         
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -1255,32 +1255,32 @@ void TableModelGame::setUrl(const QModelIndex& index, const QString& url)
     }
 }
 
-TableModel_UtilityInterface* TableModelGame::utilityInterface()
+TableModel_UtilityInterface* TableModelMovies::utilityInterface()
 {
     if (m_isTableCreated)
         return m_interface;
     return nullptr;
 }
 
-void TableModelGame::updateGamePos(int from)
+void TableModelMovies::updateMoviePos(int from)
 {
-    // Update the GamePos SQL column, used to apply order in the view.
+    // Update the MoviePos SQL column, used to apply order in the view.
     if (from < 0)
         from = 0;
 
     QString baseStatement = QString(
         "UPDATE \"%1\"\n"
-        "SET GamePos = %2\n"
-        "WHERE GameID = %3;");
+        "SET MoviePos = %2\n"
+        "WHERE MovieID = %3;");
     
     for (int i = from; i < size(); i++)
     {
-        if (m_data.at(i).gamePos != i)
+        if (m_data.at(i).moviePos != i)
         {
             QString statement = baseStatement
                 .arg(m_tableName)
                 .arg(i)
-                .arg(m_data.at(i).gameID);
+                .arg(m_data.at(i).movieID);
 
 #ifndef NDEBUG
             std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -1288,13 +1288,13 @@ void TableModelGame::updateGamePos(int from)
 
             if (m_query.exec(statement))
             {
-                m_data[i].gamePos = i;
+                m_data[i].moviePos = i;
                 m_query.clear();
             }
             else
             {
-                std::cerr << QString("Failed to update game position of game %1 of the table %2.\n\t%3")
-                    .arg(m_data.at(i).gameID)
+                std::cerr << QString("Failed to update game position of movie %1 of the table %2.\n\t%3")
+                    .arg(m_data.at(i).movieID)
                     .arg(m_tableName)
                     .arg(m_query.lastError().text())
                     .toLocal8Bit().constData()
@@ -1305,7 +1305,7 @@ void TableModelGame::updateGamePos(int from)
     }
 }
 
-QItemSelection TableModelGame::moveItemsUp(const QModelIndexList& indexList)
+QItemSelection TableModelMovies::moveItemsUp(const QModelIndexList& indexList)
 {
     // Move the selected items in the view up by one row.
     QModelIndexList indexListCpy(indexList);
@@ -1320,19 +1320,19 @@ QItemSelection TableModelGame::moveItemsUp(const QModelIndexList& indexList)
     QString baseStatement = QString(
         "UPDATE \"%1\"\n"
         "SET\n"
-        "   GamePos = %2\n"
-        "WHERE GameID = %3;");
+        "   MoviePos = %2\n"
+        "WHERE MovieID = %3;");
     
     foreach (const QModelIndex& index, indexListCpy)
     {
         // If index is equal to 0, ignore
         if (index.row() == 0)
             continue;
-
+        
         QString statement = baseStatement
             .arg(m_tableName)
-            .arg(m_data.at(index.row()).gamePos-1)
-            .arg(m_data.at(index.row()).gameID);
+            .arg(m_data.at(index.row()).moviePos-1)
+            .arg(m_data.at(index.row()).movieID);
         
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -1340,28 +1340,27 @@ QItemSelection TableModelGame::moveItemsUp(const QModelIndexList& indexList)
 
         if (m_query.exec(statement))
         {
-            // Store the game and delete it from the game list.
+            // Store the movie and delete it from the movies list.
             beginRemoveRows(QModelIndex(), index.row(), index.row());
             endRemoveRows();
-            // Move the item to the new position
+            // Move the item ot the new position.
             m_data.move(index.row(), index.row()-1);
             beginInsertRows(QModelIndex(), index.row()-1, index.row()-1);
             endInsertRows();
             emit listEdited();
 
-            // Store the index of the moved item into a list to be selected in the view.
+            // Store the index of the moved intem into a list to be selected in the view.
             selectedIndex.append(QItemSelectionRange(
                 this->index(index.row()-1, 0),
-                this->index(index.row()-1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+                this->index(index.row()-1, NUMBER_MOVIES_TABLE_COLUMN_COUNT)));
 
-            updateGamePos(index.row()-1);
+            updateMoviePos(index.row()-1);
             m_query.clear();
         }
         else
         {
             std::cerr << QString("Error: failed to move up items in the table %1.\n\t%2")
-                .arg(m_tableName)
-                .arg(m_query.lastError().text())
+                .arg(m_tableName, m_query.lastError().text())
                 .toLocal8Bit().constData()
                 << std::endl;
             m_query.clear();
@@ -1371,7 +1370,7 @@ QItemSelection TableModelGame::moveItemsUp(const QModelIndexList& indexList)
     return selectedIndex;
 }
 
-QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
+QItemSelection TableModelMovies::moveItemsDown(const QModelIndexList& indexList)
 {
     // Move the selected items in the view down by one row.
     QModelIndexList indexListCpy(indexList);
@@ -1380,53 +1379,53 @@ QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
         {
             return index1.row() > index2.row();
         });
-
-    QItemSelection selectedIndex;
     
+    QItemSelection selectedIndex;
+
     QString baseStatement = QString(
         "UPDATE \"%1\"\n"
         "SET\n"
-        "   GamePos = %2\n"
-        "WHERE GameID = %3;");
-    
+        "   MoviePos = %2\n"
+        "WHERE MovieID = %3;");
+
     foreach (const QModelIndex& index, indexListCpy)
     {
-        // If index is equal to size() - 1, ignore.
+        // If index is equal to 0, ignore
         if (index.row() == size()-1)
             continue;
         
         QString statement = baseStatement
             .arg(m_tableName)
-            .arg(m_data.at(index.row()).gamePos+1)
-            .arg(m_data.at(index.row()).gameID);
+            .arg(m_data.at(index.row()).moviePos+1)
+            .arg(m_data.at(index.row()).movieID);
         
 #ifndef NDEBUG
-        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;        // If index is equal to 0, ignore
+        std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
         if (m_query.exec(statement))
         {
+            // Store the movie and delete it from the movies list.
             beginRemoveRows(QModelIndex(), index.row(), index.row());
             endRemoveRows();
-            // Move the item to the new position
+            // Move the item ot the new position.
             m_data.move(index.row(), index.row()+1);
             beginInsertRows(QModelIndex(), index.row()+1, index.row()+1);
             endInsertRows();
             emit listEdited();
 
-            // Store the index of the moved item into a list to be selected in the view.
+            // Store the index of the moved intem into a list to be selected in the view.
             selectedIndex.append(QItemSelectionRange(
                 this->index(index.row()+1, 0),
-                this->index(index.row()+1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+                this->index(index.row()+1, NUMBER_MOVIES_TABLE_COLUMN_COUNT)));
 
-            updateGamePos(index.row());
+            updateMoviePos(index.row());
             m_query.clear();
         }
         else
         {
-            std::cerr << QString("Error: failed to move down items in the table %1.\n\t%2")
-                .arg(m_tableName)
-                .arg(m_query.lastError().text())
+            std::cerr << QString("Error: failed to move up items in the table %1.\n\t%2")
+                .arg(m_tableName, m_query.lastError().text())
                 .toLocal8Bit().constData()
                 << std::endl;
             m_query.clear();
@@ -1436,26 +1435,26 @@ QItemSelection TableModelGame::moveItemsDown(const QModelIndexList& indexList)
     return selectedIndex;
 }
 
-QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int to)
+QItemSelection TableModelMovies::moveItemsTo(const QModelIndexList& indexList, int to)
 {
     // Move the selected items from the view to the position (to).
-    // Sorting the list to be able to remove items from the highest index to the lowest index.
+    // Sorting the list to be able to remove items from the highest index to the lowest index. 
     QModelIndexList indexListCpy(indexList);
-    std::sort(indexListCpy.begin(), indexListCpy.end(), 
+    std::sort(indexListCpy.begin(), indexListCpy.end(),
         [](const QModelIndex& index1, const QModelIndex& index2) -> bool
         {
             return index1.row() < index2.row();
         });
-
-    // Removing items and add the valid index to the movingGame list.
-    QList<GameItem> movingGame;
+    
+    // Removing items and add the valid index to the movingMovies list.
+    QList<MovieItem> movingMovies;
     for (int i = indexListCpy.size()-1; i >= 0; i--)
     {
         if (indexListCpy.at(i).row() < 0 || indexListCpy.at(i).row() >= size() ||
             indexListCpy.at(i).column() < 0 || indexListCpy.at(i).column() >= columnCount())
             continue;
         
-        movingGame.prepend(m_data.at(indexListCpy.at(i).row()));
+        movingMovies.prepend(m_data.at(indexListCpy.at(i).row()));
         beginRemoveRows(QModelIndex(), indexListCpy.at(i).row(), indexListCpy.at(i).row());
         m_data.remove(indexListCpy.at(i).row(), 1);
         endRemoveRows();
@@ -1467,20 +1466,20 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     QString baseStatement = QString(
         "UPDATE \"%1\"\n"
         "SET\n"
-        "   GamePos = %2\n"
-        "WHERE GameID = %3;");
+        "   MoviePos = %2\n"
+        "WHERE MovieID = %3;");
     
-    // Moving the items.
+    // Moving items
     int i = to;
-    for (GameItem& item : movingGame)
+    for (MovieItem& item: movingMovies)
     {
-        item.gamePos = i;
+        item.moviePos = i;
 
         QString statement = baseStatement
             .arg(m_tableName)
             .arg(i)
-            .arg(item.gameID);
-
+            .arg(item.movieID);
+    
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
 #endif
@@ -1494,10 +1493,9 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
         else
         {
             std::cerr << QString("Error: failed to replace items of table %1.\n\t%2")
-                .arg(m_tableName)
-                .arg(m_query.lastError().text())
+                .arg(m_tableName, m_query.lastError().text())
                 .toLocal8Bit().constData()
-                << std::endl;
+                << std::endl << std::endl;
             m_query.clear();
         }
     }
@@ -1507,10 +1505,10 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     {
         beginInsertRows(QModelIndex(), to, i-1);
         endInsertRows();
-        updateGamePos(to);
+        updateMoviePos(to);
         selectedIndex.append(QItemSelectionRange(
             index(to, 0),
-            index(i-1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
+            index(i-1, NUMBER_MOVIES_TABLE_COLUMN_COUNT)));
         emit listEdited();
     }
 
@@ -1518,13 +1516,13 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     return selectedIndex;
 }
 
-void TableModelGame::sortUtility(int column)
+void TableModelMovies::sortUtility(int column)
 {
-    // Sorting games by there utilities.
-    if (column == 0 || column == 7)
+    // Sorting movies by there utilities.
+    if (column == Movie::NAME | column == Movie::RATE)
         return;
-
-    auto compareString =
+    
+    auto compareUtil =
         [this] (const QString& str1, const QString& str2) -> bool
         {
             if (this->m_sortingOrder == Qt::AscendingOrder)
@@ -1532,8 +1530,8 @@ void TableModelGame::sortUtility(int column)
             else
                 return str1.compare(str2) > 0;
         };
-
-    auto compareSens = 
+    
+    auto compareSens =
         [this] (const SensitiveContent& data1, const SensitiveContent& data2) -> bool
         {
             if (this->m_sortingOrder == Qt::AscendingOrder)
@@ -1551,7 +1549,7 @@ void TableModelGame::sortUtility(int column)
                     }
                 }
             }
-            else 
+            else
             {
                 if (data1.explicitContent > data2.explicitContent)
                     return true;
@@ -1569,21 +1567,23 @@ void TableModelGame::sortUtility(int column)
 
             return false;
         };
-    
+
     auto sortTemplate =
-        [column, compareString, compareSens] (const GameItem& item1, const GameItem& item2) -> bool
+        [column, compareUtil, compareSens] (const MovieItem& item1, const MovieItem& item2) -> bool
         {
-            if (column == 1)
-                return compareString(item1.categories, item2.categories);
-            else if (column == 2)
-                return compareString(item1.developpers, item2.developpers);
-            else if (column == 3)
-                return compareString(item1.publishers, item2.publishers);
-            else if (column == 4)
-                return compareString(item1.platform, item2.platform);
-            else if (column == 5)
-                return compareString(item1.services, item2.services);
-            else if (column == 6)
+            if (column == Movie::CATEGORIES)
+                return compareUtil(item1.categories, item2.categories);
+            else if (column == Movie::DIRECTORS)
+                return compareUtil(item1.directors, item2.directors);
+            else if (column == Movie::ACTORS)
+                return compareUtil(item1.actors, item2.actors);
+            else if (column == Movie::PRODUCTIONS)
+                return compareUtil(item1.productions, item2.productions);
+            else if (column == Movie::MUSIC)
+                return compareUtil(item1.music, item2.music);
+            else if (column == Movie::SERVICES)
+                return compareUtil(item1.services, item2.services);
+            else if (column == Movie::SENSITIVE_CONTENT)
                 return compareSens(item1.sensitiveContent, item2.sensitiveContent);
             return false;
         };

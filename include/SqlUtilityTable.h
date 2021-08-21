@@ -49,6 +49,7 @@ private:
 	void destroyTables();
 	void destroyTableByName(const QString& tableName);
 	void standardTableCreation(UtilityTableName tName);
+	bool setStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data);
 
 	// Games
 	void createGameTables();
@@ -60,7 +61,16 @@ private:
 	void createServicesTable();
 	QVariant queryGameData() const;
 	bool setGameData(const QVariant& data);
-	bool setGameStandardData(UtilityTableName tName, const QList<ItemUtilityData>& data);
+
+	// Movies
+	void createMoviesTables();
+	void destroyMoviesTables();
+	void createDirectoryTable();
+	void createActorsTable();
+	void createProductionsTable();
+	void createMusicTable();
+	QVariant queryMoviesData() const;
+	bool setMoviesData(const QVariant& data);
 
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 

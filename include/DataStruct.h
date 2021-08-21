@@ -33,12 +33,14 @@ struct ItemUtilityData
 enum class ListType
 {
     UNKNOWN,
-    GAMELIST
+    GAMELIST,
+    MOVIESLIST
 };
 
 enum class ViewType
 {
     GAME,
+    MOVIE,
     UTILITY,
 };
 
@@ -65,15 +67,34 @@ struct GameItem
     int rate;
 };
 
+struct MovieItem
+{
+    long long int movieID;
+    long long int moviePos;
+    QString name;
+    QString categories;
+    QString directors;
+    QString actors;
+    QString productions;
+    QString music;
+    QString services;
+    SensitiveContent sensitiveContent;
+    QString url;
+    int rate;
+};
+
 enum class UtilityTableName
 {
-    // Game
     CATEGORIES,
     DEVELOPPERS,
     PUBLISHERS,
     PLATFORM,
     SERVICES,
-    SENSITIVE_CONTENT
+    SENSITIVE_CONTENT,
+    DIRECTOR,
+    ACTORS,
+    PRODUCTION,
+    MUSIC
 };
 
 namespace Game
@@ -173,6 +194,85 @@ Q_DECLARE_METATYPE(Game::SaveUtilityData);
 Q_DECLARE_METATYPE(Game::SaveDataTable);
 Q_DECLARE_METATYPE(Game::SaveData);
 Q_DECLARE_METATYPE(Game::SensitiveContentData);
+
+namespace Movie
+{
+    enum ColumnIndex
+    {
+        NAME = 0,
+        CATEGORIES = 1,
+        DIRECTORS = 2,
+        ACTORS = 3,
+        PRODUCTIONS = 4,
+        MUSIC = 5,
+        SERVICES = 6,
+        SENSITIVE_CONTENT = 7,
+        RATE = 8
+    };
+
+    struct SaveUtilityData
+    {
+        QList<ItemUtilityData> categories;
+        QList<ItemUtilityData> directors;
+        QList<ItemUtilityData> actors;
+        QList<ItemUtilityData> productions;
+        QList<ItemUtilityData> music;
+        QList<ItemUtilityData> services;
+    };
+
+    struct SaveUtilityInterfaceData
+    {
+        QList<Game::SaveUtilityInterfaceItem> categories;
+        QList<Game::SaveUtilityInterfaceItem> directors;
+        QList<Game::SaveUtilityInterfaceItem> actors;
+        QList<Game::SaveUtilityInterfaceItem> productions;
+        QList<Game::SaveUtilityInterfaceItem> music;
+        QList<Game::SaveUtilityInterfaceItem> services;
+        QList<Game::SaveUtilitySensitiveContentItem> sensitiveContent;
+    };
+
+    struct ColumnsSize
+    {
+        int name;
+        int categories;
+        int directors;
+        int actors;
+        int productions;
+        int music;
+        int services;
+        int sensitiveContent;
+        int rate;
+    };
+
+    struct SaveItem
+    {
+        long long int movieID;
+        long long int moviePos;
+        QString name;
+        QString url;
+        int rate;
+    };
+
+    struct SaveDataTable
+    {
+        QString tableName;
+        QList<SaveItem> movieList;
+        SaveUtilityInterfaceData interface;
+        ColumnsSize viewColumnsSize;
+        signed char columnSort;
+        unsigned char sortOrder;
+    };
+
+    struct SaveData
+    {
+        QList<SaveDataTable> movieTables;
+        SaveUtilityData utilityData;
+    };
+}
+Q_DECLARE_METATYPE(Movie::SaveUtilityData);
+Q_DECLARE_METATYPE(Movie::SaveUtilityInterfaceData);
+Q_DECLARE_METATYPE(Movie::SaveDataTable);
+Q_DECLARE_METATYPE(Movie::SaveData);
 
 struct RecentFileData
 {

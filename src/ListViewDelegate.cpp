@@ -53,22 +53,24 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 		if (index.column() == Game::RATE)
 		{
 			// Painting the stars.
-			if (option.rect.width() >= 5 * StarEditor::paintFactor())
-				StarEditor::paintStars(index.data().toInt(), painter, option.rect, option.palette);
-			else
-			{
-				QString starNB = QString::number(index.data().toInt());
-
-				QFont font = painter->font();
-				font.setPixelSize(20);
-				painter->setFont(font);
-
-				painter->setPen(Qt::SolidLine);
-				painter->drawText(option.rect, starNB);
-			}
+			paintRateStars(painter, option, index);
 			return;
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
+		{
+			paintSensitiveStars(painter, option, index);
+			return;
+		}
+	}
+	else if (m_tableModel->listType() == ListType::MOVIESLIST)
+	{
+		if (index.column() == Movie::RATE)
+		{
+			// Painting the stars.
+			paintRateStars(painter, option, index);
+			return;
+		}
+		else if (index.column() == Movie::SENSITIVE_CONTENT)
 		{
 			paintSensitiveStars(painter, option, index);
 			return;
@@ -88,6 +90,17 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 			return StarEditor::sizeHint(5);
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
+		{
+			return QSize((int)StarEditor::paintFactor() * 15, 1);
+		}
+	}
+	else if (m_tableModel->listType() == ListType::MOVIESLIST)
+	{
+		if (index.column() == Movie::RATE)
+		{
+			return StarEditor::sizeHint(5);
+		}
+		else if (index.column() == Movie::SENSITIVE_CONTENT)
 		{
 			return QSize((int)StarEditor::paintFactor() * 15, 1);
 		}
@@ -115,7 +128,6 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				QSpinBox* editor = new QSpinBox(parent);
 				editor->setRange(0, 5);
 				editor->setSingleStep(1);
-				connect(editor, &QSpinBox::destroyed, [](){std::cout << "QSpinBox: destroyed." << std::endl;});
 				return editor;
 			}
 		}
@@ -175,6 +187,80 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			return nullptr;
 		}
 	}
+	else if (m_tableModel->listType() == ListType::MOVIESLIST)
+	{
+		if (index.column() == Movie::RATE)
+		{
+			// Creating the editor for the edition of the rate column.
+			if (option.rect.width() >= 5 * StarEditor::paintFactor())
+			{
+				StarEditor* editor = new StarEditor(parent);
+				connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
+				return editor;
+			}
+			else
+			{
+				QSpinBox* editor = new QSpinBox(parent);
+				editor->setRange(0, 5);
+				editor->setSingleStep(1);
+				return editor;
+			}
+		}
+		else if (index.column() >= Movie::CATEGORIES &&
+				 index.column() <= Movie::SERVICES)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID <= 0)
+				return nullptr;
+			
+			UtilityTableName tableName;
+
+			if (index.column() == Movie::CATEGORIES)
+				tableName = UtilityTableName::CATEGORIES;
+			else if (index.column() == Movie::DIRECTORS)
+				tableName = UtilityTableName::DIRECTOR;
+			else if (index.column() == Movie::ACTORS)
+				tableName = UtilityTableName::ACTORS;
+			else if (index.column() == Movie::PRODUCTIONS)
+				tableName = UtilityTableName::PRODUCTION;
+			else if (index.column() == Movie::MUSIC)
+				tableName = UtilityTableName::MUSIC;
+			else if (index.column() == Movie::SERVICES)
+				tableName == UtilityTableName::SERVICES;
+			
+			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityInterface,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
+		}
+		else if (index.column() == Movie::SENSITIVE_CONTENT)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID <= 0)
+				return nullptr;
+
+			UtilitySensitiveContentEditor* editor =
+				new UtilitySensitiveContentEditor(
+					itemID,
+					m_utilityInterface,
+					m_db,
+					parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
+		}
+	}
 
 	return QStyledItemDelegate::createEditor(parent, option, index);
 }
@@ -202,6 +288,24 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 	}
+	else if (model->listType() == ListType::MOVIESLIST)
+	{
+		if (index.column() == Movie::RATE)
+		{
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				starEditor->setStars(index.data().toInt());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				spinEditor->setValue(index.data().toInt());
+				return;
+			}
+		}
+	}
 
 	return QStyledItemDelegate::setEditorData(e, index);
 }
@@ -214,6 +318,24 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 	if (model->listType() == ListType::GAMELIST)
 	{
 		if (index.column() == Game::RATE)
+		{
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				model->setData(index, starEditor->stars());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				model->setData(index, spinEditor->value());
+				return;
+			}
+		}
+	}
+	else if (model->listType() == ListType::MOVIESLIST)
+	{
+		if (index.column() == Movie::RATE)
 		{
 			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
 			if (starEditor)
@@ -304,4 +426,21 @@ void ListViewDelegate::paintSensitiveStars(QPainter* painter, const QStyleOption
 	}
 
 	painter->restore();
+}
+
+void ListViewDelegate::paintRateStars(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const
+{
+	if (options.rect.width() >= 5 * StarEditor::paintFactor())
+		StarEditor::paintStars(index.data().toInt(), painter, options.rect, options.palette);
+	else
+	{
+		QString starNB = QString::number(index.data().toInt());
+
+		QFont font = painter->font();
+		font.setPixelSize(20);
+		painter->setFont(font);
+
+		painter->setPen(Qt::SolidLine);
+		painter->drawText(options.rect, starNB);
+	}
 }

@@ -28,6 +28,19 @@
 #include "DataStruct.h"
 #include "SqlUtilityTable.h"
 
+#define SORTING_ORDER(order, string) \
+    switch (order) \
+    { \
+    case Qt::AscendingOrder: \
+    { \
+        string = string.arg("ASC"); \
+    } break; \
+    case Qt::DescendingOrder: \
+    { \
+        string = string.arg("DESC"); \
+    } break; \
+    }
+
 class TableModel_UtilityInterface;
 
 class TableModel : public QAbstractTableModel

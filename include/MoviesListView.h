@@ -16,69 +16,61 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef GAMESORTING_TABANDLIST_H
-#define GAMESORTING_TABANDLIST_H
+#ifndef GAMESORTING_MOVIESLISTVIEW_H_
+#define GAMESORTING_MOVIESLISTVIEW_H_
 
+#include "AbstractListView.h"
 #include "DataStruct.h"
 #include "SqlUtilityTable.h"
 
 #include <QWidget>
 #include <QSqlDatabase>
-#include <QTabBar>
 
-class QTabBar;
-class SqlListView;
-class QStackedLayout;
+class TableModelMovies;
+class QTableView;
+class QVBoxLayout;
 
-class TabAndList : public QWidget
+class MoviesListView : public AbstractListView
 {
     Q_OBJECT
 public:
-    explicit TabAndList(QSqlDatabase& db, QWidget* parent = nullptr);
-    virtual ~TabAndList();
+    explicit MoviesListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
+    explicit MoviesListView(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent = nullptr);
+    virtual ~MoviesListView();
 
-    bool maybeSave();
-    const QString& filePath() const;
-    const QString& currentDirectory() const;
-    void setCurrentDit(const QString& dir);
-
-public slots:
-    void newGameList();
-    void newMoviesList();
-    void open();
-    void open(const QString& filePath);
-    void save();
-    void saveAs();
-    void openUtility(UtilityTableName tableName);
+    QString tableName() const;
+    void setTableName(const QString& tableName);
+    ListType listType() const;
+    QVariant listData() const;
+    virtual ViewType viewType() const override;
 
 signals:
-    void newList(ListType listType);
-    void newListFileName(const QString& filePath);
-    void listChanged(bool isChanged);
+    void listEdited();
+
+public slots:
+    void addingItem();
+    void deletingItems();
 
 private slots:
-    void tabChanged(int index);
-    void addTable();
-    void removeTable(int index);
-    void tabMoved(int from, int to);
-    void tabAskEdit(int index);
-    void tabChangeApplying(int tabIndex, const QString& tabName);
-    void listUpdated();
+    void setUrl();
+    void openUrl();
+    void moveItemUp();
+    void moveItemDown();
+    void moveItemTo();
+    void filter();
 
 private:
-    void newEmptyList();
+    void setupWidget();
     void setupView();
-    bool saveFile(const QString& filePath) const;
-    bool openFile(const QString& filePath);
+    void createMenu(QVBoxLayout* vLayout);
+    void setColumnsSizeAndSortingOrder(const QVariant& data);
+    void enableAction(QAction* action, bool value) const;
 
     QSqlDatabase& m_db;
-    ListType m_listType;
-    SqlUtilityTable m_sqlUtilityTable;
-    QTabBar* m_tabBar;
-    QStackedLayout* m_stackedViews;
-    QString m_filePath;
-    QString m_currentDirectory;
-    bool m_isListModified;
+    ListType m_type;
+    QTableView* m_view;
+    TableModelMovies* m_model;
+    SqlUtilityTable& m_utilityTable;
 };
 
-#endif
+#endif // GAMESORTING_MOVIESLISTVIEW_H_

@@ -38,6 +38,9 @@ bool SaveInterface::save(const QString& filePath, const QVariant& data)
     // If its a game, save the data has a game.
     if (data.canConvert<Game::SaveData>())
         return saveGame(filePath, data);
+    // If its a movies list, save the data has a movies list.
+    else if (data.canConvert<Movie::SaveData>())
+        return saveMovies(filePath, data);
     
     return false;
 }
@@ -70,6 +73,9 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
         // Checking if the file is a GameList file.
         if (strcmp(fileIdentifier, GLD_IDENTIFIER) == 0)
             ret = openGame(&in, data);
+        // Cheking if the file is a MovieList file.
+        if (strcmp(fileIdentifier, MLD_IDENTIFIER) == 0)
+            ret = openMovies(&in, data);
         file.close();
         return ret;
     }

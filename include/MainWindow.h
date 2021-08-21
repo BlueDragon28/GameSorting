@@ -45,6 +45,7 @@ private:
 	void createCentralWidget();
 	void newListCreated(ListType type);
 	void createGameToolBar();
+	void createMovieToolBar();
 	void listFilePathChanged(const QString& filePath);
 	void listChanged(bool isChanged);
 	void updateWindowTitle();

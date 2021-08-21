@@ -35,6 +35,10 @@
 #define GLD_VERSION (int)(500)
 #define GLD_VERSION_MAX_SUPPORT (int)(600)
 
+#define MLD_IDENTIFIER "MLD"
+#define MLD_VERSION (int)(100)
+#define MLD_VERSION_MAX_SUPPORT (int) (600)
+
 class QDataStream;
 
 class SaveInterface
@@ -46,6 +50,9 @@ public:
 private:
     static bool saveGame(const QString& filePath, const QVariant& data);
     static bool openGame(QDataStream* in, QVariant& data);
+
+    static bool saveMovies(const QString& filePath, const QVariant& data);
+    static bool openMovies(QDataStream* in, QVariant& data);
 };
 
 // ItemUtilityData QDataStream operators
@@ -69,5 +76,19 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveUtilitySensitiveConten
 QDataStream& operator>>(QDataStream& in, Game::SaveUtilitySensitiveContentItem& data);
 QDataStream& operator<<(QDataStream& out, const Game::ColumnsSize& data);
 QDataStream& operator>>(QDataStream& in, Game::ColumnsSize& data);
+
+// Movie data QDataStream operators.
+QDataStream& operator<<(QDataStream& out, const Movie::SaveUtilityData& data);
+QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityData& data);
+QDataStream& operator<<(QDataStream& out, const Movie::SaveUtilityInterfaceData& data);
+QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityInterfaceData& data);
+QDataStream& operator<<(QDataStream& out, const Movie::SaveData& data);
+QDataStream& operator>>(QDataStream& in, Movie::SaveData& data);
+QDataStream& operator<<(QDataStream& out, const Movie::SaveDataTable& data);
+QDataStream& operator>>(QDataStream& in, Movie::SaveDataTable& data);
+QDataStream& operator<<(QDataStream& out, const Movie::SaveItem& data);
+QDataStream& operator>>(QDataStream& in, Movie::SaveItem& data);
+QDataStream& operator<<(QDataStream& out, const Movie::ColumnsSize& data);
+QDataStream& operator>>(QDataStream& in, Movie::ColumnsSize& data);
 
 #endif // GAMESORTING_SAVEINTERFACE_H_
