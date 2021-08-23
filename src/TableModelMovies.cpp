@@ -1505,7 +1505,10 @@ QItemSelection TableModelMovies::moveItemsTo(const QModelIndexList& indexList, i
     {
         beginInsertRows(QModelIndex(), to, i-1);
         endInsertRows();
-        updateMoviePos(to);
+        if (indexListCpy.at(0).row() < to)
+            updateMoviePos(indexListCpy.at(0).row());
+        else
+            updateMoviePos(to);
         selectedIndex.append(QItemSelectionRange(
             index(to, 0),
             index(i-1, NUMBER_MOVIES_TABLE_COLUMN_COUNT)));
