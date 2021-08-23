@@ -1507,7 +1507,10 @@ QItemSelection TableModelGame::moveItemsTo(const QModelIndexList& indexList, int
     {
         beginInsertRows(QModelIndex(), to, i-1);
         endInsertRows();
-        updateGamePos(to);
+        if (indexListCpy.at(0).row() < to)
+            updateGamePos(indexListCpy.at(0).row());
+        else
+            updateGamePos(to);
         selectedIndex.append(QItemSelectionRange(
             index(to, 0),
             index(i-1, NUMBER_GAME_TABLE_COLUMN_COUNT)));
