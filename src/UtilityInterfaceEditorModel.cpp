@@ -233,9 +233,7 @@ void UtilityInterfaceEditorModel::retrieveSelectedUtilitiesOnItem()
         "FROM\n"
         "   \"%1\"\n"
         "WHERE\n"
-        "   ItemID = %2\n"
-        "GROUP BY\n"
-        "   UtilityID;")
+        "   ItemID = %2;")
         .arg(m_dataInterface->tableName(m_utilityTableName))
         .arg(m_itemID);
     
