@@ -37,6 +37,7 @@
 #include <QScreen>
 #include <QSize>
 #include <QToolButton>
+#include <QFileInfo>
 
 MainWindow::MainWindow(const QString& filePath, bool resetSettings, bool doNotSaveSettings, QWidget* parent) :
 	QMainWindow(parent),
@@ -73,7 +74,7 @@ MainWindow::MainWindow(const QString& filePath, bool resetSettings, bool doNotSa
 	readSettings();
 
 	if (!filePath.isEmpty())
-		m_tabAndList->open(filePath);
+		openRecentFile(filePath);
 }
 
 MainWindow::~MainWindow()
@@ -119,7 +120,7 @@ void MainWindow::createMenu()
 	openListAct->setShortcut(QKeySequence::Open);
 	openListAct->setToolTip(tr("Opening a list from a file"));
 	m_fileMenu->addAction(openListAct);
-	connect(openListAct, &QAction::triggered, m_tabAndList, qOverload<>(&TabAndList::open));
+	connect(openListAct, &QAction::triggered, [this](){this->openRecentFile(QString());});
 	fileToolBar->addAction(openListAct);
 
 	// Save a list into a file.
@@ -495,7 +496,7 @@ void MainWindow::updateRecentFileMenu()
 	foreach (const RecentFileData& file, m_recentFileData)
 	{
 		QAction* recentFileAct = new QAction(file.fileName, m_recentFileMenu);
-		connect(recentFileAct, &QAction::triggered, [this, file](){this->m_tabAndList->open(file.filePath);});
+		connect(recentFileAct, &QAction::triggered, [this, file](){this->openRecentFile(file.filePath);});
 		m_recentFileMenu->addAction(recentFileAct);
 	}
 }
@@ -507,5 +508,39 @@ void MainWindow::removeOldRecentFile()
 		int number = m_recentFileData.size() - 10;
 		if (number > 0)
 			m_recentFileData.remove(10, number);
+	}
+}
+
+void MainWindow::removeInvalidRecentFile(const QString& filePath)
+{
+	// Removing file that do not exist.
+	for (int i = 0; i < m_recentFileData.size(); i++)
+	{
+		if (m_recentFileData.at(i).filePath.compare(filePath) == 0)
+		{
+			m_recentFileData.remove(i);
+			updateRecentFileMenu();
+			break;
+		}
+	}
+}
+
+void MainWindow::openRecentFile(const QString& filePath)
+{
+	// Check if the file exist and opening it, otherwise, removing the file from the recent file list.
+	if (filePath.isEmpty())
+		m_tabAndList->open();
+
+	if (QFileInfo::exists(filePath))
+		m_tabAndList->open(filePath);
+	else
+	{
+		QMessageBox::warning(
+			this,
+			tr("Invalid file"),
+			tr("This recent file does not exist anymore and will be remove from the recent file list."),
+			QMessageBox::Ok,
+			QMessageBox::Ok);
+		removeInvalidRecentFile(filePath);
 	}
 }

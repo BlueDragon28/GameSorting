@@ -56,6 +56,8 @@ private:
 	void reinsertMenu();
 	void updateRecentFileMenu();
 	void removeOldRecentFile();
+	void removeInvalidRecentFile(const QString& filePath);
+	void openRecentFile(const QString& filePath);
 
 	TabAndList* m_tabAndList;
 	QSqlDatabase m_db;
