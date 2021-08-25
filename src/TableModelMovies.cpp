@@ -673,7 +673,7 @@ QVariant TableModelMovies::retrieveData() const
     }
 
     QVariant utilityInterface = m_interface->data();
-    if (!utilityInterface.canConvert<Movie::SaveUtilityInterfaceData>())
+    if (utilityInterface.canConvert<Movie::SaveUtilityInterfaceData>())
     {
         std::cerr << "Cannot convert utility QVariant to Movie::SaveUtilityInterfaceData." << std::endl;
         return QVariant();
