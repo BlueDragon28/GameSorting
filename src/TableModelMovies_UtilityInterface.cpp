@@ -27,7 +27,7 @@ TableModelMovies_UtilityInterface::TableModelMovies_UtilityInterface(const QStri
 }
 
 TableModelMovies_UtilityInterface::TableModelMovies_UtilityInterface(const QString& parentTableName, QSqlDatabase& db, const QVariant& data) :
-    TableModel_UtilityInterface(parentTableName, db)
+    TableModelMovies_UtilityInterface(parentTableName, db)
 {
     setData(data);
 }
@@ -266,22 +266,31 @@ QVariant TableModelMovies_UtilityInterface::data() const
         "ORDER BY\n"
         "   ItemID;");
     
-    UtilityTableName tablesName[7] =
+    UtilityTableName tablesName[6] =
     {
         UtilityTableName::CATEGORIES,
         UtilityTableName::DIRECTOR,
         UtilityTableName::ACTORS,
         UtilityTableName::PRODUCTION,
         UtilityTableName::MUSIC,
-        UtilityTableName::SERVICES,
-        UtilityTableName::SENSITIVE_CONTENT
+        UtilityTableName::SERVICES
     };
 
     // Utility interface (Categories, Director, Actors, Production, Music, Services, SensitiveContent).
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 6; i++)
     {
+#ifndef NDEBUG
+        std::cout << statement.arg(tableName(tablesName[i])).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
         if (!query.exec(statement.arg(tableName(tablesName[i]))))
+        {
+            std::cerr << QString("Failed to retrieve data from table %1.\n\t%2")
+                .arg(tableName(tablesName[i]), query.lastError().text())
+                .toLocal8Bit().constData()
+                << std::endl;
             return QVariant();
+        }
 
         while (query.next())
         {
@@ -318,8 +327,18 @@ QVariant TableModelMovies_UtilityInterface::data() const
 		"	SensitiveContentID;")
 			.arg(tableName(UtilityTableName::SENSITIVE_CONTENT));
 
+#ifndef NDEBUG
+    std::cout << statement.arg(tableName(UtilityTableName::SENSITIVE_CONTENT)).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
     if (!query.exec(statement))
+    {
+        std::cerr << QString("Failed to retrieve data from table %1.\n\t%2")
+            .arg(tableName(UtilityTableName::SENSITIVE_CONTENT), query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
         return QVariant();
+    }
 
     while (query.next())
     {
@@ -377,7 +396,7 @@ bool TableModelMovies_UtilityInterface::setData(const QVariant& variant)
         for (long long int j = 0; j < pItem->size(); j+=10)
         {
             QString strData;
-            for (long long int k = j; k < j+10 && k < pItem->size(); j++)
+            for (long long int k = j; k < j+10 && k < pItem->size(); k++)
             {
                 if (k > j)
                     strData += ',';
