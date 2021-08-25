@@ -698,6 +698,7 @@ bool TableModelMovies::setItemData(const QVariant& variant)
     m_tableName = data.tableName;
     if (m_tableName.isEmpty())
         return false;
+    createTable();
     
     // Set the game list
     QString statement = QString(
@@ -729,7 +730,7 @@ bool TableModelMovies::setItemData(const QVariant& variant)
             std::cout << (statement + strData).toLocal8Bit().constData() << std::endl << std::endl;
 #endif
 
-            if (!m_query.exec(statement))
+            if (!m_query.exec(statement + strData))
             {
                 std::cerr << QString("Failed to exec statement for setting data into the table %1.\n\t%2")
                     .arg(m_tableName, m_query.lastError().text())
