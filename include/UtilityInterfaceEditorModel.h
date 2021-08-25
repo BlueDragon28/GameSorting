@@ -67,6 +67,12 @@ public:
     // Return the selected utilities.
     QList<long long int> getSelectedUtilities() const;
 
+signals:
+    void utilitiesUpdated(const QString& utilityList);
+
+private slots:
+    void updateUtilitiesStr();
+
 private:
     void retrieveSelectedUtilitiesOnItem();
     void retrieveUtilityData();

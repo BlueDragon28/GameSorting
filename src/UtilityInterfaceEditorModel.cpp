@@ -23,6 +23,7 @@
 #include <iostream>
 #include <QSqlError>
 #include <QList>
+#include <QStringList>
 
 UtilityInterfaceEditorModel::UtilityInterfaceEditorModel(
     UtilityTableName utilityTableName,
@@ -96,12 +97,14 @@ bool UtilityInterfaceEditorModel::setData(const QModelIndex& index, const QVaria
         {
             removeCheckedUtilityID(m_utilityListData.at(index.row()).utilityID);
             emit dataChanged(index, index, {role});
+            updateUtilitiesStr();
             return false;
         }
         else
         {
             m_checkedIDList.append(m_utilityListData.at(index.row()).utilityID);
             emit dataChanged(index, index, {role});
+            updateUtilitiesStr();
             return true;
         }
     }
@@ -133,6 +136,7 @@ void UtilityInterfaceEditorModel::retrieveUtilityData()
             m_utilityListData[i] = utilityData.at(i);
         }
     }
+    updateUtilitiesStr();
 }
 
 void UtilityInterfaceEditorModel::applyChange()
@@ -265,4 +269,57 @@ void UtilityInterfaceEditorModel::retrieveSelectedUtilitiesOnItem()
             << std::endl;
         m_query.clear();
     }
+}
+
+void UtilityInterfaceEditorModel::updateUtilitiesStr()
+{
+    // Retrieve a string of the selected utilities.
+    QStringList selectedUtilitiesID;
+
+    for (int i = 0; i < m_checkedIDList.size(); i++)
+    {
+        selectedUtilitiesID += QString::number(m_checkedIDList.at(i));
+    }
+
+    if (selectedUtilitiesID.isEmpty())
+    {
+        emit utilitiesUpdated(QString());
+        return;
+    }
+
+    QString statement = QString(
+        "SELECT\n"
+        "   Name\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "WHERE\n"
+        "   \"%1ID\" = %2;")
+            .arg(m_utilityData.tableName(m_utilityTableName));
+
+    QString strSelectedUtilities;
+    bool result = true;
+    foreach (const QString& id, selectedUtilitiesID)
+    {
+#ifndef NDEBUG
+    std::cout << statement.arg(id).toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+        if (m_query.exec(statement.arg(id)))
+        {
+            if (m_query.next())
+            {
+                if (!strSelectedUtilities.isEmpty())
+                    strSelectedUtilities += ", ";
+                strSelectedUtilities += m_query.value(0).toString();
+            }
+        }
+        else
+        {
+            std::cerr << "failed to retrieve selected utilies in UtilityInterfaceEditorModel::updateUtilitiesStr() member function." << std::endl;
+            result = false;
+        }
+    }
+
+    if (result)
+        emit utilitiesUpdated(strSelectedUtilities);
 }

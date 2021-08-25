@@ -74,6 +74,10 @@ void UtilityInterfaceEditor::createWidgets()
         {
             this->m_model->setFilter(searchLine->text());
         });
+    
+    // Selected utilities label, it show the selected utilities.
+    QLabel* selectedLabel = new QLabel(this);
+    connect(m_model, &UtilityInterfaceEditorModel::utilitiesUpdated, selectedLabel, &QLabel::setText);
 
     // The table view used to display the available utility to the user.
     m_tableView = new QTableView(this);
@@ -104,7 +108,12 @@ void UtilityInterfaceEditor::createWidgets()
     hSearchLayout->addWidget(searchBtn, 0);
     hSearchLayout->setContentsMargins(5, 0, 5, 0);
 
+    QHBoxLayout* hSelectedLayout = new QHBoxLayout(this);
+    hSelectedLayout->addWidget(selectedLabel);
+    hSelectedLayout->setContentsMargins(5, 0, 5, 0);
+
     vLayout->addLayout(hSearchLayout);
+    vLayout->addLayout(hSelectedLayout);
     vLayout->addWidget(m_tableView);
     vLayout->addLayout(hButtonLayout);
 
