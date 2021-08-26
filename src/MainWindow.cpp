@@ -529,10 +529,15 @@ void MainWindow::openRecentFile(const QString& filePath)
 {
 	// Check if the file exist and opening it, otherwise, removing the file from the recent file list.
 	if (filePath.isEmpty())
+	{
 		m_tabAndList->open();
+		return;
+	}
 
 	if (QFileInfo::exists(filePath))
 		m_tabAndList->open(filePath);
+	else if (filePath.isEmpty())
+		return;
 	else
 	{
 		QMessageBox::warning(
