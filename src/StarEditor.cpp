@@ -153,7 +153,7 @@ QSize StarEditor::sizeHint() const
 
 QSize StarEditor::sizeHint(int maxStars)
 {
-	return QSize(paintFactor(), 1);
+	return QSize(paintFactor() * (double)maxStars, 1);
 }
 
 double StarEditor::paintFactor()
