@@ -248,7 +248,7 @@ void FilterDialog::applyFilter()
             else if (m_lastIndex == 6)
                 columnID = Movie::MUSIC;
             else if (m_lastIndex == 7)
-                columnID == Movie::SERVICES;
+                columnID = Movie::SERVICES;
             
             ListFilter filter = {};
             filter.column = columnID;
