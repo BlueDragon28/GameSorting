@@ -229,6 +229,11 @@ QDataStream& operator<<(QDataStream& out, const Movie::SaveUtilityInterfaceData&
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.services.at(i);
+    
+    count = data.sensitiveContent.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.sensitiveContent.at(i);
 
     return out;
 }
@@ -283,6 +288,14 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityInterfaceData& data)
         data.services.resize(count);
         for (long long int i = 0; i < count; i++)
             in >> data.services[i];
+    }
+
+    in >> count;
+    if (count > 0)
+    {
+        data.sensitiveContent.resize(count);
+        for (long long int i = 0; i < count; i++)
+            in >> data.sensitiveContent[i];
     }
 
     return in;

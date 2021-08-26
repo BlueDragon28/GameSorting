@@ -276,7 +276,7 @@ QVariant TableModelMovies_UtilityInterface::data() const
         UtilityTableName::SERVICES
     };
 
-    // Utility interface (Categories, Director, Actors, Production, Music, Services, SensitiveContent).
+    // Utility interface (Categories, Director, Actors, Production, Music, Services).
     for (int i = 0; i < 6; i++)
     {
 #ifndef NDEBUG
@@ -427,7 +427,7 @@ bool TableModelMovies_UtilityInterface::setData(const QVariant& variant)
         }
     }
 
-    // Apply the Sensitive Cotent data into the SQL Table.
+    // Apply the Sensitive Content data into the SQL Table.
     statement = QString(
         "INSERT INTO \"%1\" (SensitiveContentID, ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
         "VALUES")
