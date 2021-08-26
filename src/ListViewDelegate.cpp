@@ -227,7 +227,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Movie::MUSIC)
 				tableName = UtilityTableName::MUSIC;
 			else if (index.column() == Movie::SERVICES)
-				tableName == UtilityTableName::SERVICES;
+				tableName = UtilityTableName::SERVICES;
 			
 			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
 				tableName,
