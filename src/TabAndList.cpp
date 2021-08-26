@@ -277,7 +277,8 @@ void TabAndList::save()
 {
     // Saving the list into the current file,
     // or a new file if there is no current file.
-    if (m_listType == ListType::GAMELIST)
+    if (m_listType == ListType::GAMELIST || 
+        m_listType == ListType::MOVIESLIST)
     {
         if (m_filePath.isEmpty())
         {
@@ -291,12 +292,22 @@ void TabAndList::save()
             emit listChanged(false);
         }
         else
-            QMessageBox::critical(
-                this,
-                tr("Save Game List"),
-                tr("Saving the game list into the file %1 failed.").arg(m_filePath),
-                QMessageBox::Ok,
-                QMessageBox::Ok);
+        {
+            if (m_listType == ListType::GAMELIST)
+                QMessageBox::critical(
+                    this,
+                    tr("Save Game List"),
+                    tr("Saving the game list into the file %1 failed.").arg(m_filePath),
+                    QMessageBox::Ok,
+                    QMessageBox::Ok);
+            else if (m_listType == ListType::MOVIESLIST)
+                QMessageBox::critical(
+                    this,
+                    tr("Save Movies List"),
+                    tr("Saving the movies list into the file %1 failed.").arg(m_filePath),
+                    QMessageBox::Ok,
+                    QMessageBox::Ok);
+        }
     }
     else
         QMessageBox::warning(
