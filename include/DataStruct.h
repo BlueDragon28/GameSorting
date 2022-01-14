@@ -34,7 +34,8 @@ enum class ListType
 {
     UNKNOWN,
     GAMELIST,
-    MOVIESLIST
+    MOVIESLIST,
+    COMMONLIST
 };
 
 enum class ViewType
@@ -94,7 +95,8 @@ enum class UtilityTableName
     DIRECTOR,
     ACTORS,
     PRODUCTION,
-    MUSIC
+    MUSIC,
+    AUTHORS
 };
 
 namespace Game
@@ -273,6 +275,70 @@ Q_DECLARE_METATYPE(Movie::SaveUtilityData);
 Q_DECLARE_METATYPE(Movie::SaveUtilityInterfaceData);
 Q_DECLARE_METATYPE(Movie::SaveDataTable);
 Q_DECLARE_METATYPE(Movie::SaveData);
+
+namespace Common
+{
+    enum ColumnIndex
+    {
+        NAME = 0,
+        CATEGORIES = 1,
+        AUTHORS = 2,
+        SENSITIVE_CONTENT = 3,
+        RATE = 4
+    };
+
+    struct SaveUtilityData
+    {
+        QList<ItemUtilityData> categories;
+        QList<ItemUtilityData> authors;
+    };
+
+    struct SaveUtilityInterfaceData
+    {
+        QList<Game::SaveUtilityInterfaceItem> categories;
+        QList<Game::SaveUtilityInterfaceItem> authors;
+        QList<Game::SaveUtilitySensitiveContentItem> sensitiveContent;
+    };
+
+    struct ColumnsSize
+    {
+        int name;
+        int categories;
+        int authors;
+        int sensitiveContent;
+        int rate;
+    };
+
+    struct SaveItem
+    {
+        long long int commonID;
+        long long int commonPos;
+        QString name;
+        QString url;
+        int rate;
+    };
+
+    struct SaveDataTable
+    {
+        QString tableName;
+        QList<SaveItem> commonList;
+        SaveUtilityInterfaceData interface;
+        ColumnsSize viewColumnsSize;
+        signed char columnSort;
+        unsigned char sortOrder;
+    };
+
+    struct SaveData
+    {
+        QList<SaveDataTable> commonTables;
+        SaveUtilityData utilityData;
+    };
+}
+
+Q_DECLARE_METATYPE(Common::SaveUtilityData);
+Q_DECLARE_METATYPE(Common::SaveUtilityInterfaceData);
+Q_DECLARE_METATYPE(Common::SaveDataTable);
+Q_DECLARE_METATYPE(Common::SaveData);
 
 struct RecentFileData
 {
