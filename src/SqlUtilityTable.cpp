@@ -75,6 +75,8 @@ QString SqlUtilityTable::tableName(UtilityTableName tableName)
 		return "Production";
 	case UtilityTableName::MUSIC:
 		return "Music";
+	case UtilityTableName::AUTHORS:
+		return "Authors";
 	default:
 		return QString();
 	}
@@ -92,6 +94,11 @@ void SqlUtilityTable::createTables()
 		m_isTableReady = true;
 		createMoviesTables();
 	}
+	else if (m_type == ListType::COMMONLIST)
+	{
+		m_isTableReady = true;
+		createCommonTables();
+	}
 	else
 		m_isTableReady = false;
 }
@@ -101,6 +108,8 @@ void SqlUtilityTable::destroyTables()
 	if (m_type == ListType::GAMELIST)
 		destroyGameTables();
 	else if (m_type == ListType::MOVIESLIST)
+		destroyMoviesTables();
+	else if (m_type == ListType::COMMONLIST)
 		destroyMoviesTables();
 }
 
@@ -195,6 +204,8 @@ QVariant SqlUtilityTable::data() const
 			return queryGameData();
 		else if (m_type == ListType::MOVIESLIST)
 			return queryMoviesData();
+		else if (m_type == ListType::COMMONLIST)
+			return queryCommonsData();
 	}
 	return QVariant();
 }
@@ -207,10 +218,15 @@ bool SqlUtilityTable::setData(const QVariant& variant)
 		newList(ListType::GAMELIST);
 		return setGameData(variant);
 	}
-	if (variant.canConvert<Movie::SaveUtilityData>())
+	else if (variant.canConvert<Movie::SaveUtilityData>())
 	{
 		newList(ListType::MOVIESLIST);
 		return setMoviesData(variant);
+	}
+	else if (variant.canConvert<Common::SaveUtilityData>())
+	{
+		newList(ListType::COMMONLIST);
+		return setCommonsData(variant);
 	}
 	
 	newList(ListType::UNKNOWN);

@@ -72,6 +72,13 @@ private:
 	QVariant queryMoviesData() const;
 	bool setMoviesData(const QVariant& data);
 
+	// Common
+	void createCommonTables();
+	void destroyCommonTables();
+	void createAuthorsTables();
+	QVariant queryCommonsData() const;
+	bool setCommonsData(const QVariant& data);
+
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 
 	ListType m_type;
