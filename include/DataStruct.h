@@ -84,6 +84,18 @@ struct MovieItem
     int rate;
 };
 
+struct CommonItem
+{
+    long long int commonID;
+    long long int commonPos;
+    QString name;
+    QString categories;
+    QString authors;
+    SensitiveContent sensitiveContent;
+    QString url;
+    int rate;
+};
+
 enum class UtilityTableName
 {
     CATEGORIES,
