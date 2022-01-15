@@ -42,6 +42,7 @@ enum class ViewType
 {
     GAME,
     MOVIE,
+    COMMON,
     UTILITY,
 };
 
