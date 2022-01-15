@@ -41,6 +41,9 @@ bool SaveInterface::save(const QString& filePath, const QVariant& data)
     // If its a movies list, save the data has a movies list.
     else if (data.canConvert<Movie::SaveData>())
         return saveMovies(filePath, data);
+    // If its a common list, save the data has a common list.
+    else if (data.canConvert<Common::SaveData>())
+        return saveCommonList(filePath, data);
     
     return false;
 }
@@ -74,8 +77,11 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
         if (strcmp(fileIdentifier, GLD_IDENTIFIER) == 0)
             ret = openGame(&in, data);
         // Cheking if the file is a MovieList file.
-        if (strcmp(fileIdentifier, MLD_IDENTIFIER) == 0)
+        else if (strcmp(fileIdentifier, MLD_IDENTIFIER) == 0)
             ret = openMovies(&in, data);
+        // Cheking if the file is a CommonList file.
+        else if (strcmp(fileIdentifier, CLD_IDENTIFIER) == 0)
+            ret = openCommonList(&in, data);
         file.close();
         return ret;
     }
