@@ -110,7 +110,7 @@ void SqlUtilityTable::destroyTables()
 	else if (m_type == ListType::MOVIESLIST)
 		destroyMoviesTables();
 	else if (m_type == ListType::COMMONLIST)
-		destroyMoviesTables();
+		destroyCommonTables();
 }
 
 void SqlUtilityTable::errorMessageCreatingTable(const QString& tableName, const QString& queryError)
