@@ -466,4 +466,5 @@ void TableModelCommon_UtilityInterface::destroyTables()
 {
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::AUTHORS));
+	destroyTableByName(tableName(UtilityTableName::SENSITIVE_CONTENT));
 }
