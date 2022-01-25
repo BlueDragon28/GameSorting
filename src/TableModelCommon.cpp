@@ -839,7 +839,7 @@ void TableModelCommon::queryUtilityField(UtilityTableName tableName)
         SORTING_ORDER(m_sortingOrder, statement)
     }
     else
-        statement = statement.arg("GamePos").arg("ASC");
+        statement = statement.arg("CommonPos").arg("ASC");
 
     // Filtering the view.
     if (m_listFilter.column == Common::NAME)
