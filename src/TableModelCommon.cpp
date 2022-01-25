@@ -140,7 +140,7 @@ int TableModelCommon::rowCount(const QModelIndex& parent) const
 QVariant TableModelCommon::data(const QModelIndex& index, int role) const
 {
     // Returning the common table into the view.
-    if ((role == Qt::EditRole || role == Qt::DisplayPropertyRole) && m_isTableCreated)
+    if ((role == Qt::EditRole || role == Qt::DisplayRole) && m_isTableCreated)
     {
         if (index.column() >= 0 && index.column() < columnCount() &&
             index.row() >= 0 && index.row() < rowCount())
