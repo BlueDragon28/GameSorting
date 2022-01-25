@@ -19,6 +19,7 @@
 #include "TabAndList.h"
 #include "GameListView.h"
 #include "MoviesListView.h"
+#include "CommonListView.h"
 #include "Common.h"
 #include "SaveInterface.h"
 #include "UtilityListView.h"
@@ -125,6 +126,15 @@ void TabAndList::addTable()
             emit listChanged(true);
             connect(newList, &MoviesListView::listEdited, this, &TabAndList::listUpdated);
         }
+        else if (m_listType == ListType::COMMONLIST)
+        {
+            CommonListView* newList = new CommonListView(tableName, ListType::COMMONLIST, m_db, m_sqlUtilityTable, this);
+            m_stackedViews->addWidget(newList);
+            m_tabBar->addTab(newList->tableName());
+            m_isListModified = true;
+            emit listChanged(true);
+            connect(newList, &CommonListView::listEdited, this, &TabAndList::listUpdated);
+        }
     }
 }
 
@@ -152,7 +162,9 @@ void TabAndList::removeTable(int index)
 
         m_stackedViews->removeWidget(widget);
         m_tabBar->removeTab(index);
-        if (widget->viewType() == ViewType::GAME || widget->viewType() == ViewType::MOVIE)
+        if (widget->viewType() == ViewType::GAME || 
+            widget->viewType() == ViewType::MOVIE ||
+            widget->viewType() == ViewType::COMMON)
         {
             m_isListModified = true;
             emit listChanged(true);
@@ -209,6 +221,29 @@ void TabAndList::newMoviesList()
     emit newListFileName(QString());
 }
 
+void TabAndList::newCommonList()
+{
+    // Delete the existing list and creating a new list.
+    if (!maybeSave())
+        return;
+    
+    for (int i = m_tabBar->count()-1; i >= 0; i--)
+        m_tabBar->removeTab(i);
+    for (int i = m_stackedViews->count()-1; i >= 0; i--)
+    {
+        AbstractListView* listView = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+        m_stackedViews->removeWidget(listView);
+        delete listView;
+    }
+
+    m_sqlUtilityTable.newList(ListType::COMMONLIST);
+    m_listType = ListType::COMMONLIST;
+    m_isListModified = false;
+    m_filePath = QString();
+    emit newList(ListType::COMMONLIST);
+    emit newListFileName(QString());
+}
+
 void TabAndList::open()
 {
     // Opening a list from a file.
@@ -223,6 +258,7 @@ void TabAndList::open()
             tr("List File (*.gld *.mld);;"
                "Game List File (*.gld);;"
                "Movies List File (*.mld);;"
+               "Common List File (*.cld);;"
                "All Files (*)"));
         
     if (!filePath.isEmpty())
@@ -278,7 +314,8 @@ void TabAndList::save()
     // Saving the list into the current file,
     // or a new file if there is no current file.
     if (m_listType == ListType::GAMELIST || 
-        m_listType == ListType::MOVIESLIST)
+        m_listType == ListType::MOVIESLIST ||
+        m_listType == ListType::COMMONLIST)
     {
         if (m_filePath.isEmpty())
         {
@@ -307,6 +344,13 @@ void TabAndList::save()
                     tr("Saving the movies list into the file %1 failed.").arg(m_filePath),
                     QMessageBox::Ok,
                     QMessageBox::Ok);
+            else if (m_listType == ListType::COMMONLIST)
+                QMessageBox::critical(
+                    this,
+                    tr("Save Common List"),
+                    tr("Saving the common list into the file %1 failed.").arg(m_filePath),
+                    QMessageBox::Ok,
+                    QMessageBox::Ok);
         }
     }
     else
@@ -322,8 +366,9 @@ void TabAndList::saveAs()
 {
     // Saving the list into a new file
     // or by writing over an existing file.
-    // Game list.
-    if (m_listType == ListType::GAMELIST || m_listType == ListType::MOVIESLIST)
+    if (m_listType == ListType::GAMELIST || 
+        m_listType == ListType::MOVIESLIST ||
+        m_listType == ListType::COMMONLIST)
     {
         QString filter;
         if (m_listType == ListType::GAMELIST)
@@ -331,6 +376,9 @@ void TabAndList::saveAs()
                         "All Files (*)");
         else if (m_listType == ListType::MOVIESLIST)
             filter = tr("Movies List Data (*.mld);;"
+                        "All Files (*)");
+        else if (m_listType == ListType::COMMONLIST)
+            filter = tr("Common List Data (*.cld);;"
                         "All Files (*)");
 
         QString filePath = QFileDialog::getSaveFileName(
@@ -431,6 +479,37 @@ bool TabAndList::saveFile(const QString& filePath) const
         // Save into a file.
         return SaveInterface::save(filePath, QVariant::fromValue(data));
     }
+    else if (m_listType == ListType::COMMONLIST)
+    {
+        // Saving the common list into a file.
+        Common::SaveData data = {};
+
+        QVariant variant;
+
+        // Retrieve the list data.
+        for (int i = 0; i < m_tabBar->count(); i++)
+        {
+            AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+
+            if (view->viewType() == ViewType::COMMON)
+            {
+                CommonListView* commonView = reinterpret_cast<CommonListView*>(view);
+                variant = commonView->listData();
+                if (!variant.canConvert<Common::SaveDataTable>())
+                    return false;
+                data.commonTables.append(qvariant_cast<Common::SaveDataTable>(variant));
+            }
+        }
+
+        // Retrieving the utility data.
+        variant = m_sqlUtilityTable.data();
+        if (!variant.canConvert<Common::SaveUtilityData>())
+            return false;
+        data.utilityData = qvariant_cast<Common::SaveUtilityData>(variant);
+
+        // Save into a file.
+        return SaveInterface::save(filePath, QVariant::fromValue(data));
+    }
 
     return false;
 }
@@ -485,6 +564,28 @@ bool TabAndList::openFile(const QString& filePath)
             m_stackedViews->addWidget(view);
             m_tabBar->addTab(view->tableName());
             connect(view, &MoviesListView::listEdited, this, &TabAndList::listUpdated);
+        }
+
+        return true;
+    }
+    else if (variant.canConvert<Common::SaveData>())
+    {
+        // Creating a new empty common list data.
+        newEmptyList();
+        newCommonList();
+        Common::SaveData data = qvariant_cast<Common::SaveData>(variant);
+        result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
+        if (!result)
+            return false;
+        
+        for (int i = 0; i < data.commonTables.size(); i++)
+        {
+            CommonListView* view = new CommonListView(QVariant::fromValue(data.commonTables.at(i)), m_db, m_sqlUtilityTable, this);
+            if (view->listType() == ListType::UNKNOWN)
+                return false;
+            m_stackedViews->addWidget(view);
+            m_tabBar->addTab(view->tableName());
+            connect(view, &CommonListView::listEdited, this, &TabAndList::listUpdated);
         }
 
         return true;
@@ -567,6 +668,12 @@ void TabAndList::tabChangeApplying(int tabIndex, const QString& tabName)
         MoviesListView* movieView = reinterpret_cast<MoviesListView*>(view);
         movieView->setTableName(tabName);
         m_tabBar->setTabText(tabIndex, movieView->tableName());
+    }
+    else if (view->viewType() == ViewType::COMMON)
+    {
+        CommonListView* commonView = reinterpret_cast<CommonListView*>(view);
+        commonView->setTableName(tabName);
+        m_tabBar->setTabText(tabIndex, commonView->tableName());
     }
 }
 
