@@ -34,7 +34,7 @@ bool TableModelCommon::updateField(const QString& columnName, int rowNB, T value
         "SET\n"
         "   \"%2\" = %3\n"
         "WHERE\n"
-        "   GameID = %4;")
+        "   CommonID = %4;")
             .arg(m_tableName, columnName)
             .arg(value)
             .arg(m_data.at(rowNB).commonID);
@@ -69,7 +69,7 @@ bool TableModelCommon::updateField(const QString& columnName, int rowNB, const Q
         "SET\n"
         "   \"%2\" = \"%3\"\n"
         "WHERE\n"
-        "   GameID = %4;")
+        "   CommonID = %4;")
             .arg(m_tableName, columnName)
             .arg(value)
             .arg(m_data.at(rowNB).commonID);
