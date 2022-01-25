@@ -449,7 +449,8 @@ void TableModelCommon_UtilityInterface::createTables()
     if (!m_query.exec(statement))
     {
         std::cerr << QString("Failed to create table %1.\n\t%2")
-            .arg(tableName(UtilityTableName::SENSITIVE_CONTENT))
+            .arg(tableName(UtilityTableName::SENSITIVE_CONTENT),
+			m_query.lastError().text())
             .toLocal8Bit().constData()
             << std::endl;
         m_isTableReady = false;
