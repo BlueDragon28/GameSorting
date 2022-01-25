@@ -46,6 +46,7 @@ private:
 	void newListCreated(ListType type);
 	void createGameToolBar();
 	void createMovieToolBar();
+	void createCommonToolBar();
 	void listFilePathChanged(const QString& filePath);
 	void listChanged(bool isChanged);
 	void updateWindowTitle();

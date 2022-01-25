@@ -104,6 +104,11 @@ void MainWindow::createMenu()
 	newMovieListAct->setToolTip(tr("Creating a movie list."));
 	newListMenu->addAction(newMovieListAct);
 	connect(newMovieListAct, &QAction::triggered, m_tabAndList, &TabAndList::newMoviesList);
+	// Common list.
+	QAction* newCommonListAct = new QAction(tr("Common list"), this);
+	newCommonListAct->setToolTip(tr("Creating a common list."));
+	newListMenu->addAction(newCommonListAct);
+	connect(newCommonListAct, &QAction::triggered, m_tabAndList, &TabAndList::newCommonList);
 	m_fileMenu->addMenu(newListMenu);
 
 	// Adding the newListMenu into the toolbar
@@ -283,6 +288,37 @@ void MainWindow::createMovieToolBar()
 	m_listToolBar->addWidget(utilityToolButton);
 }
 
+void MainWindow::createCommonToolBar()
+{
+	m_listToolBar = addToolBar(tr("Common Toolbar"));
+	m_listToolBar->setMouseTracking(false);
+
+	// Create the utility menu.
+	m_utilityMenu = new QMenu(tr("Movie Utility"), m_listToolBar);
+	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
+	reinsertMenu();
+
+	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
+	catAct->setToolTip(tr("Open the categories editor."));
+	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
+	m_utilityMenu->addAction(catAct);
+
+	QAction* autAct = new QAction(tr("Authors"), m_listToolBar);
+	autAct->setToolTip(tr("Open the authors editor."));
+	connect(autAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::AUTHORS);});
+	m_utilityMenu->addAction(autAct);
+
+	// Creating the toolButton used to open the utilityMenu.
+	QIcon utilityIcon(":/Images/Utility.svg");
+	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
+	utilityToolButton->setText(tr("Common Utility"));
+	utilityToolButton->setIcon(utilityIcon);
+	utilityToolButton->setMenu(m_utilityMenu);
+	utilityToolButton->setToolTip(tr("Set the Categories and Authors of the common list."));
+	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_listToolBar->addWidget(utilityToolButton);
+}
+
 void MainWindow::newListCreated(ListType type)
 {
 	// Recreating the menu when a new list is created.
@@ -301,6 +337,8 @@ void MainWindow::newListCreated(ListType type)
 		createGameToolBar();
 	else if (type == ListType::MOVIESLIST)
 		createMovieToolBar();
+	else if (type == ListType::COMMONLIST)
+		createCommonToolBar();
 }
 
 void MainWindow::listFilePathChanged(const QString& filePath)
