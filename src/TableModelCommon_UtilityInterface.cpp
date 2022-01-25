@@ -46,6 +46,8 @@ QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName)
         return m_parentTableName + "_Categories";
     case UtilityTableName::AUTHORS:
         return m_parentTableName + "_Authors";
+	case UtilityTableName::SENSITIVE_CONTENT:
+		return m_parentTableName + "_SensitiveContent";
     default:
         return QString();
     }
@@ -60,6 +62,7 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
     // Storing the current table name into variables.
     QString catCurName = tableName(UtilityTableName::CATEGORIES);
     QString autCurName = tableName(UtilityTableName::AUTHORS);
+	QString senCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Changing m_parentTableName to the new parent name.
     m_parentTableName = newParentName;
@@ -67,10 +70,12 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
     // Get the new table name.
     QString catNewName = tableName(UtilityTableName::CATEGORIES);
     QString autNewName = tableName(UtilityTableName::AUTHORS);
+	QString senNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Renaming the tables
     renameTable(catCurName, catNewName);
     renameTable(autCurName, autNewName);
+	renameTable(senCurName, senNewName);
 }
 
 void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& commonIDs)
@@ -87,13 +92,14 @@ void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& c
         idList += QString::number(commonIDs.at(i));
     }
 
-    UtilityTableName tablesName[2] =
+    UtilityTableName tablesName[3] =
     {
         UtilityTableName::CATEGORIES,
-        UtilityTableName::AUTHORS
+        UtilityTableName::AUTHORS,
+		UtilityTableName::SENSITIVE_CONTENT
     };
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         QString statement = QString(
             "DELETE FROM \"%1\"\n"
