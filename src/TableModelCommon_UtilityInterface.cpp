@@ -43,9 +43,9 @@ QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName)
     switch (tableName)
     {
     case UtilityTableName::CATEGORIES:
-        return "_Categories";
+        return m_parentTableName + "_Categories";
     case UtilityTableName::AUTHORS:
-        return "_Authors";
+        return m_parentTableName + "_Authors";
     default:
         return QString();
     }
