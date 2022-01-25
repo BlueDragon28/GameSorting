@@ -283,7 +283,7 @@ void MainWindow::createMovieToolBar()
 	utilityToolButton->setText(tr("Movie Utility"));
 	utilityToolButton->setIcon(utilityIcon);
 	utilityToolButton->setMenu(m_utilityMenu);
-	utilityToolButton->setToolTip(tr("Set the Cagegories, Directors, Actors, Productions, Music and Services of the movies list."));
+	utilityToolButton->setToolTip(tr("Set the Categories, Directors, Actors, Productions, Music and Services of the movies list."));
 	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
 	m_listToolBar->addWidget(utilityToolButton);
 }
