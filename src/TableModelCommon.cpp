@@ -169,7 +169,7 @@ bool TableModelCommon::setData(const QModelIndex& index, const QVariant& data, i
 {
     // Setting the field data.
     // Each column is different, so we working on each column independently.
-    if (role == Qt::EditRole && m_isTableChanged &&
+    if (role == Qt::EditRole && m_isTableCreated &&
         index.column() >= 0 && index.column() < columnCount() &&
         index.row() >= 0 && index.row() < rowCount())
     {
