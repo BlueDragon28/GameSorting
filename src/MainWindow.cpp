@@ -395,7 +395,11 @@ void MainWindow::writeSettings()
 	if (m_doNotSaveSettings)
 		return;
 
+#ifdef NDEBUG
 	QSettings settings("Erwan28250", "gamesorting");
+#else
+	QSettings settings("Erwan28250", "gamesorting_debug");
+#endif
 
 	// Save the geometry of the window.
 	settings.setValue("mainwindow/geometry", saveGeometry());
@@ -427,7 +431,11 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
 	// Read the settings saved in the Windows Registery or in Linux Config File.
+#ifdef NDEBUG
 	QSettings settings("Erwan28250", "gamesorting");
+#else
+	QSettings settings("Erwan28250", "gamesorting_debug");
+#endif
 
 	// Read the geometry of the window.
 	QVariant vGeometry = settings.value("mainwindow/geometry");
