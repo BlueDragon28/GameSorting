@@ -584,13 +584,13 @@ void TableModelCommon::updateQuery()
         
         while (m_query.next())
         {
-            CommonItem game = {};
-            game.commonID = m_query.value(0).toLongLong();
-            game.commonPos = m_query.value(1).toLongLong();
-            game.name = m_query.value(2).toString();
-            game.url = m_query.value(3).toString();
-            game.rate = m_query.value(4).toInt();
-            m_data.append(game);
+            CommonItem common = {};
+            common.commonID = m_query.value(0).toLongLong();
+            common.commonPos = m_query.value(1).toLongLong();
+            common.name = m_query.value(2).toString();
+            common.url = m_query.value(3).toString();
+            common.rate = m_query.value(4).toInt();
+            m_data.append(common);
         }
 
         if (size() > 0)
