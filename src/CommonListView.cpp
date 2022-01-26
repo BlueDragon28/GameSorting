@@ -348,7 +348,7 @@ void CommonListView::moveItemDown()
     if (selectionModel->hasSelection())
     {
         QModelIndexList indexList = selectionModel->selectedRows(0);
-        QItemSelection selectedItems = m_model->moveItemsUp(indexList);
+        QItemSelection selectedItems = m_model->moveItemsDown(indexList);
         selectionModel->clear();
         selectionModel->select(selectedItems, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
