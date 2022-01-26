@@ -93,6 +93,17 @@ void FilterDialog::createWidget()
                 "Rate"
             });
     }
+    else if (m_model->listType() == ListType::COMMONLIST)
+    {
+        comboBox->addItems(
+            {
+                "None",
+                "Name",
+                "Categories",
+                "Authors",
+                "Rate"
+            });
+    }
     else
         comboBox->addItem("None");
     connect(comboBox, &QComboBox::currentIndexChanged, this, &FilterDialog::comboBoxChanged);
@@ -272,6 +283,49 @@ void FilterDialog::applyFilter()
             reject();
         }
     }
+    else if (m_model->listType() == ListType::COMMONLIST)
+    {
+        if (m_lastIndex == 1)
+        {
+            ListFilter filter = {};
+            filter.column = Common::NAME;
+            filter.pattern = m_nameText->text();
+            m_model->setFilter(filter);
+            accept();
+        }
+        else if (m_lastIndex >= 2 && m_lastIndex <= 3)
+        {
+            if (!m_utilityView || m_lastIndex <= 7)
+                reject();
+            
+            int columnID;
+            if (m_lastIndex == 2)
+                columnID = Common::CATEGORIES;
+            else if (m_lastIndex == 3)
+                columnID = Common::AUTHORS;
+            
+            ListFilter filter = {};
+            filter.column = columnID;
+            filter.utilityList = m_utilityModel->getSelectedUtilities();
+            m_model->setFilter(filter);
+            accept();
+        }
+        else if (m_lastIndex == 4)
+        {
+            ListFilter filter = {};
+            filter.column = Common::RATE;
+            filter.rate = m_starWidget->getValue();
+            m_model->setFilter(filter);
+            accept();
+        }
+        else
+        {
+            ListFilter filter = {};
+            filter.column = -1;
+            m_model->setFilter(filter);
+            reject();
+        }
+    }
     else 
         reject();
 }
@@ -366,6 +420,48 @@ void FilterDialog::comboBoxChanged(int index)
             else if (index == 7)
                 tableName = UtilityTableName::SERVICES;
 
+            m_utilityModel = new UtilityInterfaceEditorModel(
+                tableName,
+                m_model,
+                m_interface,
+                m_utility,
+                m_db,
+                this);
+            m_utilityView = new QTableView(this);
+            m_utilityView->setModel(m_utilityModel);
+            m_utilityView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+            m_utilityView->horizontalHeader()->setSortIndicatorClearable(true);
+            m_utilityView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder);
+            m_utilityView->setSortingEnabled(true);
+            m_utilityView->verticalHeader()->hide();
+            m_utilityVLayout->addWidget(m_utilityView, 1);
+            m_stackedLayout->setCurrentIndex(2);
+
+            emit tabChanged();
+        }
+        else
+        {
+            m_stackedLayout->setCurrentIndex(3);
+            m_starWidget->setValue(0);
+        }
+    }
+    else if (m_model->listType() == ListType::COMMONLIST)
+    {
+        if (index == 0)
+            m_stackedLayout->setCurrentIndex(0);
+        else if (index == 1)
+        {
+            m_stackedLayout->setCurrentIndex(1);
+            m_nameText->clear();
+        }
+        else if (index >= 2 && index <= 3)
+        {
+            UtilityTableName tableName;
+            if (index == 2)
+                tableName = UtilityTableName::CATEGORIES;
+            else if (index == 3)
+                tableName = UtilityTableName::AUTHORS;
+            
             m_utilityModel = new UtilityInterfaceEditorModel(
                 tableName,
                 m_model,
