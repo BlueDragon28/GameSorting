@@ -600,7 +600,7 @@ void TableModelCommon::updateQuery()
             queryAuthorsField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID >= Common::CATEGORIES && m_sortingColumnID <= Common::AUTHORS)
+            if (m_sortingColumnID >= Common::CATEGORIES && m_sortingColumnID <= Common::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
