@@ -79,6 +79,12 @@ private:
 	QVariant queryCommonsData() const;
 	bool setCommonsData(const QVariant& data);
 
+	// Books
+	void createBooksTables();
+	void destroyBooksTables();
+	QVariant queryBooksData() const;
+	bool setBooksData(const QVariant& data);
+
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 
 	ListType m_type;
