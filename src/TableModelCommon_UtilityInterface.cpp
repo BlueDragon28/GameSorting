@@ -248,7 +248,7 @@ QVariant TableModelCommon_UtilityInterface::data() const
 		UtilityTableName::AUTHORS
 	};
 
-	// Utility interface (Categories, Developpers, Publishers, Platform and Services).
+	// Utility interface (Categories, Authors).
 	for (int i = 0; i < 2; i++)
 	{
 		if (!query.exec(statement.arg(tableName(tablesName[i]))))
