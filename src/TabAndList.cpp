@@ -255,7 +255,7 @@ void TabAndList::open()
             this,
             tr("Open list"),
             m_currentDirectory,
-            tr("List File (*.gld *.mld);;"
+            tr("List File (*.gld *.mld *.cld);;"
                "Game List File (*.gld);;"
                "Movies List File (*.mld);;"
                "Common List File (*.cld);;"
