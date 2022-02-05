@@ -371,14 +371,8 @@ void TabAndList::saveAs()
         m_listType == ListType::COMMONLIST)
     {
         QString filter;
-        if (m_listType == ListType::GAMELIST)
-            filter = tr("Games List Data (*.gld);;"
-                        "All Files (*)");
-        else if (m_listType == ListType::MOVIESLIST)
-            filter = tr("Movies List Data (*.mld);;"
-                        "All Files (*)");
-        else if (m_listType == ListType::COMMONLIST)
-            filter = tr("Common List Data (*.cld);;"
+        if (m_listType != ListType::UNKNOWN)
+            filter = tr("List List Data (*.gld);;"
                         "All Files (*)");
 
         QString filePath = QFileDialog::getSaveFileName(
