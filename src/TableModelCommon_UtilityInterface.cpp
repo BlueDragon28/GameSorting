@@ -322,7 +322,7 @@ bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
 		QList<Game::SaveUtilityInterfaceItem>* pItem;
 		if (tablesName[i] == UtilityTableName::CATEGORIES)
 			pItem = &data.categories;
-		else if (tablesName[i] == UtilityTableName::DEVELOPPERS)
+		else if (tablesName[i] == UtilityTableName::AUTHORS)
 			pItem = &data.authors;
 		
 		for (long long int j = 0; j < pItem->size(); j+=10)
