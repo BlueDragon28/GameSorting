@@ -751,10 +751,10 @@ void TableModelBooks::createTable()
     // Create the Books SQL table.
     QString statement = QString(
         "CREATE TABLE \"%1\" (\n"
-        "   BooksID INTERGER PRIMARY KEY,\n"
-        "   BooksPos INTERGER,\n"
+        "   BooksID INTEGER PRIMARY KEY,\n"
+        "   BooksPos INTEGER,\n"
         "   Name TEXT,\n"
-        "   SensitiveContent INTERGER,\n"
+        "   SensitiveContent INTEGER,\n"
         "   Url TEXT,\n"
         "   Rate INTERGER);")
             .arg(m_tableName);
