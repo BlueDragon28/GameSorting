@@ -22,8 +22,8 @@
 #include <iostream>
 #include <algorithm>
 
-#define BOOKS_TABLE_COUNT 5
-#define NUMBER_BOOKS_TABLE_COLUMN_COUNT 4
+#define BOOKS_TABLE_COUNT 7
+#define NUMBER_BOOKS_TABLE_COLUMN_COUNT 6
 
 template<typename T>
 bool TableModelBooks::updateField(const QString& columnName, int rowNB, T value)
