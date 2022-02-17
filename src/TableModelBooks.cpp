@@ -814,7 +814,7 @@ void TableModelBooks::utilityChanged(long long int bookID, UtilityTableName tabl
         else if (tableName == UtilityTableName::PUBLISHERS)
             queryPublishersField(bookID);
         else if (tableName == UtilityTableName::SERVICES)
-            queryPublishersField(bookID);
+            queryServicesField(bookID);
         else if (tableName == UtilityTableName::SENSITIVE_CONTENT)
             querySensitiveContentField(bookID);
     }
