@@ -679,6 +679,8 @@ bool TabAndList::openFile(const QString& filePath)
             m_tabBar->addTab(view->tableName());
             connect(view, &BooksListView::listEdited, this, &TabAndList::listUpdated);
         }
+
+        return true;
     }
 
     return false;
