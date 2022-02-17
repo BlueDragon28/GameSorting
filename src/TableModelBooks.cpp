@@ -540,7 +540,7 @@ void TableModelBooks::updateQuery()
         statement = statement.arg(where);
     }
     else if (m_listFilter.column >= Books::CATEGORIES &&
-        m_listFilter.column <= Books::AUTHORS)
+        m_listFilter.column <= Books::SERVICES)
     {
         UtilityTableName tName;
         if (m_listFilter.column == Books::CATEGORIES)
