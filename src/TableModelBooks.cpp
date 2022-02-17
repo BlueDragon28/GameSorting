@@ -972,7 +972,7 @@ void TableModelBooks::queryUtilityField(UtilityTableName tableName, long long in
     if (m_query.exec(statement))
     {
         // Then, apply the retrieved field into the view.
-        int pos = findCommonPos(bookID);
+        int pos = findBookPos(bookID);
         if (pos >= 0 && pos <= rowCount())
         {
             QString utilityName;
@@ -1000,7 +1000,7 @@ void TableModelBooks::queryUtilityField(UtilityTableName tableName, long long in
 #endif
 }
 
-int TableModelBooks::findCommonPos(long long int bookID) const
+int TableModelBooks::findBookPos(long long int bookID) const
 {
     for (int i = 0; i < size(); i++)
         if (m_data.at(i).bookID == bookID)
@@ -1143,7 +1143,7 @@ void TableModelBooks::querySensitiveContentField(long long int commonID)
     if (m_query.exec(statement))
     {
         // Then, apply the retrieved field into the view.
-        int pos = findCommonPos(commonID);
+        int pos = findBookPos(commonID);
         if (pos >= 0 && pos < rowCount() && m_query.next())
         {
             SensitiveContent sensData = {};

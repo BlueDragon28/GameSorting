@@ -82,7 +82,7 @@ private:
     void queryServicesField(long long int bookID);
     void querySensitiveContentField();
     void querySensitiveContentField(long long int bookID);
-    int findCommonPos(long long int bookID) const;
+    int findBookPos(long long int bookID) const;
     void sortUtility(int column);
 
     void updateBooksPos(int from = -1);
