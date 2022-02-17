@@ -517,12 +517,12 @@ void TableModelBooks::updateQuery()
             .arg(m_tableName);
     
     // Sorting view.
-    if (m_sortingColumnID == Common::NAME)
+    if (m_sortingColumnID == Books::NAME)
     {
         statement = statement.arg("bName");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == Common::RATE)
+    else if (m_sortingColumnID == Books::RATE)
     {
         statement = statement.arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
@@ -612,7 +612,7 @@ void TableModelBooks::updateQuery()
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID >= Common::CATEGORIES && m_sortingColumnID <= Common::SENSITIVE_CONTENT)
+            if (m_sortingColumnID >= Books::CATEGORIES && m_sortingColumnID <= Books::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
