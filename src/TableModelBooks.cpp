@@ -1533,6 +1533,10 @@ void TableModelBooks::sortUtility(int column)
                 return compareString(item1.categories, item2.categories);
             else if (column == Books::AUTHORS)
                 return compareString(item1.authors, item2.authors);
+            else if (column == Books::PUBLISHERS)
+                return compareString(item1.publishers, item2.publishers);
+            else if (column == Books::SERVICES)
+                return compareString(item1.services, item2.services);
             else if (column == Books::SENSITIVE_CONTENT)
                 return compareSens(item1.sensitiveContent, item2.sensitiveContent);
             return false;
