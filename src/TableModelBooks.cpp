@@ -179,7 +179,7 @@ bool TableModelBooks::setData(const QModelIndex& index, const QVariant& data, in
     {
         switch (index.column())
         {
-        case Common::NAME:
+        case Books::NAME:
         {
             if (data.canConvert<QString>())
             {
@@ -198,7 +198,7 @@ bool TableModelBooks::setData(const QModelIndex& index, const QVariant& data, in
                 return false;
         } break;
 
-        case Common::RATE:
+        case Books::RATE:
         {
             if (data.canConvert<int>())
             {
