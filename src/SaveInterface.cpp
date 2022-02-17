@@ -44,6 +44,9 @@ bool SaveInterface::save(const QString& filePath, const QVariant& data)
     // If its a common list, save the data has a common list.
     else if (data.canConvert<Common::SaveData>())
         return saveCommonList(filePath, data);
+    // If its a books list, save the data has a books list.
+    else if (data.canConvert<Books::SaveData>())
+        return saveBooksList(filePath, data);
     
     return false;
 }
@@ -82,6 +85,9 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
         // Cheking if the file is a CommonList file.
         else if (strcmp(fileIdentifier, CLD_IDENTIFIER) == 0)
             ret = openCommonList(&in, data);
+        // Cheking if the file is a BooksList file.
+        else if (strcmp(fileIdentifier, BLD_IDENTIFIER) == 0)
+            ret = openBooksList(&in ,data);
         file.close();
         return ret;
     }
