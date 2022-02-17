@@ -350,7 +350,7 @@ void MainWindow::createBooksToolbar()
 	connect(pubAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PUBLISHERS);});
 	m_utilityMenu->addAction(pubAct);
 
-	QAction* serAct = new QAction(tr("Actions"), m_listToolBar);
+	QAction* serAct = new QAction(tr("Services"), m_listToolBar);
 	serAct->setToolTip(tr("Open the services editor."));
 	connect(serAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
 	m_utilityMenu->addAction(serAct);
