@@ -90,6 +90,20 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 			return;
 		}
 	}
+	else if (m_tableModel->listType() == ListType::BOOKSLIST)
+	{
+		if (index.column() == Books::RATE)
+		{
+			// Painting the starts.
+			paintRateStars(painter, option, index);
+			return;
+		}
+		else if (index.column() == Books::SENSITIVE_CONTENT)
+		{
+			paintSensitiveStars(painter, option, index);
+			return;
+		}
+	}
 
 	QStyledItemDelegate::paint(painter, option, index);
 }
@@ -126,6 +140,17 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 			return StarEditor::sizeHint(5);
 		}
 		else if (index.column() == Common::SENSITIVE_CONTENT)
+		{
+			return QSize((int)StarEditor::paintFactor() * 15, 1);
+		}
+	}
+	else if (m_tableModel->listType() == ListType::BOOKSLIST)
+	{
+		if (index.column() == Books::RATE)
+		{
+			return StarEditor::sizeHint(5);
+		}
+		else if (index.column() == Books::SENSITIVE_CONTENT)
 		{
 			return QSize((int)StarEditor::paintFactor() * 15, 1);
 		}
@@ -352,6 +377,77 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			return nullptr;
 		}
 	}
+	else if (m_tableModel->listType() == ListType::BOOKSLIST)
+	{
+		if (index.column() == Books::RATE)
+		{
+			// Creating the editor for the edition of the rate column.
+			if (option.rect.width() >= 5 * StarEditor::paintFactor())
+			{
+				StarEditor* editor = new StarEditor(parent);
+				connect(editor, &StarEditor::editFinished, this, &ListViewDelegate::commitAndCloseEditor);
+				return editor;
+			}
+			else
+			{
+				QSpinBox* editor = new QSpinBox(parent);
+				editor->setRange(0, 5);
+				editor->setSingleStep(1);
+				return editor;
+			}
+		}
+		else if (index.column() == Books::CATEGORIES ||
+				 index.column() == Books::AUTHORS ||
+				 index.column() == Books::PUBLISHERS ||
+				 index.column() == Books::SERVICES)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID <= 0)
+				return nullptr;
+			
+			UtilityTableName tableName;
+
+			if (index.column() == Books::CATEGORIES)
+				tableName = UtilityTableName::CATEGORIES;
+			else if (index.column() == Books::AUTHORS)
+				tableName = UtilityTableName::AUTHORS;
+			else if (index.column() == Books::PUBLISHERS)
+				tableName = UtilityTableName::PUBLISHERS;
+			else if (index.column() == Books::SERVICES)
+				tableName = UtilityTableName::SERVICES;
+			
+			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityInterface,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
+		}
+		else if (index.column() == Books::SENSITIVE_CONTENT)
+		{
+			long long int itemID = m_tableModel->itemID(index);
+
+			if (itemID <= 0)
+				return nullptr;
+			
+			UtilitySensitiveContentEditor* editor =
+				new UtilitySensitiveContentEditor(
+					itemID, m_utilityInterface,
+					m_db,
+					parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
+		}
+	}
 
 	return QStyledItemDelegate::createEditor(parent, option, index);
 }
@@ -415,6 +511,24 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 	}
+	else if (model->listType() == ListType::BOOKSLIST)
+	{
+		if (index.column() == Books::RATE)
+		{
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				starEditor->setStars(index.data().toInt());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				spinEditor->setValue(index.data().toInt());
+				return;
+			}
+		}
+	}
 
 	return QStyledItemDelegate::setEditorData(e, index);
 }
@@ -463,6 +577,24 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 	else if (model->listType() == ListType::COMMONLIST)
 	{
 		if (index.column() == Common::RATE)
+		{
+			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
+			if (starEditor)
+			{
+				model->setData(index, starEditor->stars());
+				return;
+			}
+			QSpinBox* spinEditor = dynamic_cast<QSpinBox*>(e);
+			if (spinEditor)
+			{
+				model->setData(index, spinEditor->value());
+				return;
+			}
+		}
+	}
+	else if (model->listType() == ListType::BOOKSLIST)
+	{
+		if (index.column() == Books::RATE)
 		{
 			StarEditor* starEditor = dynamic_cast<StarEditor*>(e);
 			if (starEditor)

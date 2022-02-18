@@ -35,7 +35,8 @@ enum class ListType
     UNKNOWN,
     GAMELIST,
     MOVIESLIST,
-    COMMONLIST
+    COMMONLIST,
+    BOOKSLIST
 };
 
 enum class ViewType
@@ -43,6 +44,7 @@ enum class ViewType
     GAME,
     MOVIE,
     COMMON,
+    BOOKS,
     UTILITY,
 };
 
@@ -92,6 +94,20 @@ struct CommonItem
     QString name;
     QString categories;
     QString authors;
+    SensitiveContent sensitiveContent;
+    QString url;
+    int rate;
+};
+
+struct BooksItem
+{
+    long long int bookID;
+    long long int bookPos;
+    QString name;
+    QString categories;
+    QString authors;
+    QString publishers;
+    QString services;
     SensitiveContent sensitiveContent;
     QString url;
     int rate;
@@ -352,6 +368,77 @@ Q_DECLARE_METATYPE(Common::SaveUtilityData);
 Q_DECLARE_METATYPE(Common::SaveUtilityInterfaceData);
 Q_DECLARE_METATYPE(Common::SaveDataTable);
 Q_DECLARE_METATYPE(Common::SaveData);
+
+namespace Books
+{
+    enum ColumnIndex
+    {
+        NAME = 0,
+        CATEGORIES = 1,
+        AUTHORS = 2,
+        PUBLISHERS = 3,
+        SERVICES = 4,
+        SENSITIVE_CONTENT = 5,
+        RATE = 6
+    };
+
+    struct SaveUtilityData
+    {
+        QList<ItemUtilityData> categories;
+        QList<ItemUtilityData> authors;
+        QList<ItemUtilityData> publishers;
+        QList<ItemUtilityData> services;
+    };
+
+    struct SaveUtilityInterfaceData
+    {
+        QList<Game::SaveUtilityInterfaceItem> categories;
+        QList<Game::SaveUtilityInterfaceItem> authors;
+        QList<Game::SaveUtilityInterfaceItem> publishers;
+        QList<Game::SaveUtilityInterfaceItem> services;
+        QList<Game::SaveUtilitySensitiveContentItem> sensitiveContent;
+    };
+
+    struct ColumnsSize
+    {
+        int name;
+        int categories;
+        int authors;
+        int publishers;
+        int services;
+        int sensitiveContent;
+        int rate;
+    };
+
+    struct SaveItem
+    {
+        long long int bookID;
+        long long int bookPos;
+        QString name;
+        QString url;
+        int rate;
+    };
+
+    struct SaveDataTable
+    {
+        QString tableName;
+        QList<SaveItem> booksList;
+        SaveUtilityInterfaceData interface;
+        ColumnsSize viewColumnsSize;
+        signed char columnSort;
+        unsigned char sortOrder;
+    };
+
+    struct SaveData
+    {
+        QList<SaveDataTable> booksTables;
+        SaveUtilityData utilityData;
+    };
+}
+Q_DECLARE_METATYPE(Books::SaveUtilityData);
+Q_DECLARE_METATYPE(Books::SaveUtilityInterfaceData);
+Q_DECLARE_METATYPE(Books::SaveDataTable);
+Q_DECLARE_METATYPE(Books::SaveData);
 
 struct RecentFileData
 {

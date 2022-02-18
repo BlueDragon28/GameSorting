@@ -16,28 +16,28 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "TableModelCommon_UtilityInterface.h"
+#include "TableModelBooks_UtilityInterface.h"
 #include <iostream>
 #include <QSqlError>
 
-TableModelCommon_UtilityInterface::TableModelCommon_UtilityInterface(const QString& parentName, QSqlDatabase& db) :
-    TableModel_UtilityInterface(parentName, db)
+TableModelBooks_UtilityInterface::TableModelBooks_UtilityInterface(const QString& parentTableName, QSqlDatabase& db) :
+    TableModel_UtilityInterface(parentTableName, db)
 {
     createTables();
 }
 
-TableModelCommon_UtilityInterface::TableModelCommon_UtilityInterface(const QString& parentName, QSqlDatabase& db, const QVariant& variant) :
-    TableModelCommon_UtilityInterface(parentName, db)
+TableModelBooks_UtilityInterface::TableModelBooks_UtilityInterface(const QString& parentTableName, QSqlDatabase& db, const QVariant& variant) :
+    TableModelBooks_UtilityInterface(parentTableName, db)
 {
     setData(variant);
 }
 
-TableModelCommon_UtilityInterface::~TableModelCommon_UtilityInterface()
+TableModelBooks_UtilityInterface::~TableModelBooks_UtilityInterface()
 {
     destroyTables();
 }
 
-QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName) const
+QString TableModelBooks_UtilityInterface::tableName(UtilityTableName tableName) const
 {
     // Return the table name of a specific utility.
     switch (tableName)
@@ -46,6 +46,10 @@ QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName)
         return m_parentTableName + "_Categories";
     case UtilityTableName::AUTHORS:
         return m_parentTableName + "_Authors";
+    case UtilityTableName::PUBLISHERS:
+        return m_parentTableName + "_Publishers";
+    case UtilityTableName::SERVICES:
+        return m_parentTableName + "_Services";
 	case UtilityTableName::SENSITIVE_CONTENT:
 		return m_parentTableName + "_SensitiveContent";
     default:
@@ -53,7 +57,7 @@ QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName)
     }
 }
 
-void TableModelCommon_UtilityInterface::newParentName(const QString& newParentName)
+void TableModelBooks_UtilityInterface::newParentName(const QString& newParentName)
 {
     // Replace the parent table name of the interface table with the new parent table name.
     if (!m_isTableReady)
@@ -62,7 +66,9 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
     // Storing the current table name into variables.
     QString catCurName = tableName(UtilityTableName::CATEGORIES);
     QString autCurName = tableName(UtilityTableName::AUTHORS);
-	QString senCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
+    QString pubCurName = tableName(UtilityTableName::PUBLISHERS);
+    QString serCurName = tableName(UtilityTableName::SERVICES);
+    QString senCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Changing m_parentTableName to the new parent name.
     m_parentTableName = newParentName;
@@ -70,43 +76,49 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
     // Get the new table name.
     QString catNewName = tableName(UtilityTableName::CATEGORIES);
     QString autNewName = tableName(UtilityTableName::AUTHORS);
-	QString senNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
+    QString pubNewName = tableName(UtilityTableName::PUBLISHERS);
+    QString serNewName = tableName(UtilityTableName::SERVICES);
+    QString senNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Renaming the tables
     renameTable(catCurName, catNewName);
     renameTable(autCurName, autNewName);
-	renameTable(senCurName, senNewName);
+    renameTable(pubCurName, pubNewName);
+    renameTable(serCurName, serNewName);
+    renameTable(senCurName, senNewName);
 }
 
-void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& commonIDs)
+void TableModelBooks_UtilityInterface::rowRemoved(const QList<long long int>& booksIDs)
 {
     // Deleting any row of each utility tables referrencing a commonID inside commonIDs.
-    if (!m_isTableReady || commonIDs.isEmpty())
+    if (!m_isTableReady || booksIDs.isEmpty())
         return;
     
     QString idList;
-    for (int i = 0; i < commonIDs.size(); i++)
+    for (int i = 0; i < booksIDs.size(); i++)
     {
         if (i > 0)
             idList += ", ";
-        idList += QString::number(commonIDs.at(i));
+        idList += QString::number(booksIDs.at(i));
     }
 
-    UtilityTableName tablesName[3] =
+    UtilityTableName tablesName[5] =
     {
         UtilityTableName::CATEGORIES,
         UtilityTableName::AUTHORS,
+        UtilityTableName::PUBLISHERS,
+        UtilityTableName::SERVICES,
 		UtilityTableName::SENSITIVE_CONTENT
     };
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 5; i++)
     {
         QString statement = QString(
             "DELETE FROM \"%1\"\n"
             "WHERE\n")
                 .arg(tableName(tablesName[i]));
         
-        if (commonIDs.size() == 1)
+        if (booksIDs.size() == 1)
             statement += QString("  ItemID = %1;").arg(idList);
         else
             statement += QString("  ItemID IN (%1);").arg(idList);
@@ -116,7 +128,7 @@ void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& c
 #endif
 
         if (!m_query.exec(statement))
-            std::cerr << QString("Failed to delete commonID (%1) from the table %2.\n\t%3")
+            std::cerr << QString("Failed to delete booksIDs (%1) from the table %2.\n\t%3")
                 .arg(idList, tableName(tablesName[i]), m_query.lastError().text())
                 .toLocal8Bit().constData()
                 << std::endl;
@@ -124,7 +136,7 @@ void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& c
     }
 }
 
-void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID, UtilityTableName tableName, const QVariant& data)
+void TableModelBooks_UtilityInterface::updateItemUtility(long long int bookID, UtilityTableName tableName, const QVariant& data)
 {
 	// Updating all the utility of a category of the SQL table TableModel.
 	if (!m_isTableReady || !data.isValid() && (data.canConvert<QList<long long int>>() || data.canConvert<Game::SensitiveContentData>()))
@@ -136,7 +148,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 		"WHERE\n"
 		"	ItemID = %2;")
 			.arg(this->tableName(tableName))
-			.arg(commonID);
+			.arg(bookID);
 	
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
@@ -146,7 +158,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 	{
 		std::cerr << QString("Failed to remove all the utility of the table %1 where ItemID is equal to %2.\n\t%3")
 			.arg(this->tableName(tableName))
-			.arg(commonID)
+			.arg(bookID)
 			.arg(m_query.lastError().text())
 			.toLocal8Bit().constData()
 			<< std::endl;
@@ -169,7 +181,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 			{
 				if (i > 0)
 					statement += ',';
-				statement += QString("\n	(%1, %2)").arg(commonID).arg(utilitiesID.at(i));
+				statement += QString("\n	(%1, %2)").arg(bookID).arg(utilitiesID.at(i));
 			}
 			statement += ';';
 
@@ -178,7 +190,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 #endif
 
 			if (m_query.exec(statement))
-				emit interfaceChanged(commonID, tableName);
+				emit interfaceChanged(bookID, tableName);
 			else
 				std::cerr << QString("Failed to insert data into %1.\n\t%2")
 					.arg(this->tableName(tableName), m_query.lastError().text())
@@ -187,7 +199,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 			m_query.clear();
 		}
 		else
-			emit interfaceChanged(commonID, tableName);
+			emit interfaceChanged(bookID, tableName);
 	}
 	// If the data is sensitive content.
 	else if (data.canConvert<Game::SensitiveContentData>())
@@ -199,7 +211,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 			"VALUES\n"
 			"	(%2, %3, %4, %5);")
 				.arg(this->tableName(UtilityTableName::SENSITIVE_CONTENT))
-				.arg(commonID)
+				.arg(bookID)
 				.arg(sensData.explicitContent)
 				.arg(sensData.violenceContent)
 				.arg(sensData.badLanguageContent);
@@ -209,7 +221,7 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 #endif
 
 		if (m_query.exec(statement))
-			emit interfaceChanged(commonID, tableName);
+			emit interfaceChanged(bookID, tableName);
 		else
 			std::cerr << QString("Failed to insert data into %1.\n\t%2")
 				.arg(this->tableName(tableName), m_query.lastError().text())
@@ -219,55 +231,61 @@ void TableModelCommon_UtilityInterface::updateItemUtility(long long int commonID
 	}
 }
 
-ListType TableModelCommon_UtilityInterface::listType() const
+ListType TableModelBooks_UtilityInterface::listType() const
 {
-    return ListType::COMMONLIST;
+    return ListType::BOOKSLIST;
 }
 
-QVariant TableModelCommon_UtilityInterface::data() const
+QVariant TableModelBooks_UtilityInterface::data() const
 {
     // Retrieve the data of the utility interface to be save into a file.
-	if (!m_isTableReady)
-		return QVariant();
+    if (!m_isTableReady)
+        return QVariant();
+    
+    Books::SaveUtilityInterfaceData data = {};
 
-	Common::SaveUtilityInterfaceData data = {};
+    QSqlQuery query(m_db);
+    QString statement = QString(
+        "SELECT\n"
+        "   ItemID,\n"
+        "   UtilityID\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   ItemID;");
+    
+    UtilityTableName tablesName[4] =
+    {
+        UtilityTableName::CATEGORIES,
+        UtilityTableName::AUTHORS,
+        UtilityTableName::PUBLISHERS,
+        UtilityTableName::SERVICES
+    };
 
-	QSqlQuery query(m_db);
-	QString statement = QString(
-		"SELECT\n"
-		"	ItemID,\n"
-		"	UtilityID\n"
-		"FROM\n"
-		"	\"%1\"\n"
-		"ORDER BY\n"
-		"	ItemID;");
-	
-	UtilityTableName tablesName[2] =
-	{
-		UtilityTableName::CATEGORIES,
-		UtilityTableName::AUTHORS
-	};
+    // Utility interface (Categories, Authors, Publishers, Services).
+    for (int i = 0; i < 4; i++)
+    {
+        if (!query.exec(statement.arg(tableName(tablesName[i]))))
+            return QVariant();
+        
+        while (query.next())
+        {
+            Game::SaveUtilityInterfaceItem item = {};
+            item.gameID = query.value(0).toLongLong();
+            item.utilityID = query.value(1).toLongLong();
+            if (tablesName[i] == UtilityTableName::CATEGORIES)
+                data.categories.append(item);
+            else if (tablesName[i] == UtilityTableName::AUTHORS)
+                data.authors.append(item);
+            else if (tablesName[i] == UtilityTableName::PUBLISHERS)
+                data.publishers.append(item);
+            else if (tablesName[i] == UtilityTableName::SERVICES)
+                data.services.append(item);
+        }
+        query.clear();
+    }
 
-	// Utility interface (Categories, Authors).
-	for (int i = 0; i < 2; i++)
-	{
-		if (!query.exec(statement.arg(tableName(tablesName[i]))))
-			return QVariant();
-		
-		while (query.next())
-		{
-			Game::SaveUtilityInterfaceItem item = {};
-			item.gameID = query.value(0).toLongLong();
-			item.utilityID = query.value(1).toLongLong();
-			if (tablesName[i] == UtilityTableName::CATEGORIES)
-				data.categories.append(item);
-			else if (tablesName[i] == UtilityTableName::AUTHORS)
-				data.authors.append(item);
-		}
-		query.clear();
-	}
-
-	// Sensitive content
+    // Sensitive content
 	statement = QString(
 		"SELECT\n"
 		"	SensitiveContentID,\n"
@@ -295,35 +313,41 @@ QVariant TableModelCommon_UtilityInterface::data() const
 		data.sensitiveContent.append(item);
 	}
 
-	return QVariant::fromValue(data);
+    return QVariant::fromValue(data);
 }
 
-bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
+bool TableModelBooks_UtilityInterface::setData(const QVariant& variant)
 {
-	// Apply the data into the SQL table.
-	if (!variant.isValid())
-		return false;
-	
-	Common::SaveUtilityInterfaceData data = qvariant_cast<Common::SaveUtilityInterfaceData>(variant);
+    // Apply the data into the SQL table.
+    if (!variant.isValid())
+        return false;
+    
+    Books::SaveUtilityInterfaceData data = qvariant_cast<Books::SaveUtilityInterfaceData>(variant);
 
-	UtilityTableName tablesName[2] = 
-	{
-		UtilityTableName::CATEGORIES,
-		UtilityTableName::AUTHORS
-	};
+    UtilityTableName tablesName[4] =
+    {
+        UtilityTableName::CATEGORIES,
+        UtilityTableName::AUTHORS,
+        UtilityTableName::PUBLISHERS,
+        UtilityTableName::SERVICES
+    };
 
-	// Apply the utility into the SQL tables.
-	QString statement = QString(
-		"INSERT INTO \"%1\" (ItemID, UtilityID)\n"
-		"VALUES");
-
-	for (int i = 0; i < 2; i++)
+    // Apply the utility into the SQL tables.
+    QString statement = QString(
+        "INSERT INTO \"%1\" (ItemID, UtilityID)\n"
+        "VALUES");
+    
+    for (int i = 0; i < 4; i++)
 	{
 		QList<Game::SaveUtilityInterfaceItem>* pItem;
 		if (tablesName[i] == UtilityTableName::CATEGORIES)
 			pItem = &data.categories;
 		else if (tablesName[i] == UtilityTableName::AUTHORS)
 			pItem = &data.authors;
+        else if (tablesName[i] == UtilityTableName::PUBLISHERS)
+            pItem = &data.publishers;
+        else if (tablesName[i] == UtilityTableName::SERVICES)
+            pItem = &data.services;
 		
 		for (long long int j = 0; j < pItem->size(); j+=10)
 		{
@@ -359,7 +383,7 @@ bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
 		}
 	}
 
-	// Apply the Sensitive Content data into the SQL table.
+    // Apply the Sensitive Content data into the SQL table.
 	statement = QString(
 		"INSERT INTO \"%1\" (SensitiveContentID, ItemID, ExplicitContent, ViolenceContent, BadLanguage)\n"
 		"VALUES")
@@ -399,25 +423,27 @@ bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
 		}
 	}
 
-	return true;
+    return true;
 }
 
-void TableModelCommon_UtilityInterface::createTables()
+void TableModelBooks_UtilityInterface::createTables()
 {
-    // Create the utilities interface tables (Categories, Authors and Sensitive Content).
+    // Create the utilities interface tables (Categories, Authors, Publishers, Services, Sensitive Content).
     QString statement = QString(
         "CREATE TABLE \"%1\" (\n"
         "   ItemID INTEGER,\n"
         "   UtilityID INTEGER);");
     
     // Create all the standard interface.
-    UtilityTableName tablesName[2] = 
+    UtilityTableName tablesName[4] = 
     {
         UtilityTableName::CATEGORIES,
-        UtilityTableName::AUTHORS
+        UtilityTableName::AUTHORS,
+        UtilityTableName::PUBLISHERS,
+        UtilityTableName::SERVICES
     };
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 4; i++)
     {
         if (!m_query.exec(statement.arg(tableName(tablesName[i]))))
         {
@@ -462,9 +488,11 @@ void TableModelCommon_UtilityInterface::createTables()
     m_isTableReady = true;
 }
 
-void TableModelCommon_UtilityInterface::destroyTables()
+void TableModelBooks_UtilityInterface::destroyTables()
 {
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::AUTHORS));
-	destroyTableByName(tableName(UtilityTableName::SENSITIVE_CONTENT));
+    destroyTableByName(tableName(UtilityTableName::PUBLISHERS));
+    destroyTableByName(tableName(UtilityTableName::SERVICES));
+    destroyTableByName(tableName(UtilityTableName::SENSITIVE_CONTENT));
 }

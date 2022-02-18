@@ -104,6 +104,11 @@ void MainWindow::createMenu()
 	newMovieListAct->setToolTip(tr("Creating a movie list."));
 	newListMenu->addAction(newMovieListAct);
 	connect(newMovieListAct, &QAction::triggered, m_tabAndList, &TabAndList::newMoviesList);
+	// Books list.
+	QAction* newBooksListAct = new QAction(tr("Books List"), this);
+	newBooksListAct->setToolTip(tr("Creating a books list."));
+	newListMenu->addAction(newBooksListAct);
+	connect(newBooksListAct, &QAction::triggered, m_tabAndList, &TabAndList::newBooksList);
 	// Common list.
 	QAction* newCommonListAct = new QAction(tr("Common list"), this);
 	newCommonListAct->setToolTip(tr("Creating a common list."));
@@ -319,6 +324,48 @@ void MainWindow::createCommonToolBar()
 	m_listToolBar->addWidget(utilityToolButton);
 }
 
+void MainWindow::createBooksToolbar()
+{
+	// Creating the toolbar next to the file toolbar.
+	// This toolbar is used to open the utility editor.
+	m_listToolBar = addToolBar(tr("Books Toolbar"));
+	m_listToolBar->setMovable(false);
+
+	// Creathe the utility menu.
+	m_utilityMenu = new QMenu(tr("Books Utility"), m_listToolBar);
+	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
+	reinsertMenu();
+	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
+	catAct->setToolTip(tr("Open the categories editor."));
+	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
+	m_utilityMenu->addAction(catAct);
+
+	QAction* autAct = new QAction(tr("Authors"), m_listToolBar);
+	autAct->setToolTip(tr("Open the authors editor."));
+	connect(autAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::AUTHORS);});
+	m_utilityMenu->addAction(autAct);
+
+	QAction* pubAct = new QAction(tr("Publishers"), m_listToolBar);
+	autAct->setToolTip(tr("Open the publishers editor."));
+	connect(pubAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::PUBLISHERS);});
+	m_utilityMenu->addAction(pubAct);
+
+	QAction* serAct = new QAction(tr("Services"), m_listToolBar);
+	serAct->setToolTip(tr("Open the services editor."));
+	connect(serAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERVICES);});
+	m_utilityMenu->addAction(serAct);
+
+	// Creating the toolButton used to open the utilityMenu.
+	QIcon utilityIcon(":/Images/Utility.svg");
+	QToolButton* utilityToolButton = new QToolButton(m_listToolBar);
+	utilityToolButton->setText(tr("Books Utility"));
+	utilityToolButton->setIcon(utilityIcon);
+	utilityToolButton->setMenu(m_utilityMenu);
+	utilityToolButton->setToolTip(tr("Set the Categories, Authors, Publishers and Services of the books list."));
+	utilityToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_listToolBar->addWidget(utilityToolButton);
+}
+
 void MainWindow::newListCreated(ListType type)
 {
 	// Recreating the menu when a new list is created.
@@ -339,6 +386,8 @@ void MainWindow::newListCreated(ListType type)
 		createMovieToolBar();
 	else if (type == ListType::COMMONLIST)
 		createCommonToolBar();
+	else if (type == ListType::BOOKSLIST)
+		createBooksToolbar();
 }
 
 void MainWindow::listFilePathChanged(const QString& filePath)
