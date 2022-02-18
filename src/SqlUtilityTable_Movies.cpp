@@ -23,6 +23,7 @@
 void SqlUtilityTable::createMoviesTables()
 {
     // Creating all the Movies utility table.
+    createSeriesTable();
     createCategoriesTable();
     createDirectoryTable();
     createActorsTable();
@@ -33,6 +34,7 @@ void SqlUtilityTable::createMoviesTables()
 
 void SqlUtilityTable::destroyMoviesTables()
 {
+    destroyTableByName(tableName(UtilityTableName::SERIES));
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::DIRECTOR));
     destroyTableByName(tableName(UtilityTableName::ACTORS));
@@ -64,6 +66,7 @@ void SqlUtilityTable::createMusicTable()
 QVariant SqlUtilityTable::queryMoviesData() const
 {
     Movie::SaveUtilityData data = {};
+    data.series = retrieveTableData(UtilityTableName::SERIES);
     data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
     data.directors = retrieveTableData(UtilityTableName::DIRECTOR);
     data.actors = retrieveTableData(UtilityTableName::ACTORS);
@@ -78,7 +81,8 @@ bool SqlUtilityTable::setMoviesData(const QVariant& variant)
 {
     Movie::SaveUtilityData data = qvariant_cast<Movie::SaveUtilityData>(variant);
 
-    if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+    if (!setStandardData(UtilityTableName::SERIES, data.series) ||
+        !setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
         !setStandardData(UtilityTableName::DIRECTOR, data.directors) ||
         !setStandardData(UtilityTableName::ACTORS, data.actors) ||
         !setStandardData(UtilityTableName::PRODUCTION, data.productions) ||
