@@ -81,7 +81,7 @@ bool SaveInterface::openMovies(QDataStream* in, QVariant& variant)
     // Version
     int fileVersion;
     *in >> fileVersion;
-    if (fileVersion >= MLD_VERSION && fileVersion < MLD_VERSION_MAX_SUPPORT)
+    if (fileVersion >= MLD_LEGACY_VERSION && fileVersion < MLD_VERSION_MAX_SUPPORT)
     {
         if (in->atEnd())
             return false;
