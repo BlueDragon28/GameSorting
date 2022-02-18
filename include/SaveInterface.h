@@ -32,8 +32,8 @@
 
 // Type identifier and version of a GLD file.
 #define GLD_IDENTIFIER "GLD"
-#define GLD_VERSION (int)(500)
-#define GLD_VERSION_MAX_SUPPORT (int)(600)
+#define GLD_VERSION (int)(600)
+#define GLD_VERSION_MAX_SUPPORT (int)(700)
 
 #define MLD_IDENTIFIER "MLD"
 #define MLD_VERSION (int)(100)
