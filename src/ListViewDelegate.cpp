@@ -259,7 +259,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				return editor;
 			}
 		}
-		else if (index.column() >= Movie::CATEGORIES &&
+		else if (index.column() >= Movie::SERIES &&
 				 index.column() <= Movie::SERVICES)
 		{
 			long long int itemID = m_tableModel->itemID(index);
@@ -269,7 +269,9 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			
 			UtilityTableName tableName;
 
-			if (index.column() == Movie::CATEGORIES)
+			if (index.column() == Movie::SERIES)
+				tableName = UtilityTableName::SERIES;
+			else if (index.column() == Movie::CATEGORIES)
 				tableName = UtilityTableName::CATEGORIES;
 			else if (index.column() == Movie::DIRECTORS)
 				tableName = UtilityTableName::DIRECTOR;
