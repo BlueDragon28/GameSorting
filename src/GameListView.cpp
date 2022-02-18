@@ -231,6 +231,7 @@ QVariant GameListView::listData() const
                 // Retrieve the size of the column.
                 Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
                 data.viewColumnsSize.name = m_view->columnWidth(Game::NAME);
+                data.viewColumnsSize.series = m_view->columnWidth(Game::SERIES);
                 data.viewColumnsSize.categories = m_view->columnWidth(Game::CATEGORIES);
                 data.viewColumnsSize.developpers = m_view->columnWidth(Game::DEVELOPPERS);
                 data.viewColumnsSize.publishers = m_view->columnWidth(Game::PUBLISHERS);
@@ -265,6 +266,7 @@ void GameListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
         {
             Game::SaveDataTable data = qvariant_cast<Game::SaveDataTable>(variant);
             m_view->setColumnWidth(Game::NAME, data.viewColumnsSize.name);
+            m_view->setColumnWidth(Game::SERIES, data.viewColumnsSize.series);
             m_view->setColumnWidth(Game::CATEGORIES, data.viewColumnsSize.categories);
             m_view->setColumnWidth(Game::DEVELOPPERS, data.viewColumnsSize.developpers);
             m_view->setColumnWidth(Game::PUBLISHERS, data.viewColumnsSize.publishers);
