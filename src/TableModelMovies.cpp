@@ -1222,7 +1222,7 @@ QString TableModelMovies::url(const QModelIndex& index) const
 void TableModelMovies::setUrl(const QModelIndex& index, const QString& url)
 {
     // Set the url of a movie.
-    if (index.isValid() && index.row() > 0 && index.row() < size())
+    if (index.isValid() && index.row() >= 0 && index.row() < size())
     {
         long long int movieID = m_data.at(index.row()).movieID;
 
