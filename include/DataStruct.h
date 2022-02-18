@@ -61,6 +61,7 @@ struct GameItem
     long long int gameID;
     long long int gamePos;
     QString name;
+    QString series;
     QString categories;
     QString developpers;
     QString publishers;
@@ -134,13 +135,14 @@ namespace Game
     enum ColumnIndex
     {
         NAME = 0,
-        CATEGORIES = 1,
-        DEVELOPPERS = 2,
-        PUBLISHERS = 3,
-        PLATFORMS = 4,
-        SERVICES = 5,
-        SENSITIVE_CONTENT = 6,
-        RATE = 7
+        SERIES = 1,
+        CATEGORIES = 2,
+        DEVELOPPERS = 3,
+        PUBLISHERS = 4,
+        PLATFORMS = 5,
+        SERVICES = 6,
+        SENSITIVE_CONTENT = 7,
+        RATE = 8
     };
 
     struct SensitiveContentData
@@ -152,6 +154,7 @@ namespace Game
 
     struct SaveUtilityData
     {
+        QList<ItemUtilityData> series;
         QList<ItemUtilityData> categories;
         QList<ItemUtilityData> developpers;
         QList<ItemUtilityData> publishers;
@@ -185,6 +188,7 @@ namespace Game
 
     struct SaveUtilityInterfaceData
     {
+        QList<SaveUtilityInterfaceItem> series;
         QList<SaveUtilityInterfaceItem> categories;
         QList<SaveUtilityInterfaceItem> developpers;
         QList<SaveUtilityInterfaceItem> pubishers;
@@ -196,6 +200,7 @@ namespace Game
     struct ColumnsSize
     {
         int name;
+        int series;
         int categories;
         int developpers;
         int publishers;
