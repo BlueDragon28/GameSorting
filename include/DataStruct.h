@@ -125,7 +125,8 @@ enum class UtilityTableName
     ACTORS,
     PRODUCTION,
     MUSIC,
-    AUTHORS
+    AUTHORS,
+    SERIES
 };
 
 namespace Game
