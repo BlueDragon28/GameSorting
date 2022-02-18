@@ -69,6 +69,7 @@ void FilterDialog::createWidget()
             {
                 "None",
                 "Name",
+                "Series",
                 "Categories",
                 "Developpers",
                 "Publishers",
@@ -206,21 +207,23 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex >= 2 && m_lastIndex <= 6)
+        else if (m_lastIndex >= 2 && m_lastIndex <= 7)
         {
             if (!m_utilityView || !m_utilityModel)
                 reject();
 
             int columnID;
             if (m_lastIndex == 2)
-                columnID = Game::CATEGORIES;
+                columnID = Game::SERIES;
             else if (m_lastIndex == 3)
-                columnID = Game::DEVELOPPERS;
+                columnID = Game::CATEGORIES;
             else if (m_lastIndex == 4)
-                columnID = Game::PUBLISHERS;
+                columnID = Game::DEVELOPPERS;
             else if (m_lastIndex == 5)
-                columnID = Game::PLATFORMS;
+                columnID = Game::PUBLISHERS;
             else if (m_lastIndex == 6)
+                columnID = Game::PLATFORMS;
+            else if (m_lastIndex == 7)
                 columnID = Game::SERVICES;
             
             ListFilter filter = {};
@@ -416,18 +419,20 @@ void FilterDialog::comboBoxChanged(int index)
             m_stackedLayout->setCurrentIndex(1);
             m_nameText->clear();
         }
-        else if (index >= 2 && index <= 6)
+        else if (index >= 2 && index <= 7)
         {
             UtilityTableName tableName;
             if (index == 2)
-                tableName = UtilityTableName::CATEGORIES;
+                tableName = UtilityTableName::SERIES;
             else if (index == 3)
-                tableName = UtilityTableName::DEVELOPPERS;
+                tableName = UtilityTableName::CATEGORIES;
             else if (index == 4)
-                tableName = UtilityTableName::PUBLISHERS;
+                tableName = UtilityTableName::DEVELOPPERS;
             else if (index == 5)
-                tableName = UtilityTableName::PLATFORM;
+                tableName = UtilityTableName::PUBLISHERS;
             else if (index == 6)
+                tableName = UtilityTableName::PLATFORM;
+            else if (index == 7)
                 tableName = UtilityTableName::SERVICES;
             
             m_utilityModel = new UtilityInterfaceEditorModel(

@@ -95,6 +95,11 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
         return false;
 }
 
+bool SaveInterface::isLegacy()
+{
+    return m_isLegacy;
+}
+
 // Item utility data
 QDataStream& operator<<(QDataStream& out, const ItemUtilityData& data)
 {

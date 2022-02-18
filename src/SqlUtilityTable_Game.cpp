@@ -23,6 +23,7 @@
 void SqlUtilityTable::createGameTables()
 {
 	// Creating all the Game utility table.
+	createSeriesTable();
 	createCategoriesTable();
 	createDeveloppersTable();
 	createPublishersTable();
@@ -32,6 +33,7 @@ void SqlUtilityTable::createGameTables()
 
 void SqlUtilityTable::destroyGameTables()
 {
+	destroyTableByName(tableName(UtilityTableName::SERIES));
 	destroyTableByName(tableName(UtilityTableName::CATEGORIES));
 	destroyTableByName(tableName(UtilityTableName::DEVELOPPERS));
 	destroyTableByName(tableName(UtilityTableName::PUBLISHERS));
@@ -39,6 +41,11 @@ void SqlUtilityTable::destroyGameTables()
 	destroyTableByName(tableName(UtilityTableName::SERVICES));
 	m_type = ListType::UNKNOWN;
 	m_isTableReady = false;
+}
+
+void SqlUtilityTable::createSeriesTable()
+{
+	standardTableCreation(UtilityTableName::SERIES);
 }
 
 void SqlUtilityTable::createCategoriesTable()
@@ -69,6 +76,7 @@ void SqlUtilityTable::createServicesTable()
 QVariant SqlUtilityTable::queryGameData() const
 {
 	Game::SaveUtilityData data = {};
+	data.series = retrieveTableData(UtilityTableName::SERIES);
 	data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
 	data.developpers = retrieveTableData(UtilityTableName::DEVELOPPERS);
 	data.publishers = retrieveTableData(UtilityTableName::PUBLISHERS);
@@ -83,7 +91,8 @@ bool SqlUtilityTable::setGameData(const QVariant& variant)
 	// Set the data into the SQL tables.
 	Game::SaveUtilityData data = qvariant_cast<Game::SaveUtilityData>(variant);
 
-	if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+	if (!setStandardData(UtilityTableName::SERIES, data.series) ||
+		!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
 		!setStandardData(UtilityTableName::DEVELOPPERS, data.developpers) ||
 		!setStandardData(UtilityTableName::PUBLISHERS, data.publishers) ||
 		!setStandardData(UtilityTableName::PLATFORM, data.platform) ||

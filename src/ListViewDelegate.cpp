@@ -181,7 +181,8 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				return editor;
 			}
 		}
-		else if (index.column() == Game::CATEGORIES ||
+		else if (index.column() == Game::SERIES ||
+				 index.column() == Game::CATEGORIES ||
 				 index.column() == Game::DEVELOPPERS ||
 				 index.column() == Game::PUBLISHERS ||
 				 index.column() == Game::PLATFORMS ||
@@ -194,7 +195,9 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			
 			UtilityTableName tableName;
 
-			if (index.column() == Game::CATEGORIES)
+			if (index.column() == Game::SERIES)
+				tableName = UtilityTableName::SERIES;
+			else if (index.column() == Game::CATEGORIES)
 				tableName = UtilityTableName::CATEGORIES;
 			else if (index.column() == Game::DEVELOPPERS)
 				tableName = UtilityTableName::DEVELOPPERS;

@@ -44,6 +44,8 @@ QString TableModelGame_UtilityInterface::tableName(UtilityTableName tableName) c
 	// Return the table name of a specific utility.
 	switch (tableName)
 	{
+	case UtilityTableName::SERIES:
+		return m_parentTableName + "_Series";
 	case UtilityTableName::CATEGORIES:
 		return m_parentTableName + "_Categories";
 	case UtilityTableName::DEVELOPPERS:
@@ -68,6 +70,7 @@ void TableModelGame_UtilityInterface::newParentName(const QString& newParentName
 		return;
 	
 	// Storing the current table name into variable.
+	QString serCurName = tableName(UtilityTableName::SERIES);
 	QString catCurName = tableName(UtilityTableName::CATEGORIES);
 	QString devCurName = tableName(UtilityTableName::DEVELOPPERS);
 	QString pubCurName = tableName(UtilityTableName::PUBLISHERS);
@@ -79,6 +82,7 @@ void TableModelGame_UtilityInterface::newParentName(const QString& newParentName
 	m_parentTableName = newParentName;
 
 	// Get the new table name.
+	QString serNewName = tableName(UtilityTableName::SERIES);
 	QString catNewName = tableName(UtilityTableName::CATEGORIES);
 	QString devNewName = tableName(UtilityTableName::DEVELOPPERS);
 	QString pubNewName = tableName(UtilityTableName::PUBLISHERS);
@@ -87,6 +91,7 @@ void TableModelGame_UtilityInterface::newParentName(const QString& newParentName
 	QString sensNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
 	// Renaming the tables.
+	renameTable(serCurName, serNewName);
 	renameTable(catCurName, catNewName);
 	renameTable(devCurName, devNewName);
 	renameTable(pubCurName, pubNewName);
@@ -109,8 +114,9 @@ void TableModelGame_UtilityInterface::rowRemoved(const QList<long long int>& gam
 		idList += QString::number(gamesID.at(i));
 	}
 
-	UtilityTableName tablesName[6] =
+	UtilityTableName tablesName[7] =
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::DEVELOPPERS,
 		UtilityTableName::PUBLISHERS,
@@ -119,7 +125,7 @@ void TableModelGame_UtilityInterface::rowRemoved(const QList<long long int>& gam
 		UtilityTableName::SENSITIVE_CONTENT
 	};
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 7; i++)
 	{
 		QString statement = QString(
 			"DELETE FROM \"%1\"\n"
@@ -262,8 +268,9 @@ QVariant TableModelGame_UtilityInterface::data() const
 		"ORDER BY\n"
 		"	ItemID;");
 	
-	UtilityTableName tablesName[5] =
+	UtilityTableName tablesName[6] =
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::DEVELOPPERS,
 		UtilityTableName::PUBLISHERS,
@@ -272,7 +279,7 @@ QVariant TableModelGame_UtilityInterface::data() const
 	};
 
 	// Utility interface (Categories, Developpers, Publishers, Platform and Services).
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		if (!query.exec(statement.arg(tableName(tablesName[i]))))
 			return QVariant();
@@ -282,6 +289,8 @@ QVariant TableModelGame_UtilityInterface::data() const
 			Game::SaveUtilityInterfaceItem item = {};
 			item.gameID = query.value(0).toLongLong();
 			item.utilityID = query.value(1).toLongLong();
+			if (tablesName[i] == UtilityTableName::SERIES)
+				data.series.append(item);
 			if (tablesName[i] == UtilityTableName::CATEGORIES)
 				data.categories.append(item);
 			else if (tablesName[i] == UtilityTableName::DEVELOPPERS)
@@ -335,8 +344,9 @@ bool TableModelGame_UtilityInterface::setData(const QVariant& variant)
 	
 	Game::SaveUtilityInterfaceData data = qvariant_cast<Game::SaveUtilityInterfaceData>(variant);
 
-	UtilityTableName tablesName[5] = 
+	UtilityTableName tablesName[6] = 
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::DEVELOPPERS,
 		UtilityTableName::PUBLISHERS,
@@ -349,9 +359,11 @@ bool TableModelGame_UtilityInterface::setData(const QVariant& variant)
 		"INSERT INTO \"%1\" (ItemID, UtilityID)\n"
 		"VALUES");
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		QList<Game::SaveUtilityInterfaceItem>* pItem;
+		if (tablesName[i] == UtilityTableName::SERIES)
+			pItem = &data.series;
 		if (tablesName[i] == UtilityTableName::CATEGORIES)
 			pItem = &data.categories;
 		else if (tablesName[i] == UtilityTableName::DEVELOPPERS)
@@ -449,8 +461,9 @@ void TableModelGame_UtilityInterface::createTables()
 		"	UtilityID INTEGER);\n");
 	
 	// Create all the standard interface.
-	UtilityTableName tablesName[5] =
+	UtilityTableName tablesName[6] =
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::DEVELOPPERS,
 		UtilityTableName::PUBLISHERS,
@@ -458,7 +471,7 @@ void TableModelGame_UtilityInterface::createTables()
 		UtilityTableName::SERVICES
 	};
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		if (!m_query.exec(statement.arg(tableName(tablesName[i]))))
 		{
@@ -504,6 +517,7 @@ void TableModelGame_UtilityInterface::createTables()
 
 void TableModelGame_UtilityInterface::destroyTables()
 {
+	destroyTableByName(tableName(UtilityTableName::SERIES));
 	destroyTableByName(tableName(UtilityTableName::CATEGORIES));
 	destroyTableByName(tableName(UtilityTableName::DEVELOPPERS));
 	destroyTableByName(tableName(UtilityTableName::PUBLISHERS));

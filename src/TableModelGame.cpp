@@ -22,8 +22,8 @@
 #include <iostream>
 #include <algorithm>
 
-#define GAME_TABLE_COLUMN_COUNT 8
-#define NUMBER_GAME_TABLE_COLUMN_COUNT 7
+#define GAME_TABLE_COLUMN_COUNT 9
+#define NUMBER_GAME_TABLE_COLUMN_COUNT 8
 
 template<typename T>
 bool TableModelGame::updateField(const QString& columnName, int rowNB, T value)
@@ -150,6 +150,8 @@ QVariant TableModelGame::data(const QModelIndex& index, int role) const
             {
             case Game::NAME:
                 return m_data.at(index.row()).name;
+            case Game::SERIES:
+                return m_data.at(index.row()).series;
             case Game::CATEGORIES:
                 return m_data.at(index.row()).categories;
             case Game::DEVELOPPERS:
@@ -431,6 +433,8 @@ QVariant TableModelGame::headerData(int section, Qt::Orientation orientation, in
     {
     case Game::NAME:
         return "Name";
+    case Game::SERIES:
+        return "Series";
     case Game::CATEGORIES:
         return "Categories";
     case Game::DEVELOPPERS:
@@ -523,12 +527,12 @@ void TableModelGame::updateQuery()
             .arg(m_tableName);
     
     // Sorting view.
-    if (m_sortingColumnID == 0)
+    if (m_sortingColumnID == Game::NAME)
     {
         statement = statement.arg("gName");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Game::RATE)
     {
         statement = statement.arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
@@ -545,11 +549,13 @@ void TableModelGame::updateQuery()
             .arg(m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Game::CATEGORIES &&
+    else if (m_listFilter.column >= Game::SERIES &&
         m_listFilter.column <= Game::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Game::CATEGORIES)
+        if (m_listFilter.column == Game::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Game::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Game::DEVELOPPERS)
             tName = UtilityTableName::DEVELOPPERS;
@@ -614,6 +620,7 @@ void TableModelGame::updateQuery()
         if (size() > 0)
         {
             // Quering the util table and set it into the specifics rows.
+            querySeriesField();
             queryCategoriesField();
             queryDeveloppersField();
             queryPublishersField();
@@ -817,7 +824,9 @@ void TableModelGame::utilityChanged(long long int gameID, UtilityTableName table
     // This member function is called when the utility interface if changed.
     if (gameID >= 0 && size() > 0 && m_isTableCreated)
     {
-        if (tableName == UtilityTableName::CATEGORIES)
+        if (tableName == UtilityTableName::SERIES)
+            querySeriesField(gameID);
+        else if (tableName == UtilityTableName::CATEGORIES)
             queryCategoriesField(gameID);
         else if (tableName == UtilityTableName::DEVELOPPERS)
             queryDeveloppersField(gameID);
@@ -856,12 +865,12 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
             .arg(m_interface->tableName(tableName));
     
     // Sorting order.
-    if (m_sortingColumnID == 0)
+    if (m_sortingColumnID == Game::NAME)
     {
         statement = statement.arg("Name");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Game::RATE)
     {
         statement = statement.arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
@@ -878,11 +887,13 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
             .arg(m_tableName, m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Game::CATEGORIES &&
+    else if (m_listFilter.column >= Game::SERIES &&
         m_listFilter.column <= Game::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Game::CATEGORIES)
+        if (m_listFilter.column == Game::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Game::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Game::DEVELOPPERS)
             tName = UtilityTableName::DEVELOPPERS;
@@ -951,7 +962,9 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName)
             {
                 if (m_data.at(i).gameID == gameID)
                 {
-                    if (tableName == UtilityTableName::CATEGORIES)
+                    if (tableName == UtilityTableName::SERIES)
+                        m_data[i].series = utilityName;
+                    else if (tableName == UtilityTableName::CATEGORIES)
                         m_data[i].categories = utilityName;
                     else if (tableName == UtilityTableName::DEVELOPPERS)
                         m_data[i].developpers = utilityName;
@@ -1011,7 +1024,9 @@ void TableModelGame::queryUtilityField(UtilityTableName tableName, long long int
             if (m_query.next())
                 utilityName = m_query.value(1).toString();
 
-            if (tableName == UtilityTableName::CATEGORIES)
+            if (tableName == UtilityTableName::SERIES)
+                m_data[pos].series = utilityName;
+            else if (tableName == UtilityTableName::CATEGORIES)
                 m_data[pos].categories = utilityName;
             else if (tableName == UtilityTableName::DEVELOPPERS)
                 m_data[pos].developpers = utilityName;
@@ -1040,6 +1055,18 @@ int TableModelGame::findGamePos(long long int gameID) const
         if (m_data.at(i).gameID == gameID)
             return i;
     return -1;
+}
+
+void TableModelGame::querySeriesField()
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES);
+}
+
+void TableModelGame::querySeriesField(long long int gameID)
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES, gameID);
 }
 
 void TableModelGame::queryCategoriesField()
@@ -1120,12 +1147,12 @@ void TableModelGame::querySensitiveContentField()
             .arg(m_tableName);
 
     // Sorting order
-    if (m_sortingColumnID == 0)
+    if (m_sortingColumnID == Game::NAME)
     {
         statement = statement.arg(m_tableName).arg("Name");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Game::RATE)
     {
         statement = statement.arg(m_tableName).arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
@@ -1576,17 +1603,19 @@ void TableModelGame::sortUtility(int column)
     auto sortTemplate =
         [column, compareString, compareSens] (const GameItem& item1, const GameItem& item2) -> bool
         {
-            if (column == 1)
+            if (column == Game::SERIES)
+                return compareString(item1.series, item2.series);
+            else if (column == Game::CATEGORIES)
                 return compareString(item1.categories, item2.categories);
-            else if (column == 2)
+            else if (column == Game::DEVELOPPERS)
                 return compareString(item1.developpers, item2.developpers);
-            else if (column == 3)
+            else if (column == Game::PUBLISHERS)
                 return compareString(item1.publishers, item2.publishers);
-            else if (column == 4)
+            else if (column == Game::PLATFORMS)
                 return compareString(item1.platform, item2.platform);
-            else if (column == 5)
+            else if (column == Game::SERVICES)
                 return compareString(item1.services, item2.services);
-            else if (column == 6)
+            else if (column == Game::SENSITIVE_CONTENT)
                 return compareSens(item1.sensitiveContent, item2.sensitiveContent);
             return false;
         };

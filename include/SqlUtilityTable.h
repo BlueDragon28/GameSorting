@@ -54,6 +54,7 @@ private:
 	// Games
 	void createGameTables();
 	void destroyGameTables();
+	void createSeriesTable();
 	void createCategoriesTable();
 	void createDeveloppersTable();
 	void createPublishersTable();

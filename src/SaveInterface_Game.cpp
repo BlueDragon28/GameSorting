@@ -28,6 +28,8 @@
 #include <iostream>
 #include <cstring>
 
+bool SaveInterface::m_isLegacy = false;
+
 bool SaveInterface::saveGame(const QString& filePath, const QVariant& variant)
 {
     // Retrieving the data from the QVariant.
@@ -83,10 +85,17 @@ bool SaveInterface::openGame(QDataStream* in, QVariant& variant)
     int fileVersion;
     *in >> fileVersion;
     // Checking if the version of the file is a valid version.
-    if (fileVersion >= GLD_VERSION && fileVersion < GLD_VERSION_MAX_SUPPORT)
+    if (fileVersion >= GLD_LEGACY_VERSION && fileVersion < GLD_VERSION_MAX_SUPPORT)
     {
         if (in->atEnd())
             return false;
+
+        // Check if it's a legacy gld file.
+        if (fileVersion >= GLD_LEGACY_VERSION && fileVersion < GLD_LEGACY_MAX_SUPPORT)
+            m_isLegacy = true;
+        else
+            m_isLegacy = false;
+        
         // Reading the data.
         Game::SaveData data = {};
         *in >> data;
@@ -114,9 +123,14 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveUtilityData& data)
     // Writing the Item SQL Utility data.
     // Categories
     // Writing the number of rows.
-    long long int count = data.categories.size();
+    long long int count = data.series.size();
     out << count;
     // Then writing each row.
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
+    count = data.categories.size();
+    out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
     
@@ -153,10 +167,21 @@ QDataStream& operator>>(QDataStream& in, Game::SaveUtilityData& data)
     // Categories
     // Reading the number of rows.
     long long int count;
+    if (!SaveInterface::isLegacy())
+    {
+        in >> count;
+        if (count > 0)
+        {
+            // Then, reading each row.
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
+    }
+
     in >> count;
     if (count > 0)
     {
-        // Then, reading each row.
         data.categories.resize(count);
         for (long long int i = 0; i < count; i++)
             in >> data.categories[i];
@@ -204,8 +229,14 @@ QDataStream& operator>>(QDataStream& in, Game::SaveUtilityData& data)
 QDataStream& operator<<(QDataStream& out, const Game::SaveUtilityInterfaceData& data)
 {
     // Writing the game list utility interface data.
+    // Series
+    long long int count = data.series.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
     // Categories
-    long long int count = data.categories.size();
+    count = data.categories.size();
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
@@ -246,8 +277,20 @@ QDataStream& operator<<(QDataStream& out, const Game::SaveUtilityInterfaceData& 
 QDataStream& operator>>(QDataStream& in, Game::SaveUtilityInterfaceData& data)
 {
     // Reading the game list utility interface data from the data stream.
-    // Categories
+    // Series
     long long int count;
+    if (!SaveInterface::isLegacy())
+    {
+        in >> count;
+        if (count > 0)
+        {
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
+    }
+
+    // Categories
     in >> count;
     if (count > 0)
     {
@@ -467,6 +510,7 @@ QDataStream& operator<<(QDataStream& out, const Game::ColumnsSize& data)
 {
     // Writing the size of the columns of the table view.
     out << data.name;
+    out << data.series;
     out << data.categories;
     out << data.developpers;
     out << data.publishers;
@@ -482,6 +526,10 @@ QDataStream& operator>>(QDataStream& in, Game::ColumnsSize& data)
 {
     // Reading the size of the columns of the table view.
     in >> data.name;
+    if (!SaveInterface::isLegacy())
+        in >> data.series;
+    else
+        data.series = 140;
     in >> data.categories;
     in >> data.developpers;
     in >> data.publishers;

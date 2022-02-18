@@ -32,8 +32,10 @@
 
 // Type identifier and version of a GLD file.
 #define GLD_IDENTIFIER "GLD"
-#define GLD_VERSION (int)(500)
-#define GLD_VERSION_MAX_SUPPORT (int)(600)
+#define GLD_LEGACY_VERSION (int)(500)
+#define GLD_LEGACY_MAX_SUPPORT (int)(600)
+#define GLD_VERSION (int)(600)
+#define GLD_VERSION_MAX_SUPPORT (int)(700)
 
 #define MLD_IDENTIFIER "MLD"
 #define MLD_VERSION (int)(100)
@@ -55,6 +57,8 @@ public:
     static bool save(const QString& filePath, const QVariant& data);
     static bool open(const QString& filePath, QVariant& data);
 
+    static bool isLegacy();
+
 private:
     static bool saveGame(const QString& filePath, const QVariant& data);
     static bool openGame(QDataStream* in, QVariant& data);
@@ -67,6 +71,8 @@ private:
 
     static bool saveBooksList(const QString& filePath, const QVariant& data);
     static bool openBooksList(QDataStream* in, QVariant& data);
+
+    static bool m_isLegacy;
 };
 
 // ItemUtilityData QDataStream operators
