@@ -42,6 +42,8 @@ QString TableModelMovies_UtilityInterface::tableName(UtilityTableName tableName)
     // Return the table name of a specific utility
     switch (tableName)
     {
+    case UtilityTableName::SERIES:
+        return m_parentTableName + "_Series";
     case UtilityTableName::CATEGORIES:
         return m_parentTableName + "_Categories";
     case UtilityTableName::DIRECTOR:
@@ -68,33 +70,36 @@ void TableModelMovies_UtilityInterface::newParentName(const QString& newParentNa
         return;
     
     // Storing the current table name into variable.
+    QString serCurName = tableName(UtilityTableName::SERIES);
     QString catCurName = tableName(UtilityTableName::CATEGORIES);
     QString dirCurName = tableName(UtilityTableName::DIRECTOR);
     QString actCurName = tableName(UtilityTableName::ACTORS);
     QString proCurName = tableName(UtilityTableName::PRODUCTION);
     QString musCurName = tableName(UtilityTableName::MUSIC);
-    QString serCurName = tableName(UtilityTableName::SERVICES);
+    QString servCurName = tableName(UtilityTableName::SERVICES);
     QString sensCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Changing the parent table name to the new parent name.
     m_parentTableName = newParentName;
 
     // Get the new table name.
+    QString serNewName = tableName(UtilityTableName::SERIES);
     QString catNewName = tableName(UtilityTableName::CATEGORIES);
     QString dirNewName = tableName(UtilityTableName::DIRECTOR);
     QString actNewName = tableName(UtilityTableName::ACTORS);
     QString proNewName = tableName(UtilityTableName::PRODUCTION);
     QString musNewName = tableName(UtilityTableName::MUSIC);
-    QString serNewName = tableName(UtilityTableName::SERVICES);
+    QString servNewName = tableName(UtilityTableName::SERVICES);
     QString sensNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Renaming the tables
+    renameTable(serCurName, serNewName);
     renameTable(catCurName, catNewName);
     renameTable(dirCurName, dirNewName);
     renameTable(actCurName, actNewName);
     renameTable(proCurName, proNewName);
     renameTable(musCurName, musNewName);
-    renameTable(serCurName, serNewName);
+    renameTable(servCurName, servNewName);
     renameTable(sensCurName, sensNewName);
 }
 
@@ -112,8 +117,9 @@ void TableModelMovies_UtilityInterface::rowRemoved(const QList<long long int>& m
         idList += QString::number(moviesID.at(i));
     }
 
-    UtilityTableName tablesName[7] =
+    UtilityTableName tablesName[9] =
     {
+        UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::DIRECTOR,
         UtilityTableName::ACTORS,
@@ -123,7 +129,7 @@ void TableModelMovies_UtilityInterface::rowRemoved(const QList<long long int>& m
         UtilityTableName::SENSITIVE_CONTENT
     };
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
         QString statement = QString(
             "DELETE FROM \"%1\"\n"
@@ -266,8 +272,9 @@ QVariant TableModelMovies_UtilityInterface::data() const
         "ORDER BY\n"
         "   ItemID;");
     
-    UtilityTableName tablesName[6] =
+    UtilityTableName tablesName[7] =
     {
+        UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::DIRECTOR,
         UtilityTableName::ACTORS,
@@ -277,7 +284,7 @@ QVariant TableModelMovies_UtilityInterface::data() const
     };
 
     // Utility interface (Categories, Director, Actors, Production, Music, Services).
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
 #ifndef NDEBUG
         std::cout << statement.arg(tableName(tablesName[i])).toLocal8Bit().constData() << std::endl << std::endl;
@@ -297,7 +304,9 @@ QVariant TableModelMovies_UtilityInterface::data() const
             Game::SaveUtilityInterfaceItem item = {};
             item.gameID = query.value(0).toLongLong();
             item.utilityID = query.value(1).toLongLong();
-            if (tablesName[i] == UtilityTableName::CATEGORIES)
+            if (tablesName[i] == UtilityTableName::SERIES)
+                data.series.append(item);
+            else if (tablesName[i] == UtilityTableName::CATEGORIES)
                 data.categories.append(item);
             else if (tablesName[i] == UtilityTableName::DIRECTOR)
                 data.directors.append(item);
@@ -362,8 +371,9 @@ bool TableModelMovies_UtilityInterface::setData(const QVariant& variant)
     
     Movie::SaveUtilityInterfaceData data = qvariant_cast<Movie::SaveUtilityInterfaceData>(variant);
 
-    UtilityTableName tablesName[6] =
+    UtilityTableName tablesName[7] =
     {
+        UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::DIRECTOR,
         UtilityTableName::ACTORS,
@@ -377,10 +387,12 @@ bool TableModelMovies_UtilityInterface::setData(const QVariant& variant)
         "INSERT INTO \"%1\" (ItemID, UtilityID)\n"
         "VALUES");
     
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
         QList<Game::SaveUtilityInterfaceItem>* pItem;
-        if (tablesName[i] == UtilityTableName::CATEGORIES)
+        if (tablesName[i] == UtilityTableName::SERIES)
+            pItem = &data.series;
+        else if (tablesName[i] == UtilityTableName::CATEGORIES)
             pItem = &data.categories;
         else if (tablesName[i] == UtilityTableName::DIRECTOR)
             pItem = &data.directors;
@@ -479,8 +491,9 @@ void TableModelMovies_UtilityInterface::createTables()
         "   ItemID INTEGER,\n"
         "   UtilityID INTEGER);");
 
-    UtilityTableName tablesName[6] =
+    UtilityTableName tablesName[7] =
     {
+        UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::DIRECTOR,
         UtilityTableName::ACTORS,
@@ -489,7 +502,7 @@ void TableModelMovies_UtilityInterface::createTables()
         UtilityTableName::SERVICES
     };
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
 #ifndef NDEBUG
         std::cout << statement.arg(tableName(tablesName[i])).toLocal8Bit().constData() << std::endl << std::endl;
@@ -539,6 +552,7 @@ void TableModelMovies_UtilityInterface::createTables()
 
 void TableModelMovies_UtilityInterface::destroyTables()
 {
+    destroyTableByName(tableName(UtilityTableName::SERIES));
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::DIRECTOR));
     destroyTableByName(tableName(UtilityTableName::ACTORS));
