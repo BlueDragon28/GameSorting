@@ -72,6 +72,8 @@ private:
 
     void queryUtilityField(UtilityTableName tableName);
     void queryUtilityField(UtilityTableName tableName, long long int gameID);
+    void querySeriesField();
+    void querySeriesField(long long int gameID);
     void queryCategoriesField();
     void queryCategoriesField(long long int gameID);
     void queryDeveloppersField();
