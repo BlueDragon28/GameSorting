@@ -426,6 +426,8 @@ void TabAndList::saveAs()
             listType = "Movies";
         else if (m_listType == ListType::COMMONLIST)
             listType = "Common";
+        else if (m_listType == ListType::BOOKSLIST)
+            listType = "Books";
 
         QString filePath = QFileDialog::getSaveFileName(
             this,
