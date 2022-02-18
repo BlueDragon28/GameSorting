@@ -85,6 +85,7 @@ void FilterDialog::createWidget()
             {
                 "None",
                 "Name",
+                "Series",
                 "Categories",
                 "Directors",
                 "Actors",
@@ -258,23 +259,25 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex >= 2 && m_lastIndex <= 7)
+        else if (m_lastIndex >= 2 && m_lastIndex <= 8)
         {
             if (!m_utilityView || !m_utilityModel)
                 reject();
 
             int columnID;
             if (m_lastIndex == 2)
-                columnID = Movie::CATEGORIES;
+                columnID = Movie::SERIES;
             else if (m_lastIndex == 3)
-                columnID = Movie::DIRECTORS;
+                columnID = Movie::CATEGORIES;
             else if (m_lastIndex == 4)
-                columnID = Movie::ACTORS;
+                columnID = Movie::DIRECTORS;
             else if (m_lastIndex == 5)
-                columnID = Movie::PRODUCTIONS;
+                columnID = Movie::ACTORS;
             else if (m_lastIndex == 6)
-                columnID = Movie::MUSIC;
+                columnID = Movie::PRODUCTIONS;
             else if (m_lastIndex == 7)
+                columnID = Movie::MUSIC;
+            else if (m_lastIndex == 8)
                 columnID = Movie::SERVICES;
             
             ListFilter filter = {};
@@ -283,7 +286,7 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex == 8)
+        else if (m_lastIndex == 9)
         {
             ListFilter filter = {};
             filter.column = Movie::RATE;
@@ -469,20 +472,22 @@ void FilterDialog::comboBoxChanged(int index)
             m_stackedLayout->setCurrentIndex(1);
             m_nameText->clear();
         }
-        else if (index >= 2 && index <= 7)
+        else if (index >= 2 && index <= 8)
         {
             UtilityTableName tableName;
             if (index == 2)
-                tableName = UtilityTableName::CATEGORIES;
+                tableName = UtilityTableName::SERIES;
             else if (index == 3)
-                tableName = UtilityTableName::DIRECTOR;
+                tableName = UtilityTableName::CATEGORIES;
             else if (index == 4)
-                tableName = UtilityTableName::ACTORS;
+                tableName = UtilityTableName::DIRECTOR;
             else if (index == 5)
-                tableName = UtilityTableName::PRODUCTION;
+                tableName = UtilityTableName::ACTORS;
             else if (index == 6)
-                tableName = UtilityTableName::MUSIC;
+                tableName = UtilityTableName::PRODUCTION;
             else if (index == 7)
+                tableName = UtilityTableName::MUSIC;
+            else if (index == 8)
                 tableName = UtilityTableName::SERVICES;
 
             m_utilityModel = new UtilityInterfaceEditorModel(
