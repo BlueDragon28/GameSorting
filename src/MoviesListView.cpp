@@ -227,6 +227,7 @@ QVariant MoviesListView::listData() const
             // Retrieve the size of the column.
             Movie::SaveDataTable data = qvariant_cast<Movie::SaveDataTable>(variant);
             data.viewColumnsSize.name = m_view->columnWidth(Movie::NAME);
+            data.viewColumnsSize.series = m_view->columnWidth(Movie::SERIES);
             data.viewColumnsSize.categories = m_view->columnWidth(Movie::CATEGORIES);
             data.viewColumnsSize.directors = m_view->columnWidth(Movie::DIRECTORS);
             data.viewColumnsSize.actors = m_view->columnWidth(Movie::ACTORS);
@@ -259,6 +260,7 @@ void MoviesListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
         {
             Movie::SaveDataTable data = qvariant_cast<Movie::SaveDataTable>(variant);
             m_view->setColumnWidth(Movie::NAME, data.viewColumnsSize.name);
+            m_view->setColumnWidth(Movie::SERIES, data.viewColumnsSize.series);
             m_view->setColumnWidth(Movie::CATEGORIES, data.viewColumnsSize.categories);
             m_view->setColumnWidth(Movie::DIRECTORS, data.viewColumnsSize.directors);
             m_view->setColumnWidth(Movie::ACTORS, data.viewColumnsSize.actors);

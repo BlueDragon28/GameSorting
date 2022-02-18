@@ -22,8 +22,8 @@
 #include <iostream>
 #include <algorithm>
 
-#define MOVIES_TABLE_COLUMN_COUNT 9
-#define NUMBER_MOVIES_TABLE_COLUMN_COUNT 8
+#define MOVIES_TABLE_COLUMN_COUNT 10
+#define NUMBER_MOVIES_TABLE_COLUMN_COUNT 9
 
 template<typename T>
 bool TableModelMovies::updateField(const QString& columnName, int rowNB, T value)
@@ -146,6 +146,8 @@ QVariant TableModelMovies::data(const QModelIndex& index, int role) const
             {
             case Movie::NAME:
                 return m_data.at(index.row()).name;
+            case Movie::SERIES:
+                return m_data.at(index.row()).series;
             case Movie::CATEGORIES:
                 return m_data.at(index.row()).categories;
             case Movie::DIRECTORS:
@@ -425,6 +427,8 @@ QVariant TableModelMovies::headerData(int section, Qt::Orientation orientation, 
         {
         case Movie::NAME:
             return "Name";
+        case Movie::SERIES:
+            return "Series";
         case Movie::CATEGORIES:
             return "Categories";
         case Movie::DIRECTORS:
@@ -537,11 +541,13 @@ void TableModelMovies::updateQuery()
             .arg(m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Movie::CATEGORIES &&
+    else if (m_listFilter.column >= Movie::SERIES &&
         m_listFilter.column <= Movie::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Movie::CATEGORIES)
+        if (m_listFilter.column == Movie::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Movie::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Movie::DIRECTORS)
             tName = UtilityTableName::DIRECTOR;
@@ -606,6 +612,7 @@ void TableModelMovies::updateQuery()
         if (size() > 0)
         {
             // Quering the util table and set it into the specifics rows.
+            querySeriesField();
             queryCategoriesField();
             queryDirectorsField();
             queryActorsField();
@@ -614,7 +621,7 @@ void TableModelMovies::updateQuery()
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID > 0 && m_sortingColumnID < 8)
+            if (m_sortingColumnID >= Movie::SERIES && m_sortingColumnID <= Movie::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
             
             beginInsertRows(QModelIndex(), 0, size()-1);
@@ -817,7 +824,9 @@ void TableModelMovies::utilityChanged(long long int movieID, UtilityTableName ta
     // This member function is called when the utility interface is changed.
     if (movieID >= 0 && size() > 0 && m_isTableCreated)
     {
-        if (tableName == UtilityTableName::CATEGORIES)
+        if (tableName == UtilityTableName::SERIES)
+            querySeriesField();
+        else if (tableName == UtilityTableName::CATEGORIES)
             queryCategoriesField();
         else if (tableName == UtilityTableName::DIRECTOR)
             queryDirectorsField();
@@ -880,11 +889,13 @@ void TableModelMovies::queryUtilityField(UtilityTableName tableName)
                 .arg(m_tableName, m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Movie::CATEGORIES &&
+    else if (m_listFilter.column >= Movie::SERIES &&
         m_listFilter.column <= Movie::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Movie::CATEGORIES)
+        if (m_listFilter.column == Movie::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Movie::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Movie::DIRECTORS)
             tName = UtilityTableName::DIRECTOR;
@@ -939,7 +950,9 @@ void TableModelMovies::queryUtilityField(UtilityTableName tableName)
             {
                 if (m_data.at(i).movieID == movieID)
                 {
-                    if (tableName == UtilityTableName::CATEGORIES)
+                    if (tableName == UtilityTableName::SERIES)
+                        m_data[i].series = utilityName;
+                    else if (tableName == UtilityTableName::CATEGORIES)
                         m_data[i].categories = utilityName;
                     else if (tableName == UtilityTableName::DIRECTOR)
                         m_data[i].directors = utilityName;
@@ -1000,7 +1013,9 @@ void TableModelMovies::queryUtilityField(UtilityTableName tableName, long long i
             if (m_query.next())
                 utilityName = m_query.value(1).toString();
             
-            if (tableName == UtilityTableName::CATEGORIES)
+            if (tableName == UtilityTableName::SERIES)
+                m_data[pos].series = utilityName;
+            else if (tableName == UtilityTableName::CATEGORIES)
                 m_data[pos].categories = utilityName;
             else if (tableName == UtilityTableName::DIRECTOR)
                 m_data[pos].directors = utilityName;
@@ -1029,6 +1044,18 @@ int TableModelMovies::findMoviePos(long long int movieID) const
         if (m_data.at(i).movieID == movieID)
             return i;
     return -1;
+}
+
+void TableModelMovies::querySeriesField()
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES);
+}
+
+void TableModelMovies::querySeriesField(long long int movieID)
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES, movieID);
 }
 
 void TableModelMovies::queryCategoriesField()
@@ -1121,12 +1148,12 @@ void TableModelMovies::querySensitiveContentField()
             .arg(m_tableName);
 
     // Sorting order
-    if (m_sortingColumnID == 0)
+    if (m_sortingColumnID == Movie::NAME)
     {
         statement = statement.arg(m_tableName).arg("Name");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == 7)
+    else if (m_sortingColumnID == Movie::RATE)
     {
         statement = statement.arg(m_tableName).arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
@@ -1575,7 +1602,9 @@ void TableModelMovies::sortUtility(int column)
     auto sortTemplate =
         [column, compareUtil, compareSens] (const MovieItem& item1, const MovieItem& item2) -> bool
         {
-            if (column == Movie::CATEGORIES)
+            if (column == Movie::SERIES)
+                return compareUtil(item1.series, item2.series);
+            else if (column == Movie::CATEGORIES)
                 return compareUtil(item1.categories, item2.categories);
             else if (column == Movie::DIRECTORS)
                 return compareUtil(item1.directors, item2.directors);

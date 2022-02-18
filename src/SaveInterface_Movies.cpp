@@ -81,10 +81,16 @@ bool SaveInterface::openMovies(QDataStream* in, QVariant& variant)
     // Version
     int fileVersion;
     *in >> fileVersion;
-    if (fileVersion >= MLD_VERSION && fileVersion < MLD_VERSION_MAX_SUPPORT)
+    if (fileVersion >= MLD_LEGACY_VERSION && fileVersion < MLD_VERSION_MAX_SUPPORT)
     {
         if (in->atEnd())
             return false;
+
+        // Check if it's a legacy MLD file.
+        if (fileVersion >= MLD_LEGACY_VERSION && fileVersion < MLD_LEGACY_MAX_SUPPORT)
+            m_isLegacy = true;
+        else
+            m_isLegacy = false;
         
         // Data.
         Movie::SaveData data = {};
@@ -109,7 +115,12 @@ bool SaveInterface::openMovies(QDataStream* in, QVariant& variant)
 QDataStream& operator<<(QDataStream& out, const Movie::SaveUtilityData& data)
 {
     // Writing the SQL Utility data to the data stream.
-    long long int count = data.categories.size();
+    long long int count = data.series.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
+    count = data.categories.size();
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
@@ -146,6 +157,17 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityData& data)
 {
     // Reading the SQL Utility data from the data stream.
     long long int count;
+    if (!SaveInterface::isLegacy())
+    {
+        in >> count;
+        if (count > 0)
+        {
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
+    }
+
     in >> count;
     if (count > 0)
     {
@@ -200,7 +222,12 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityData& data)
 QDataStream& operator<<(QDataStream& out, const Movie::SaveUtilityInterfaceData& data)
 {
     // Writing the movies list utility interface data.
-    long long int count = data.categories.size();
+    long long int count = data.series.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
+    count = data.categories.size();
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
@@ -242,6 +269,17 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityInterfaceData& data)
 {
     // Reading the movies list utility interface data.
     long long int count;
+    if (!SaveInterface::isLegacy())
+    {
+        in >> count;
+        if (count > 0)
+        {
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
+    }
+
     in >> count;
     if (count > 0)
     {
@@ -397,6 +435,7 @@ QDataStream& operator<<(QDataStream& out, const Movie::ColumnsSize& data)
 {
     // Writing the size of the columns of the table view.
     out << data.name;
+    out << data.series;
     out << data.categories;
     out << data.directors;
     out << data.actors;
@@ -412,6 +451,10 @@ QDataStream& operator>>(QDataStream& in, Movie::ColumnsSize& data)
 {
     // Reading the size of the columns of the table view.
     in >> data.name;
+    if (!SaveInterface::isLegacy())
+        in >> data.series;
+    else
+        data.series = 140;
     in >> data.categories;
     in >> data.directors;
     in >> data.actors;

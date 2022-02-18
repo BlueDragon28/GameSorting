@@ -38,8 +38,10 @@
 #define GLD_VERSION_MAX_SUPPORT (int)(700)
 
 #define MLD_IDENTIFIER "MLD"
-#define MLD_VERSION (int)(100)
-#define MLD_VERSION_MAX_SUPPORT (int) (600)
+#define MLD_LEGACY_VERSION (int)(100)
+#define MLD_LEGACY_MAX_SUPPORT (int)(600)
+#define MLD_VERSION (int)(600)
+#define MLD_VERSION_MAX_SUPPORT (int) (700)
 
 #define CLD_IDENTIFIER "CLD"
 #define CLD_VERSION (int)(100)

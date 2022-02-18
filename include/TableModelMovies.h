@@ -72,6 +72,8 @@ private:
 
     void queryUtilityField(UtilityTableName tableName);
     void queryUtilityField(UtilityTableName tableName, long long int movieID);
+    void querySeriesField();
+    void querySeriesField(long long int movieID);
     void queryCategoriesField();
     void queryCategoriesField(long long int movieID);
     void queryDirectorsField();
