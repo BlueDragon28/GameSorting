@@ -1175,7 +1175,7 @@ QString TableModelBooks::url(const QModelIndex& index) const
 void TableModelBooks::setUrl(const QModelIndex& index, const QString& url)
 {
     // Set the url of the book item.
-    if (index.isValid() && index.row() > 0 && index.row() < size())
+    if (index.isValid() && index.row() >= 0 && index.row() < size())
     {
         long long int bookID = m_data.at(index.row()).bookID;
 
