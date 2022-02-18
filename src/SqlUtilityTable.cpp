@@ -77,6 +77,8 @@ QString SqlUtilityTable::tableName(UtilityTableName tableName)
 		return "Music";
 	case UtilityTableName::AUTHORS:
 		return "Authors";
+	case UtilityTableName::SERIES:
+		return "Series";
 	default:
 		return QString();
 	}
