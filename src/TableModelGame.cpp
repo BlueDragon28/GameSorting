@@ -628,7 +628,7 @@ void TableModelGame::updateQuery()
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID > 0 && m_sortingColumnID < 7)
+            if (m_sortingColumnID >= Game::SERIES && m_sortingColumnID <= Game::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
