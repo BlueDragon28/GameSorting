@@ -1221,7 +1221,7 @@ QString TableModelGame::url(const QModelIndex& index) const
 void TableModelGame::setUrl(const QModelIndex& index, const QString& url)
 {
     // Set the url of a game.
-    if (index.isValid() && index.row() > 0 && index.row() < size())
+    if (index.isValid() && index.row() >= 0 && index.row() < size())
     {
         long long int gameID = m_data.at(index.row()).gameID;
 
