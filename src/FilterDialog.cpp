@@ -232,7 +232,7 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex == 7)
+        else if (m_lastIndex == 8)
         {
             ListFilter filter = {};
             filter.column = Game::RATE;
