@@ -85,6 +85,12 @@ bool SaveInterface::openMovies(QDataStream* in, QVariant& variant)
     {
         if (in->atEnd())
             return false;
+
+        // Check if it's a legacy MLD file.
+        if (fileVersion >= MLD_LEGACY_VERSION && fileVersion < MLD_LEGACY_MAX_SUPPORT)
+            m_isLegacy = true;
+        else
+            m_isLegacy = false;
         
         // Data.
         Movie::SaveData data = {};
@@ -151,12 +157,15 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityData& data)
 {
     // Reading the SQL Utility data from the data stream.
     long long int count;
-    in >> count;
-    if (count > 0)
+    if (!SaveInterface::isLegacy())
     {
-        data.series.resize(count);
-        for (long long int i = 0; i < count; i++)
-            in >> data.series[i];
+        in >> count;
+        if (count > 0)
+        {
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
     }
 
     in >> count;
@@ -260,12 +269,15 @@ QDataStream& operator>>(QDataStream& in, Movie::SaveUtilityInterfaceData& data)
 {
     // Reading the movies list utility interface data.
     long long int count;
-    in >> count;
-    if (count > 0)
+    if (!SaveInterface::isLegacy())
     {
-        data.series.resize(count);
-        for (long long int i = 0; i < count; i++)
-            in >> data.series[i];
+        in >> count;
+        if (count > 0)
+        {
+            data.series.resize(count);
+            for (long long int i = 0; i < count; i++)
+                in >> data.series[i];
+        }
     }
 
     in >> count;
@@ -439,7 +451,10 @@ QDataStream& operator>>(QDataStream& in, Movie::ColumnsSize& data)
 {
     // Reading the size of the columns of the table view.
     in >> data.name;
-    in >> data.series;
+    if (!SaveInterface::isLegacy())
+        in >> data.series;
+    else
+        data.series = 140;
     in >> data.categories;
     in >> data.directors;
     in >> data.actors;
