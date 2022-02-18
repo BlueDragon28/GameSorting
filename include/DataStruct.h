@@ -77,6 +77,7 @@ struct MovieItem
     long long int movieID;
     long long int moviePos;
     QString name;
+    QString series;
     QString categories;
     QString directors;
     QString actors;
@@ -237,18 +238,20 @@ namespace Movie
     enum ColumnIndex
     {
         NAME = 0,
-        CATEGORIES = 1,
-        DIRECTORS = 2,
-        ACTORS = 3,
-        PRODUCTIONS = 4,
-        MUSIC = 5,
-        SERVICES = 6,
-        SENSITIVE_CONTENT = 7,
-        RATE = 8
+        SERIES = 1,
+        CATEGORIES = 2,
+        DIRECTORS = 3,
+        ACTORS = 4,
+        PRODUCTIONS = 5,
+        MUSIC = 6,
+        SERVICES = 7,
+        SENSITIVE_CONTENT = 8,
+        RATE = 9
     };
 
     struct SaveUtilityData
     {
+        QList<ItemUtilityData> series;
         QList<ItemUtilityData> categories;
         QList<ItemUtilityData> directors;
         QList<ItemUtilityData> actors;
@@ -259,6 +262,7 @@ namespace Movie
 
     struct SaveUtilityInterfaceData
     {
+        QList<Game::SaveUtilityInterfaceItem> series;
         QList<Game::SaveUtilityInterfaceItem> categories;
         QList<Game::SaveUtilityInterfaceItem> directors;
         QList<Game::SaveUtilityInterfaceItem> actors;
@@ -271,6 +275,7 @@ namespace Movie
     struct ColumnsSize
     {
         int name;
+        int series;
         int categories;
         int directors;
         int actors;
