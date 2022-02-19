@@ -100,6 +100,7 @@ void FilterDialog::createWidget()
         comboBox->addItems(
             {
                 "None",
+                "Series",
                 "Name",
                 "Categories",
                 "Authors",
@@ -312,15 +313,17 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex >= 2 && m_lastIndex <= 3)
+        else if (m_lastIndex >= 2 && m_lastIndex <= 4)
         {
             if (!m_utilityView || m_lastIndex <= 7)
                 reject();
             
             int columnID;
             if (m_lastIndex == 2)
-                columnID = Common::CATEGORIES;
+                columnID = Common::SERIES;
             else if (m_lastIndex == 3)
+                columnID = Common::CATEGORIES;
+            else if (m_lastIndex == 4)
                 columnID = Common::AUTHORS;
             
             ListFilter filter = {};
@@ -329,7 +332,7 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex == 4)
+        else if (m_lastIndex == 5)
         {
             ListFilter filter = {};
             filter.column = Common::RATE;
@@ -524,12 +527,14 @@ void FilterDialog::comboBoxChanged(int index)
             m_stackedLayout->setCurrentIndex(1);
             m_nameText->clear();
         }
-        else if (index >= 2 && index <= 3)
+        else if (index >= 2 && index <= 4)
         {
             UtilityTableName tableName;
             if (index == 2)
-                tableName = UtilityTableName::CATEGORIES;
+                tableName == UtilityTableName::SERIES;
             else if (index == 3)
+                tableName = UtilityTableName::CATEGORIES;
+            else if (index == 4)
                 tableName = UtilityTableName::AUTHORS;
             
             m_utilityModel = new UtilityInterfaceEditorModel(
