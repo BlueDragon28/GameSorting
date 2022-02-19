@@ -23,12 +23,14 @@
 void SqlUtilityTable::createCommonTables()
 {
     // Creating all the Common utility table.
+    createSeriesTable();
     createCategoriesTable();
     createAuthorsTables();
 }
 
 void SqlUtilityTable::destroyCommonTables()
 {
+    destroyTableByName(tableName(UtilityTableName::SERIES));
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::AUTHORS));
 }
@@ -41,6 +43,7 @@ void SqlUtilityTable::createAuthorsTables()
 QVariant SqlUtilityTable::queryCommonsData() const
 {
     Common::SaveUtilityData data = {};
+    data.series = retrieveTableData(UtilityTableName::SERIES);
     data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
     data.authors = retrieveTableData(UtilityTableName::AUTHORS);
     return QVariant::fromValue(data);
@@ -50,7 +53,8 @@ bool SqlUtilityTable::setCommonsData(const QVariant& variant)
 {
     Common::SaveUtilityData data = qvariant_cast<Common::SaveUtilityData>(variant);
 
-    if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+    if (!setStandardData(UtilityTableName::SERIES, data.series) ||
+        !setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
         !setStandardData(UtilityTableName::AUTHORS, data.authors))
         return false;
     
