@@ -109,7 +109,12 @@ bool SaveInterface::openCommonList(QDataStream* in, QVariant& variant)
 QDataStream& operator<<(QDataStream& out, const Common::SaveUtilityData& data)
 {
     // Writing the SQL Utility data to the data stream.
-    long long int count = data.categories.size();
+    long long int count = data.series.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
+    count = data.categories.size();
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
@@ -126,6 +131,14 @@ QDataStream& operator>>(QDataStream& in, Common::SaveUtilityData& data)
 {
     // Reading the SQL Utility data from the data stream.
     long long int count;
+    in >> count;
+    if (count > 0)
+    {
+        data.series.resize(count);
+        for (long long int i = 0; i < count; i++)
+            in >> data.series[i];
+    }
+
     in >> count;
     if (count > 0)
     {
@@ -148,7 +161,12 @@ QDataStream& operator>>(QDataStream& in, Common::SaveUtilityData& data)
 QDataStream& operator<<(QDataStream& out, const Common::SaveUtilityInterfaceData& data)
 {
     // Wrinting the commons list utility interface data.
-    long long int count = data.categories.size();
+    long long int count = data.series.size();
+    out << count;
+    for (long long int i = 0; i < count; i++)
+        out << data.series.at(i);
+
+    count = data.categories.size();
     out << count;
     for (long long int i = 0; i < count; i++)
         out << data.categories.at(i);
@@ -170,6 +188,14 @@ QDataStream& operator>>(QDataStream& in, Common::SaveUtilityInterfaceData& data)
 {
     // Reading the commons list utility interface data.
     long long int count;
+    in >> count;
+    if (count > 0)
+    {
+        data.series.resize(count);
+        for (long long int i = 0; i < count; i++)
+            in >> data.series[i];
+    }
+
     in >> count;
     if (count > 0)
     {
@@ -292,6 +318,7 @@ QDataStream& operator<<(QDataStream& out, const Common::ColumnsSize& data)
 {
     // Writing the size of the columns of the table view.
     out << data.name;
+    out << data.series;
     out << data.categories;
     out << data.authors;
     out << data.sensitiveContent;
@@ -303,6 +330,7 @@ QDataStream& operator>>(QDataStream&  in, Common::ColumnsSize& data)
 {
     // Reading the size of the columns of the table view.
     in >> data.name;
+    in >> data.series;
     in >> data.categories;
     in >> data.authors;
     in >> data.sensitiveContent;
