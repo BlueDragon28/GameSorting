@@ -314,7 +314,7 @@ void FilterDialog::applyFilter()
         }
         else if (m_lastIndex >= 2 && m_lastIndex <= 3)
         {
-            if (!m_utilityView || m_lastIndex <= 7)
+            if (!m_utilityView || !m_utilityModel)
                 reject();
             
             int columnID;
