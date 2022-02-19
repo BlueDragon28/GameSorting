@@ -100,8 +100,8 @@ void FilterDialog::createWidget()
         comboBox->addItems(
             {
                 "None",
-                "Series",
                 "Name",
+                "Series",
                 "Categories",
                 "Authors",
                 "Rate"
