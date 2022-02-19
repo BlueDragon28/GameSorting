@@ -42,6 +42,8 @@ QString TableModelCommon_UtilityInterface::tableName(UtilityTableName tableName)
     // Return the table name of a specific utility.
     switch (tableName)
     {
+	case UtilityTableName::SERIES:
+		return m_parentTableName + "_Series";
     case UtilityTableName::CATEGORIES:
         return m_parentTableName + "_Categories";
     case UtilityTableName::AUTHORS:
@@ -60,6 +62,7 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
         return;
     
     // Storing the current table name into variables.
+	QString serCurName = tableName(UtilityTableName::SERIES);
     QString catCurName = tableName(UtilityTableName::CATEGORIES);
     QString autCurName = tableName(UtilityTableName::AUTHORS);
 	QString senCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
@@ -68,11 +71,13 @@ void TableModelCommon_UtilityInterface::newParentName(const QString& newParentNa
     m_parentTableName = newParentName;
 
     // Get the new table name.
+	QString serNewName = tableName(UtilityTableName::SERIES);
     QString catNewName = tableName(UtilityTableName::CATEGORIES);
     QString autNewName = tableName(UtilityTableName::AUTHORS);
 	QString senNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Renaming the tables
+	renameTable(serCurName, serNewName);
     renameTable(catCurName, catNewName);
     renameTable(autCurName, autNewName);
 	renameTable(senCurName, senNewName);
@@ -92,14 +97,15 @@ void TableModelCommon_UtilityInterface::rowRemoved(const QList<long long int>& c
         idList += QString::number(commonIDs.at(i));
     }
 
-    UtilityTableName tablesName[3] =
+    UtilityTableName tablesName[4] =
     {
+		UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::AUTHORS,
 		UtilityTableName::SENSITIVE_CONTENT
     };
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
         QString statement = QString(
             "DELETE FROM \"%1\"\n"
@@ -242,14 +248,15 @@ QVariant TableModelCommon_UtilityInterface::data() const
 		"ORDER BY\n"
 		"	ItemID;");
 	
-	UtilityTableName tablesName[2] =
+	UtilityTableName tablesName[3] =
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::AUTHORS
 	};
 
 	// Utility interface (Categories, Authors).
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		if (!query.exec(statement.arg(tableName(tablesName[i]))))
 			return QVariant();
@@ -259,6 +266,8 @@ QVariant TableModelCommon_UtilityInterface::data() const
 			Game::SaveUtilityInterfaceItem item = {};
 			item.gameID = query.value(0).toLongLong();
 			item.utilityID = query.value(1).toLongLong();
+			if (tablesName[i] == UtilityTableName::SERIES)
+				data.series.append(item);
 			if (tablesName[i] == UtilityTableName::CATEGORIES)
 				data.categories.append(item);
 			else if (tablesName[i] == UtilityTableName::AUTHORS)
@@ -306,8 +315,9 @@ bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
 	
 	Common::SaveUtilityInterfaceData data = qvariant_cast<Common::SaveUtilityInterfaceData>(variant);
 
-	UtilityTableName tablesName[2] = 
+	UtilityTableName tablesName[3] = 
 	{
+		UtilityTableName::SERIES,
 		UtilityTableName::CATEGORIES,
 		UtilityTableName::AUTHORS
 	};
@@ -317,10 +327,12 @@ bool TableModelCommon_UtilityInterface::setData(const QVariant& variant)
 		"INSERT INTO \"%1\" (ItemID, UtilityID)\n"
 		"VALUES");
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		QList<Game::SaveUtilityInterfaceItem>* pItem;
-		if (tablesName[i] == UtilityTableName::CATEGORIES)
+		if (tablesName[i] == UtilityTableName::SERIES)
+			pItem = &data.series;
+		else if (tablesName[i] == UtilityTableName::CATEGORIES)
 			pItem = &data.categories;
 		else if (tablesName[i] == UtilityTableName::AUTHORS)
 			pItem = &data.authors;
@@ -411,13 +423,14 @@ void TableModelCommon_UtilityInterface::createTables()
         "   UtilityID INTEGER);");
     
     // Create all the standard interface.
-    UtilityTableName tablesName[2] = 
+    UtilityTableName tablesName[3] = 
     {
+		UtilityTableName::SERIES,
         UtilityTableName::CATEGORIES,
         UtilityTableName::AUTHORS
     };
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         if (!m_query.exec(statement.arg(tableName(tablesName[i]))))
         {
@@ -464,6 +477,7 @@ void TableModelCommon_UtilityInterface::createTables()
 
 void TableModelCommon_UtilityInterface::destroyTables()
 {
+	destroyTableByName(tableName(UtilityTableName::SERIES));
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::AUTHORS));
 	destroyTableByName(tableName(UtilityTableName::SENSITIVE_CONTENT));
