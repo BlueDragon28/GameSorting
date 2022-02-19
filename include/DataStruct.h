@@ -94,6 +94,7 @@ struct CommonItem
     long long int commonID;
     long long int commonPos;
     QString name;
+    QString series;
     QString categories;
     QString authors;
     SensitiveContent sensitiveContent;
@@ -321,20 +322,23 @@ namespace Common
     enum ColumnIndex
     {
         NAME = 0,
-        CATEGORIES = 1,
-        AUTHORS = 2,
-        SENSITIVE_CONTENT = 3,
-        RATE = 4
+        SERIES = 1,
+        CATEGORIES = 2,
+        AUTHORS = 3,
+        SENSITIVE_CONTENT = 4,
+        RATE = 5
     };
 
     struct SaveUtilityData
     {
+        QList<ItemUtilityData> series;
         QList<ItemUtilityData> categories;
         QList<ItemUtilityData> authors;
     };
 
     struct SaveUtilityInterfaceData
     {
+        QList<Game::SaveUtilityInterfaceItem> series;
         QList<Game::SaveUtilityInterfaceItem> categories;
         QList<Game::SaveUtilityInterfaceItem> authors;
         QList<Game::SaveUtilitySensitiveContentItem> sensitiveContent;
@@ -343,6 +347,7 @@ namespace Common
     struct ColumnsSize
     {
         int name;
+        int series;
         int categories;
         int authors;
         int sensitiveContent;
