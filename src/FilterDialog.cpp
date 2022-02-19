@@ -531,7 +531,7 @@ void FilterDialog::comboBoxChanged(int index)
         {
             UtilityTableName tableName;
             if (index == 2)
-                tableName == UtilityTableName::SERIES;
+                tableName = UtilityTableName::SERIES;
             else if (index == 3)
                 tableName = UtilityTableName::CATEGORIES;
             else if (index == 4)
