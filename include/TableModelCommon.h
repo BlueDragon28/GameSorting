@@ -72,6 +72,8 @@ private:
 
     void queryUtilityField(UtilityTableName tableName);
     void queryUtilityField(UtilityTableName tableName, long long int commonID);
+    void querySeriesField();
+    void querySeriesField(long long int commonID);
     void queryCategoriesField();
     void queryCategoriesField(long long int commonID);
     void queryAuthorsField();

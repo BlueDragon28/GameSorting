@@ -22,8 +22,8 @@
 #include <iostream>
 #include <algorithm>
 
-#define COMMON_TABLE_COUNT 5
-#define NUMBER_COMMON_TABLE_COLUMN_COUNT 4
+#define COMMON_TABLE_COUNT 6
+#define NUMBER_COMMON_TABLE_COLUMN_COUNT 5
 
 template<typename T>
 bool TableModelCommon::updateField(const QString& columnName, int rowNB, T value)
@@ -150,6 +150,8 @@ QVariant TableModelCommon::data(const QModelIndex& index, int role) const
             {
             case Common::NAME:  
                 return m_data.at(index.row()).name;
+            case Common::SERIES:
+                return m_data.at(index.row()).series;
             case Common::CATEGORIES:
                 return m_data.at(index.row()).categories;
             case Common::AUTHORS:
@@ -425,6 +427,8 @@ QVariant TableModelCommon::headerData(int section, Qt::Orientation orientation, 
         {
         case Common::NAME:
             return "Name";
+        case Common::SERIES:
+            return "Series";
         case Common::CATEGORIES:
             return "Categories";
         case Common::AUTHORS:
@@ -533,11 +537,13 @@ void TableModelCommon::updateQuery()
             .arg(m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Common::CATEGORIES &&
+    else if (m_listFilter.column >= Common::SERIES &&
         m_listFilter.column <= Common::AUTHORS)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Common::CATEGORIES)
+        if (m_listFilter.column == Common::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Common::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Common::AUTHORS)
             tName = UtilityTableName::AUTHORS;
@@ -596,11 +602,12 @@ void TableModelCommon::updateQuery()
         if (size() > 0)
         {
             // Quering the util table and set it into the specifics rows.
+            querySeriesField();
             queryCategoriesField();
             queryAuthorsField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID >= Common::CATEGORIES && m_sortingColumnID <= Common::SENSITIVE_CONTENT)
+            if (m_sortingColumnID >= Common::SERIES && m_sortingColumnID <= Common::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
@@ -795,7 +802,9 @@ void TableModelCommon::utilityChanged(long long int commonID, UtilityTableName t
     // This member function is called when the utility interface if changed.
     if (commonID >= 0 && size() > 0 && m_isTableCreated)
     {
-        if (tableName == UtilityTableName::CATEGORIES)
+        if (tableName == UtilityTableName::SERIES)
+            querySeriesField(commonID);
+        else if (tableName == UtilityTableName::CATEGORIES)
             queryCategoriesField(commonID);
         else if (tableName == UtilityTableName::AUTHORS)
             queryAuthorsField(commonID);
@@ -850,10 +859,12 @@ void TableModelCommon::queryUtilityField(UtilityTableName tableName)
             .arg(m_tableName, m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Common::CATEGORIES &&
+    else if (m_listFilter.column >= Common::SERIES &&
         m_listFilter.column <= Common::AUTHORS)
     {
         UtilityTableName tName;
+        if (m_listFilter.column == Common::SERIES)
+            tName = UtilityTableName::SERIES;
         if (m_listFilter.column == Common::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Common::AUTHORS)
@@ -901,7 +912,9 @@ void TableModelCommon::queryUtilityField(UtilityTableName tableName)
             {
                 if (m_data.at(i).commonID == commonID)
                 {
-                    if (tableName == UtilityTableName::CATEGORIES)
+                    if (tableName == UtilityTableName::SERIES)
+                        m_data[i].series = utilityName;
+                    else if (tableName == UtilityTableName::CATEGORIES)
                         m_data[i].categories = utilityName;
                     else if (tableName == UtilityTableName::AUTHORS)
                         m_data[i].authors = utilityName;
@@ -955,7 +968,9 @@ void TableModelCommon::queryUtilityField(UtilityTableName tableName, long long i
             if (m_query.next())
                 utilityName = m_query.value(1).toString();
 
-            if (tableName == UtilityTableName::CATEGORIES)
+            if (tableName == UtilityTableName::SERIES)
+                m_data[pos].series = utilityName;
+            else if (tableName == UtilityTableName::CATEGORIES)
                 m_data[pos].categories = utilityName;
             else if (tableName == UtilityTableName::AUTHORS)
                 m_data[pos].authors = utilityName;
@@ -978,6 +993,18 @@ int TableModelCommon::findCommonPos(long long int commonID) const
         if (m_data.at(i).commonID == commonID)
             return i;
     return -1;
+}
+
+void TableModelCommon::querySeriesField()
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES);
+}
+
+void TableModelCommon::querySeriesField(long long int commonID)
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES, commonID);
 }
 
 void TableModelCommon::queryCategoriesField()
@@ -1477,7 +1504,9 @@ void TableModelCommon::sortUtility(int column)
     auto sortTemplate =
         [column, compareString, compareSens] (const CommonItem& item1, const CommonItem& item2) -> bool
         {
-            if (column == Common::CATEGORIES)
+            if (column == Common::SERIES)
+                return compareString(item1.series, item2.series);
+            else if (column == Common::CATEGORIES)
                 return compareString(item1.categories, item2.categories);
             else if (column == Common::AUTHORS)
                 return compareString(item1.authors, item2.authors);

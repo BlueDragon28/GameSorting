@@ -226,6 +226,7 @@ QVariant CommonListView::listData() const
             // Retrieve the size of the column.
             Common::SaveDataTable data = qvariant_cast<Common::SaveDataTable>(variant);
             data.viewColumnsSize.name = m_view->columnWidth(Common::NAME);
+            data.viewColumnsSize.series = m_view->columnWidth(Common::SERIES);
             data.viewColumnsSize.categories = m_view->columnWidth(Common::CATEGORIES);
             data.viewColumnsSize.authors = m_view->columnWidth(Common::AUTHORS);
             data.viewColumnsSize.sensitiveContent = m_view->columnWidth(Common::SENSITIVE_CONTENT);
@@ -252,6 +253,7 @@ void CommonListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
     {
         Common::SaveDataTable data = qvariant_cast<Common::SaveDataTable>(variant);
         m_view->setColumnWidth(Common::NAME, data.viewColumnsSize.name);
+        m_view->setColumnWidth(Common::SERIES, data.viewColumnsSize.series);
         m_view->setColumnWidth(Common::CATEGORIES, data.viewColumnsSize.categories);
         m_view->setColumnWidth(Common::AUTHORS, data.viewColumnsSize.authors);
         m_view->setColumnWidth(Common::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);

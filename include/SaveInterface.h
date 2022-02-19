@@ -44,8 +44,8 @@
 #define MLD_VERSION_MAX_SUPPORT (int) (700)
 
 #define CLD_IDENTIFIER "CLD"
-#define CLD_VERSION (int)(100)
-#define CLD_VERSION_MAX_SUPPORT (int)(200)
+#define CLD_VERSION (int)(200)
+#define CLD_VERSION_MAX_SUPPORT (int)(300)
 
 #define BLD_IDENTIFIER "BLD"
 #define BLD_VERSION (int)(100)

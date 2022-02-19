@@ -313,6 +313,11 @@ void MainWindow::createCommonToolBar()
 	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
 	reinsertMenu();
 
+	QAction* serAct= new QAction(tr("Series"), m_listToolBar);
+	serAct->setToolTip(tr("Open the series editor."));
+	connect(serAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERIES);});
+	m_utilityMenu->addAction(serAct);
+
 	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
 	catAct->setToolTip(tr("Open the categories editor."));
 	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});

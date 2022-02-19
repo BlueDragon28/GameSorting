@@ -335,7 +335,8 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				return editor;
 			}
 		}
-		else if (index.column() == Common::CATEGORIES ||
+		else if (index.column() == Common::SERIES ||
+				 index.column() == Common::CATEGORIES ||
 				 index.column() == Common::AUTHORS)
 		{
 			long long int itemID = m_tableModel->itemID(index);
@@ -345,7 +346,9 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			
 			UtilityTableName tableName;
 
-			if (index.column() == Common::CATEGORIES)
+			if (index.column() == Common::SERIES)
+				tableName = UtilityTableName::SERIES;
+			else if (index.column() == Common::CATEGORIES)
 				tableName = UtilityTableName::CATEGORIES;
 			else if (index.column() == Common::AUTHORS)
 				tableName = UtilityTableName::AUTHORS;
