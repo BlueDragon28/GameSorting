@@ -23,6 +23,7 @@
 void SqlUtilityTable::createBooksTables()
 {
     // Creating all the Common utility table.
+    createSeriesTable();
     createCategoriesTable();
     createAuthorsTables();
     createPublishersTable();
@@ -31,6 +32,7 @@ void SqlUtilityTable::createBooksTables()
 
 void SqlUtilityTable::destroyBooksTables()
 {
+    destroyTableByName(tableName(UtilityTableName::SERIES));
     destroyTableByName(tableName(UtilityTableName::CATEGORIES));
     destroyTableByName(tableName(UtilityTableName::AUTHORS));
     destroyTableByName(tableName(UtilityTableName::PUBLISHERS));
@@ -40,6 +42,7 @@ void SqlUtilityTable::destroyBooksTables()
 QVariant SqlUtilityTable::queryBooksData() const
 {
     Books::SaveUtilityData data = {};
+    data.series = retrieveTableData(UtilityTableName::SERIES);
     data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
     data.authors = retrieveTableData(UtilityTableName::AUTHORS);
     data.publishers = retrieveTableData(UtilityTableName::PUBLISHERS);
@@ -51,7 +54,8 @@ bool SqlUtilityTable::setBooksData(const QVariant& variant)
 {
     Books::SaveUtilityData data = qvariant_cast<Books::SaveUtilityData>(variant);
 
-    if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
+    if (!setStandardData(UtilityTableName::SERIES, data.series) ||
+        !setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
         !setStandardData(UtilityTableName::AUTHORS, data.authors) ||
         !setStandardData(UtilityTableName::PUBLISHERS, data.publishers) ||
         !setStandardData(UtilityTableName::SERVICES, data.services))
