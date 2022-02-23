@@ -22,8 +22,8 @@
 #include <iostream>
 #include <algorithm>
 
-#define BOOKS_TABLE_COUNT 7
-#define NUMBER_BOOKS_TABLE_COLUMN_COUNT 6
+#define BOOKS_TABLE_COUNT 8
+#define NUMBER_BOOKS_TABLE_COLUMN_COUNT 7
 
 template<typename T>
 bool TableModelBooks::updateField(const QString& columnName, int rowNB, T value)
@@ -150,6 +150,8 @@ QVariant TableModelBooks::data(const QModelIndex& index, int role) const
             {
             case Books::NAME:
                 return m_data.at(index.row()).name;
+            case Books::SERIES:
+                return m_data.at(index.row()).series;
             case Books::CATEGORIES:
                 return m_data.at(index.row()).categories;
             case Books::AUTHORS:
@@ -429,6 +431,8 @@ QVariant TableModelBooks::headerData(int section, Qt::Orientation orientation, i
         {
         case Books::NAME:
             return "Name";
+        case Books::SERIES:
+            return "Series";
         case Books::CATEGORIES:
             return "Categories";
         case Books::AUTHORS:
@@ -539,11 +543,13 @@ void TableModelBooks::updateQuery()
             .arg(m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Books::CATEGORIES &&
+    else if (m_listFilter.column >= Books::SERIES &&
         m_listFilter.column <= Books::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Books::CATEGORIES)
+        if (m_listFilter.column == Books::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Books::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Books::AUTHORS)
             tName = UtilityTableName::AUTHORS;
@@ -606,13 +612,14 @@ void TableModelBooks::updateQuery()
         if (size() > 0)
         {
             // Quering the util table and set it into the specifics rows.
+            querySeriesField();
             queryCategoriesField();
             queryAuthorsField();
             queryPublishersField();
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID >= Books::CATEGORIES && m_sortingColumnID <= Books::SENSITIVE_CONTENT)
+            if (m_sortingColumnID >= Books::SERIES && m_sortingColumnID <= Books::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
@@ -807,7 +814,9 @@ void TableModelBooks::utilityChanged(long long int bookID, UtilityTableName tabl
     // This member function is called when the utility interface if changed.
     if (bookID >= 0 && size() > 0 && m_isTableCreated)
     {
-        if (tableName == UtilityTableName::CATEGORIES)
+        if (tableName == UtilityTableName::SERIES)
+            querySeriesField(bookID);
+        else if (tableName == UtilityTableName::CATEGORIES)
             queryCategoriesField(bookID);
         else if (tableName == UtilityTableName::AUTHORS)
             queryAuthorsField(bookID);
@@ -866,11 +875,13 @@ void TableModelBooks::queryUtilityField(UtilityTableName tableName)
             .arg(m_tableName, m_listFilter.pattern);
         statement = statement.arg(where);
     }
-    else if (m_listFilter.column >= Books::CATEGORIES &&
+    else if (m_listFilter.column >= Books::SERIES &&
         m_listFilter.column <= Books::SERVICES)
     {
         UtilityTableName tName;
-        if (m_listFilter.column == Books::CATEGORIES)
+        if (m_listFilter.column == Books::SERIES)
+            tName = UtilityTableName::SERIES;
+        else if (m_listFilter.column == Books::CATEGORIES)
             tName = UtilityTableName::CATEGORIES;
         else if (m_listFilter.column == Books::AUTHORS)
             tName = UtilityTableName::AUTHORS;
@@ -921,7 +932,9 @@ void TableModelBooks::queryUtilityField(UtilityTableName tableName)
             {
                 if (m_data.at(i).bookID == bookID)
                 {
-                    if (tableName == UtilityTableName::CATEGORIES)
+                    if (tableName == UtilityTableName::SERIES)
+                        m_data[i].series = utilityName;
+                    else if (tableName == UtilityTableName::CATEGORIES)
                         m_data[i].categories = utilityName;
                     else if (tableName == UtilityTableName::AUTHORS)
                         m_data[i].authors = utilityName;
@@ -979,7 +992,9 @@ void TableModelBooks::queryUtilityField(UtilityTableName tableName, long long in
             if (m_query.next())
                 utilityName = m_query.value(1).toString();
 
-            if (tableName == UtilityTableName::CATEGORIES)
+            if (tableName == UtilityTableName::SERIES)
+                m_data[pos].series = utilityName;
+            else if (tableName == UtilityTableName::CATEGORIES)
                 m_data[pos].categories = utilityName;
             else if (tableName == UtilityTableName::AUTHORS)
                 m_data[pos].authors = utilityName;
@@ -1006,6 +1021,18 @@ int TableModelBooks::findBookPos(long long int bookID) const
         if (m_data.at(i).bookID == bookID)
             return i;
     return -1;
+}
+
+void TableModelBooks::querySeriesField()
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES);
+}
+
+void TableModelBooks::querySeriesField(long long int bookID)
+{
+    if (m_isTableCreated)
+        queryUtilityField(UtilityTableName::SERIES);
 }
 
 void TableModelBooks::queryCategoriesField()
@@ -1529,7 +1556,9 @@ void TableModelBooks::sortUtility(int column)
     auto sortTemplate =
         [column, compareString, compareSens] (const BooksItem& item1, const BooksItem& item2) -> bool
         {
-            if (column == Books::CATEGORIES)
+            if (column == Books::SERIES)
+                return compareString(item1.series, item2.series);
+            else if (column == Books::CATEGORIES)
                 return compareString(item1.categories, item2.categories);
             else if (column == Books::AUTHORS)
                 return compareString(item1.authors, item2.authors);

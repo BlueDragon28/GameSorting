@@ -72,6 +72,8 @@ private:
 
     void queryUtilityField(UtilityTableName tableName);
     void queryUtilityField(UtilityTableName tableName, long long int booksID);
+    void querySeriesField();
+    void querySeriesField(long long int bookID);
     void queryCategoriesField();
     void queryCategoriesField(long long int bookID);
     void queryAuthorsField();

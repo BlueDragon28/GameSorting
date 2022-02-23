@@ -226,6 +226,7 @@ QVariant BooksListView::listData() const
             // Retrieve the size of the column.
             Books::SaveDataTable data = qvariant_cast<Books::SaveDataTable>(variant);
             data.viewColumnsSize.name = m_view->columnWidth(Books::NAME);
+            data.viewColumnsSize.series = m_view->columnWidth(Books::SERIES);
             data.viewColumnsSize.categories = m_view->columnWidth(Books::CATEGORIES);
             data.viewColumnsSize.authors = m_view->columnWidth(Books::AUTHORS);
             data.viewColumnsSize.publishers = m_view->columnWidth(Books::PUBLISHERS);
@@ -254,6 +255,7 @@ void BooksListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
     {
         Books::SaveDataTable data = qvariant_cast<Books::SaveDataTable>(variant);
         m_view->setColumnWidth(Books::NAME, data.viewColumnsSize.name);
+        m_view->setColumnWidth(Books::SERIES, data.viewColumnsSize.series);
         m_view->setColumnWidth(Books::CATEGORIES, data.viewColumnsSize.categories);
         m_view->setColumnWidth(Books::AUTHORS, data.viewColumnsSize.authors);
         m_view->setColumnWidth(Books::PUBLISHERS, data.viewColumnsSize.publishers);

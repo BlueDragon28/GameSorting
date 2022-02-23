@@ -350,6 +350,12 @@ void MainWindow::createBooksToolbar()
 	m_utilityMenu = new QMenu(tr("Books Utility"), m_listToolBar);
 	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
 	reinsertMenu();
+
+	QAction* seriesAct = new QAction(tr("Series"), m_listToolBar);
+	seriesAct->setToolTip(tr("Open the series editor"));
+	connect(seriesAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::SERIES);});
+	m_utilityMenu->addAction(seriesAct);
+
 	QAction* catAct = new QAction(tr("Categories"), m_listToolBar);
 	catAct->setToolTip(tr("Open the categories editor."));
 	connect(catAct, &QAction::triggered, [this](){this->m_tabAndList->openUtility(UtilityTableName::CATEGORIES);});
