@@ -48,8 +48,8 @@
 #define CLD_VERSION_MAX_SUPPORT (int)(300)
 
 #define BLD_IDENTIFIER "BLD"
-#define BLD_VERSION (int)(100)
-#define BLD_VERSION_MAX_SUPPORT (int)(200)
+#define BLD_VERSION (int)(200)
+#define BLD_VERSION_MAX_SUPPORT (int)(300)
 
 class QDataStream;
 
