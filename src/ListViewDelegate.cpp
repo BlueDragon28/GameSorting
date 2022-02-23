@@ -404,7 +404,8 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				return editor;
 			}
 		}
-		else if (index.column() == Books::CATEGORIES ||
+		else if (index.column() == Books::SERIES ||
+				 index.column() == Books::CATEGORIES ||
 				 index.column() == Books::AUTHORS ||
 				 index.column() == Books::PUBLISHERS ||
 				 index.column() == Books::SERVICES)
@@ -416,7 +417,9 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			
 			UtilityTableName tableName;
 
-			if (index.column() == Books::CATEGORIES)
+			if (index.column() == Books::SERIES)
+				tableName = UtilityTableName::SERIES;
+			else if (index.column() == Books::CATEGORIES)
 				tableName = UtilityTableName::CATEGORIES;
 			else if (index.column() == Books::AUTHORS)
 				tableName = UtilityTableName::AUTHORS;
