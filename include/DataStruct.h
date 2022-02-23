@@ -107,6 +107,7 @@ struct BooksItem
     long long int bookID;
     long long int bookPos;
     QString name;
+    QString series;
     QString categories;
     QString authors;
     QString publishers;
@@ -390,16 +391,18 @@ namespace Books
     enum ColumnIndex
     {
         NAME = 0,
-        CATEGORIES = 1,
-        AUTHORS = 2,
-        PUBLISHERS = 3,
-        SERVICES = 4,
-        SENSITIVE_CONTENT = 5,
-        RATE = 6
+        SERIES = 1,
+        CATEGORIES = 2,
+        AUTHORS = 3,
+        PUBLISHERS = 4,
+        SERVICES = 5,
+        SENSITIVE_CONTENT = 6,
+        RATE = 7
     };
 
     struct SaveUtilityData
     {
+        QList<ItemUtilityData> series;
         QList<ItemUtilityData> categories;
         QList<ItemUtilityData> authors;
         QList<ItemUtilityData> publishers;
@@ -408,6 +411,7 @@ namespace Books
 
     struct SaveUtilityInterfaceData
     {
+        QList<Game::SaveUtilityInterfaceItem> series;
         QList<Game::SaveUtilityInterfaceItem> categories;
         QList<Game::SaveUtilityInterfaceItem> authors;
         QList<Game::SaveUtilityInterfaceItem> publishers;
@@ -418,6 +422,7 @@ namespace Books
     struct ColumnsSize
     {
         int name;
+        int series;
         int categories;
         int authors;
         int publishers;
