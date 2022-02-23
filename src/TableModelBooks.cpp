@@ -619,7 +619,7 @@ void TableModelBooks::updateQuery()
             queryServicesField();
             querySensitiveContentField();
 
-            if (m_sortingColumnID >= Books::CATEGORIES && m_sortingColumnID <= Books::SENSITIVE_CONTENT)
+            if (m_sortingColumnID >= Books::SERIES && m_sortingColumnID <= Books::SENSITIVE_CONTENT)
                 sortUtility(m_sortingColumnID);
 
             beginInsertRows(QModelIndex(), 0, size()-1);
