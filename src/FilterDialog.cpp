@@ -113,6 +113,7 @@ void FilterDialog::createWidget()
             {
                 "None",
                 "Name",
+                "Series",
                 "Categories",
                 "Authors",
                 "Publishers",
@@ -358,19 +359,21 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex >= 2 && m_lastIndex <= 5)
+        else if (m_lastIndex >= 2 && m_lastIndex <= 6)
         {
             if(!m_utilityView || !m_utilityModel)
                 reject();
             
             int columnID;
             if (m_lastIndex == 2)
-                columnID = Books::CATEGORIES;
+                columnID = Books::SERIES;
             else if (m_lastIndex == 3)
-                columnID = Books::AUTHORS;
+                columnID = Books::CATEGORIES;
             else if (m_lastIndex == 4)
-                columnID = Books::PUBLISHERS;
+                columnID = Books::AUTHORS;
             else if (m_lastIndex == 5)
+                columnID = Books::PUBLISHERS;
+            else if (m_lastIndex == 6)
                 columnID = Books::SERVICES;
             
             ListFilter filter = {};
@@ -379,7 +382,7 @@ void FilterDialog::applyFilter()
             m_model->setFilter(filter);
             accept();
         }
-        else if (m_lastIndex == 6)
+        else if (m_lastIndex == 7)
         {
             ListFilter filter = {};
             filter.column = Books::RATE;
@@ -571,16 +574,18 @@ void FilterDialog::comboBoxChanged(int index)
             m_stackedLayout->setCurrentIndex(1);
             m_nameText->clear();
         }
-        else if (index >= 2 && index <= 5)
+        else if (index >= 2 && index <= 6)
         {
             UtilityTableName tableName;
             if (index == 2)
-                tableName = UtilityTableName::CATEGORIES;
+                tableName = UtilityTableName::SERIES;
             else if (index == 3)
-                tableName = UtilityTableName::AUTHORS;
+                tableName = UtilityTableName::CATEGORIES;
             else if (index == 4)
-                tableName = UtilityTableName::PUBLISHERS;
+                tableName = UtilityTableName::AUTHORS;
             else if (index == 5)
+                tableName = UtilityTableName::PUBLISHERS;
+            else if (index == 6)
                 tableName = UtilityTableName::SERVICES;
             
             m_utilityModel = new UtilityInterfaceEditorModel(
