@@ -1079,7 +1079,7 @@ void TableModelBooks::querySensitiveContentField()
         statement = statement.arg(m_tableName).arg("Name");
         SORTING_ORDER(m_sortingOrder, statement)
     }
-    else if (m_sortingColumnID == Books::AUTHORS)
+    else if (m_sortingColumnID == Books::RATE)
     {
         statement = statement.arg(m_tableName).arg("Rate");
         SORTING_ORDER(m_sortingOrder, statement)
