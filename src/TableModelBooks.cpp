@@ -1032,7 +1032,7 @@ void TableModelBooks::querySeriesField()
 void TableModelBooks::querySeriesField(long long int bookID)
 {
     if (m_isTableCreated)
-        queryUtilityField(UtilityTableName::SERIES);
+        queryUtilityField(UtilityTableName::SERIES, bookID);
 }
 
 void TableModelBooks::queryCategoriesField()
