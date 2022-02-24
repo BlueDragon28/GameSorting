@@ -121,8 +121,8 @@ struct BooksItem
 
 struct SeriesItem
 {
-    long long int bookID;
-    long long int bookPos;
+    long long int serieID;
+    long long int seriePos;
     QString name;
     int episodePos;
     int seasonPos;
