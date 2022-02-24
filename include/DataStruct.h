@@ -543,7 +543,7 @@ namespace Series
         int episodePos;
         int seasonPos;
         QString url;
-        QString rate;
+        int rate;
     };
 
     struct SaveDataTable
