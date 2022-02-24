@@ -30,7 +30,7 @@ class TableModelCommon : public TableModel
 public:
     TableModelCommon(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     TableModelCommon(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
-    ~TableModelCommon();
+    virtual ~TableModelCommon();
 
     // Data interface
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
