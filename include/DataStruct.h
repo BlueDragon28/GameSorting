@@ -540,6 +540,8 @@ namespace Series
         long long int serieID;
         long long int seriePos;
         QString name;
+        int episodePos;
+        int seasonPos;
         QString url;
         QString rate;
     };
