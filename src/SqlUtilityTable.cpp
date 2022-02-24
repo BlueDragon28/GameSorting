@@ -106,6 +106,11 @@ void SqlUtilityTable::createTables()
 		m_isTableReady = true;
 		createBooksTables();
 	}
+	else if (m_type == ListType::SERIESLIST)
+	{
+		m_isTableReady = true;
+		createSeriesTables();
+	}
 	else
 		m_isTableReady = false;
 }
@@ -120,6 +125,8 @@ void SqlUtilityTable::destroyTables()
 		destroyCommonTables();
 	else if (m_type == ListType::BOOKSLIST)
 		destroyBooksTables();
+	else if (m_type == ListType::SERIESLIST)
+		destroySeriesTables();
 }
 
 void SqlUtilityTable::errorMessageCreatingTable(const QString& tableName, const QString& queryError)
@@ -217,6 +224,8 @@ QVariant SqlUtilityTable::data() const
 			return queryCommonsData();
 		else if (m_type == ListType::BOOKSLIST)
 			return queryBooksData();
+		else if (m_type == ListType::SERIESLIST)
+			return querySeriesData();
 	}
 	return QVariant();
 }
@@ -243,6 +252,11 @@ bool SqlUtilityTable::setData(const QVariant& variant)
 	{
 		newList(ListType::BOOKSLIST);
 		return setBooksData(variant);
+	}
+	else if (variant.canConvert<Series::SaveUtilityData>())
+	{
+		newList(ListType::SERIESLIST);
+		return setSeriesData(variant);
 	}
 	
 	newList(ListType::UNKNOWN);

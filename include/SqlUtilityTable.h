@@ -86,6 +86,12 @@ private:
 	QVariant queryBooksData() const;
 	bool setBooksData(const QVariant& data);
 
+	// Series
+	void createSeriesTables();
+	void destroySeriesTables();
+	QVariant querySeriesData() const;
+	bool setSeriesData(const QVariant& data);
+
 	static void errorMessageCreatingTable(const QString& tableName, const QString& queryError);
 
 	ListType m_type;
