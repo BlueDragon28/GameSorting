@@ -30,7 +30,7 @@ class TableModelBooks : public TableModel
 public:
     TableModelBooks(const QString& tableName, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
     TableModelBooks(const QVariant& data, QSqlDatabase& db, SqlUtilityTable& utilityTable, QObject* parent = nullptr);
-    ~TableModelBooks();
+    virtual ~TableModelBooks();
 
     // Data interface
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
