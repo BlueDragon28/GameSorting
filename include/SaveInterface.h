@@ -51,6 +51,10 @@
 #define BLD_VERSION (int)(200)
 #define BLD_VERSION_MAX_SUPPORT (int)(300)
 
+#define SLD_IDENTIFIER "SLD"
+#define SLD_VERSION (int)(100)
+#define SLD_VERSION_MAX_SUPPORT (int)(200)
+
 class QDataStream;
 
 class SaveInterface
@@ -73,6 +77,9 @@ private:
 
     static bool saveBooksList(const QString& filePath, const QVariant& data);
     static bool openBooksList(QDataStream* in, QVariant& data);
+
+    static bool saveSeriesList(const QString& filePath, const QVariant& data);
+    static bool openSeriesList(QDataStream* in, QVariant& data);
 
     static bool m_isLegacy;
 };
@@ -140,5 +147,19 @@ QDataStream& operator<<(QDataStream& out, const Books::SaveItem& data);
 QDataStream& operator>>(QDataStream& in, Books::SaveItem& data);
 QDataStream& operator<<(QDataStream& out, const Books::ColumnsSize& data);
 QDataStream& operator>>(QDataStream& in, Books::ColumnsSize& data);
+
+// Series data QDataStream operators.
+QDataStream& operator<<(QDataStream& out, const Series::SaveUtilityData& data);
+QDataStream& operator>>(QDataStream& in, Series::SaveDataTable& data);
+QDataStream& operator<<(QDataStream& out, const Series::SaveUtilityInterfaceData& data);
+QDataStream& operator>>(QDataStream& in, Series::SaveUtilityInterfaceData& data);
+QDataStream& operator<<(QDataStream& out, const Series::SaveData& data);
+QDataStream& operator>>(QDataStream& in, Series::SaveData& data);
+QDataStream& operator<<(QDataStream& out, const Series::SaveDataTable& data);
+QDataStream& operator>>(QDataStream& in, Series::SaveDataTable& data);
+QDataStream& operator<<(QDataStream& out, const Series::SaveItem& data);
+QDataStream& operator>>(QDataStream& in, Series::SaveItem& data);
+QDataStream& operator<<(QDataStream& out, const Series::ColumnsSize& data);
+QDataStream& operator>>(QDataStream& in, Series::ColumnsSize& data);
 
 #endif // GAMESORTING_SAVEINTERFACE_H_

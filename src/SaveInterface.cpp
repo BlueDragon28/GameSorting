@@ -47,6 +47,9 @@ bool SaveInterface::save(const QString& filePath, const QVariant& data)
     // If its a books list, save the data has a books list.
     else if (data.canConvert<Books::SaveData>())
         return saveBooksList(filePath, data);
+    // If its a series list, save the data has a series list.
+    else if (data.canConvert<Series::SaveData>())
+        return saveSeriesList(filePath, data);
     
     return false;
 }
@@ -88,6 +91,9 @@ bool SaveInterface::open(const QString& filePath, QVariant& data)
         // Cheking if the file is a BooksList file.
         else if (strcmp(fileIdentifier, BLD_IDENTIFIER) == 0)
             ret = openBooksList(&in ,data);
+        // Cheking if the file is a SeriesList file.
+        else if (strcmp(fileIdentifier, SLD_IDENTIFIER) == 0)
+            ret = openSeriesList(&in, data);
         file.close();
         return ret;
     }
