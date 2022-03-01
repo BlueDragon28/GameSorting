@@ -21,6 +21,7 @@
 #include "MoviesListView.h"
 #include "CommonListView.h"
 #include "BooksListView.h"
+#include "SeriesListView.h"
 #include "Common.h"
 #include "SaveInterface.h"
 #include "UtilityListView.h"
@@ -145,6 +146,15 @@ void TabAndList::addTable()
             emit listChanged(true);
             connect(newList, &BooksListView::listEdited, this, &TabAndList::listUpdated);
         }
+        else if (m_listType == ListType::SERIESLIST)
+        {
+            SeriesListView* newList = new SeriesListView(tableName, ListType::SERIESLIST, m_db, m_sqlUtilityTable, this);
+            m_stackedViews->addWidget(newList);
+            m_tabBar->addTab(newList->tableName());
+            m_isListModified = true;
+            emit listChanged(true);
+            connect(newList, &SeriesListView::listEdited, this, &TabAndList::listUpdated);
+        }
     }
 }
 
@@ -175,7 +185,8 @@ void TabAndList::removeTable(int index)
         if (widget->viewType() == ViewType::GAME || 
             widget->viewType() == ViewType::MOVIE ||
             widget->viewType() == ViewType::COMMON ||
-            widget->viewType() == ViewType::BOOKS)
+            widget->viewType() == ViewType::BOOKS ||
+            widget->viewType() == ViewType::SERIES)
         {
             m_isListModified = true;
             emit listChanged(true);
@@ -279,6 +290,30 @@ void TabAndList::newBooksList()
     emit newListFileName(QString());
 }
 
+void TabAndList::newSeriesList()
+{
+    // Deleting the existing list and creating a new list.
+    // First, check if there is any unsaved change.
+    if (!maybeSave())
+        return;
+    
+    for (int i = m_tabBar->count()-1; i>=0; i--)
+        m_tabBar->removeTab(i);
+    for (int i = m_stackedViews->count()-1; i>=0; i--)
+    {
+        AbstractListView* listView = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+        m_stackedViews->removeWidget(listView);
+        delete listView;
+    }
+
+    m_sqlUtilityTable.newList(ListType::SERIESLIST);
+    m_listType = ListType::SERIESLIST;
+    m_isListModified = false;
+    m_filePath = QString();
+    emit newList(ListType::SERIESLIST);
+    emit newListFileName(QString());
+}
+
 void TabAndList::open()
 {
     // Opening a list from a file.
@@ -351,7 +386,8 @@ void TabAndList::save()
     if (m_listType == ListType::GAMELIST || 
         m_listType == ListType::MOVIESLIST ||
         m_listType == ListType::COMMONLIST ||
-        m_listType == ListType::BOOKSLIST)
+        m_listType == ListType::BOOKSLIST ||
+        m_listType == ListType::SERIESLIST)
     {
         if (m_filePath.isEmpty())
         {
@@ -394,6 +430,13 @@ void TabAndList::save()
                     tr("Saving the books list into the file %1 failed.").arg(m_filePath),
                     QMessageBox::Ok,
                     QMessageBox::Ok);
+            else if (m_listType == ListType::SERIESLIST)
+                QMessageBox::critical(
+                    this,
+                    tr("Save Series List"),
+                    tr("Saving the series list into the file %1 failed.").arg(m_filePath),
+                    QMessageBox::Ok,
+                    QMessageBox::Ok);
         }
     }
     else
@@ -412,7 +455,8 @@ void TabAndList::saveAs()
     if (m_listType == ListType::GAMELIST || 
         m_listType == ListType::MOVIESLIST ||
         m_listType == ListType::COMMONLIST ||
-        m_listType == ListType::BOOKSLIST)
+        m_listType == ListType::BOOKSLIST ||
+        m_listType == ListType::SERIESLIST)
     {
         QString filter;
         if (m_listType != ListType::UNKNOWN)
@@ -428,6 +472,8 @@ void TabAndList::saveAs()
             listType = "Common";
         else if (m_listType == ListType::BOOKSLIST)
             listType = "Books";
+        else if (m_listType == ListType::SERIESLIST)
+            listType = "Series";
 
         QString filePath = QFileDialog::getSaveFileName(
             this,
@@ -589,6 +635,36 @@ bool TabAndList::saveFile(const QString& filePath) const
         // Save to a file.
         return SaveInterface::save(filePath, QVariant::fromValue(data));
     }
+    else if (m_listType == ListType::SERIESLIST)
+    {
+        // Saving the series list.
+        Series::SaveData data = {};
+
+        QVariant variant;
+
+        // Getting the books data.
+        for (int i = 0; i < m_tabBar->count(); i++)
+        {
+            AbstractListView* view = reinterpret_cast<AbstractListView*>(m_stackedViews->widget(i));
+            if (view->viewType() == ViewType::SERIES)
+            {
+                SeriesListView* seriesView = reinterpret_cast<SeriesListView*>(view);
+                variant = seriesView->listData();
+                if (!variant.canConvert<Series::SaveDataTable>())
+                    return false;
+                data.serieTables.append(qvariant_cast<Series::SaveDataTable>(variant));
+            }
+        }
+
+        // Getting the utility data.
+        variant = m_sqlUtilityTable.data();
+        if (!variant.canConvert<Series::SaveUtilityData>())
+            return false;
+        data.utilityData = qvariant_cast<Series::SaveUtilityData>(variant);
+
+        // Save to a file
+        return SaveInterface::save(filePath, QVariant::fromValue(data));
+    }
 
     return false;
 }
@@ -692,6 +768,29 @@ bool TabAndList::openFile(const QString& filePath)
 
         return true;
     }
+    else if (variant.canConvert<Series::SaveData>())
+    {
+        // Creating the new empty series list data.
+        newEmptyList();
+        // Then creating an empty series list.
+        newSeriesList();
+        Series::SaveData data = qvariant_cast<Series::SaveData>(variant);
+        result = m_sqlUtilityTable.setData(QVariant::fromValue(data.utilityData));
+        if (!result)
+            return false;
+        
+        for (int i = 0; i < data.serieTables.size(); i++)
+        {
+            SeriesListView* view = new SeriesListView(QVariant::fromValue(data.serieTables.at(i)), m_db, m_sqlUtilityTable, this);
+            if (view->listType() == ListType::UNKNOWN)
+                return false;
+            m_stackedViews->addWidget(view);
+            m_tabBar->addTab(view->tableName());
+            connect(view, &SeriesListView::listEdited, this, &TabAndList::listUpdated);
+        }
+
+        return true;
+    }
 
     return false;
 }
@@ -732,6 +831,7 @@ void TabAndList::tabMoved(int from, int to)
     m_stackedViews->removeWidget(view);
     m_stackedViews->insertWidget(to, view);
 }
+
 void TabAndList::tabAskEdit(int index)
 {
     // Show a QLineEdit for the edition of the
@@ -782,6 +882,12 @@ void TabAndList::tabChangeApplying(int tabIndex, const QString& tabName)
         BooksListView* booksView = reinterpret_cast<BooksListView*>(view);
         booksView->setTableName(tabName);
         m_tabBar->setTabText(tabIndex, booksView->tableName());
+    }
+    else if (view->viewType() == ViewType::SERIES)
+    {
+        SeriesListView* seriesView = reinterpret_cast<SeriesListView*>(view);
+        seriesView->setTableName(tabName);
+        m_tabBar->setTabText(tabIndex, seriesView->tableName());
     }
 }
 

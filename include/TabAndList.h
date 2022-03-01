@@ -47,6 +47,7 @@ public slots:
     void newMoviesList();
     void newCommonList();
     void newBooksList();
+    void newSeriesList();
     void open();
     void open(const QString& filePath);
     void save();
