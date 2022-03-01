@@ -48,6 +48,7 @@ private:
 	void createMovieToolBar();
 	void createCommonToolBar();
 	void createBooksToolbar();
+	void createSeriesToolbar();
 	void listFilePathChanged(const QString& filePath);
 	void listChanged(bool isChanged);
 	void updateWindowTitle();
