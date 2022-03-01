@@ -59,7 +59,7 @@ sudo pacman -S base-devel glibc qt6-base qt6-svg cmake git
 Clone the GameSorting repository with git:
 
 ```
-git clone https://github.com/Erwan28250/GameSorting.git
+git clone https://github.com/BlueDragon28/GameSorting.git
 ```
 
 Then, compile the program:
