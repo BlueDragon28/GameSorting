@@ -508,7 +508,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				 index.column() == Series::ACTORS ||
 				 index.column() == Series::PRODUCTION ||
 				 index.column() == Series::MUSIC ||
-				 index.column() == Series::SENSITIVE_CONTENT)
+				 index.column() == Series::SERVICES)
 		{
 			long long int itemID = m_tableModel->itemID(index);
 
