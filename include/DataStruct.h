@@ -495,8 +495,7 @@ namespace Series
         MUSIC = 7,
         SERVICES = 8,
         SENSITIVE_CONTENT = 9,
-        URL = 10,
-        RATE = 11
+        RATE = 10
     };
 
     struct SaveUtilityData
