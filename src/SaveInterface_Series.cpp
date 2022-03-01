@@ -326,6 +326,8 @@ QDataStream& operator>>(QDataStream& in, Series::SaveData& data)
             in >> data.serieTables[i];
     }
 
+    in >> data.utilityData;
+
     return in;
 }
 
