@@ -488,7 +488,7 @@ ListType TableModelMovies::listType() const
 long long int TableModelMovies::itemID(const QModelIndex& index) const
 {
     if (m_isTableCreated &&
-        index.column() >= 0 && index.row() < columnCount() &&
+        index.column() >= 0 && index.column() < columnCount() &&
         index.row() >= 0 && index.row() < rowCount())
         return m_data.at(index.row()).movieID;
     return -1;
