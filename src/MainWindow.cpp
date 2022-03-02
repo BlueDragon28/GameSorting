@@ -527,9 +527,9 @@ void MainWindow::writeSettings()
 		return;
 
 #ifdef NDEBUG
-	QSettings settings("Erwan28250", "gamesorting");
+	QSettings settings("BlueDragon28", "gamesorting");
 #else
-	QSettings settings("Erwan28250", "gamesorting_debug");
+	QSettings settings("BlueDragon28", "gamesorting_debug");
 #endif
 
 	// Save the geometry of the window.
@@ -563,9 +563,9 @@ void MainWindow::readSettings()
 {
 	// Read the settings saved in the Windows Registery or in Linux Config File.
 #ifdef NDEBUG
-	QSettings settings("Erwan28250", "gamesorting");
+	QSettings settings("BlueDragon28", "gamesorting");
 #else
-	QSettings settings("Erwan28250", "gamesorting_debug");
+	QSettings settings("BlueDragon28", "gamesorting_debug");
 #endif
 
 	// Read the geometry of the window.
