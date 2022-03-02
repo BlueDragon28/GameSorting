@@ -256,18 +256,22 @@ void SeriesListView::setColumnsSizeAndSortingOrder(const QVariant& variant)
     // Set the size of the column inside the table view.
     if (m_type == ListType::SERIESLIST)
     {
-        Series::SaveDataTable data = qvariant_cast<Series::SaveDataTable>(variant);
-        m_view->setColumnWidth(Series::NAME, data.viewColumnsSize.name);
-        m_view->setColumnWidth(Series::EPISODE, data.viewColumnsSize.episode);
-        m_view->setColumnWidth(Series::SEASON, data.viewColumnsSize.season);
-        m_view->setColumnWidth(Series::CATEGORIES, data.viewColumnsSize.categories);
-        m_view->setColumnWidth(Series::DIRECTORS, data.viewColumnsSize.directors);
-        m_view->setColumnWidth(Series::ACTORS, data.viewColumnsSize.actors);
-        m_view->setColumnWidth(Series::PRODUCTION, data.viewColumnsSize.production);
-        m_view->setColumnWidth(Series::MUSIC, data.viewColumnsSize.music);
-        m_view->setColumnWidth(Series::SERVICES, data.viewColumnsSize.services);
-        m_view->setColumnWidth(Series::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);
-        m_view->setColumnWidth(Series::RATE, data.viewColumnsSize.rate);
+        if (variant.canConvert<Series::SaveDataTable>() && m_view)
+        {
+            Series::SaveDataTable data = qvariant_cast<Series::SaveDataTable>(variant);
+            m_view->setColumnWidth(Series::NAME, data.viewColumnsSize.name);
+            m_view->setColumnWidth(Series::EPISODE, data.viewColumnsSize.episode);
+            m_view->setColumnWidth(Series::SEASON, data.viewColumnsSize.season);
+            m_view->setColumnWidth(Series::CATEGORIES, data.viewColumnsSize.categories);
+            m_view->setColumnWidth(Series::DIRECTORS, data.viewColumnsSize.directors);
+            m_view->setColumnWidth(Series::ACTORS, data.viewColumnsSize.actors);
+            m_view->setColumnWidth(Series::PRODUCTION, data.viewColumnsSize.production);
+            m_view->setColumnWidth(Series::MUSIC, data.viewColumnsSize.music);
+            m_view->setColumnWidth(Series::SERVICES, data.viewColumnsSize.services);
+            m_view->setColumnWidth(Series::SENSITIVE_CONTENT, data.viewColumnsSize.sensitiveContent);
+            m_view->setColumnWidth(Series::RATE, data.viewColumnsSize.rate);
+            m_view->horizontalHeader()->setSortIndicator(data.columnSort, (data.sortOrder == 0 ? Qt::AscendingOrder : Qt::DescendingOrder));
+        }
     }
 }
 
