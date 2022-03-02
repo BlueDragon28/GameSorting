@@ -44,7 +44,7 @@ void SqlUtilityTable::destroySeriesTables()
 QVariant SqlUtilityTable::querySeriesData() const
 {
     Series::SaveUtilityData data = {};
-    data.categories = retrieveTableData(UtilityTableName::SERIES);
+    data.categories = retrieveTableData(UtilityTableName::CATEGORIES);
     data.directors = retrieveTableData(UtilityTableName::DIRECTOR);
     data.actors = retrieveTableData(UtilityTableName::ACTORS);
     data.production = retrieveTableData(UtilityTableName::PRODUCTION);
@@ -57,7 +57,7 @@ bool SqlUtilityTable::setSeriesData(const QVariant& variant)
 {
     Series::SaveUtilityData data = qvariant_cast<Series::SaveUtilityData>(variant);
 
-    if (!setStandardData(UtilityTableName::CATEGORIES, data.services) ||
+    if (!setStandardData(UtilityTableName::CATEGORIES, data.categories) ||
         !setStandardData(UtilityTableName::DIRECTOR, data.directors) ||
         !setStandardData(UtilityTableName::ACTORS, data.actors) ||
         !setStandardData(UtilityTableName::PRODUCTION, data.production) ||
