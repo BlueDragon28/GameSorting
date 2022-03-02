@@ -503,6 +503,15 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 				return editor;
 			}
 		}
+		else if (index.column() == Series::EPISODE ||
+		         index.column() == Series::SEASON)
+		{
+			// Creating the editor for the episode column.
+			QSpinBox* editor = new QSpinBox(parent);
+			editor->setRange(0, 0x7FFFFFFF);
+			editor->setSingleStep(1);
+			return editor;
+		}
 		else if (index.column() == Series::CATEGORIES ||
 				 index.column() == Series::DIRECTORS ||
 				 index.column() == Series::ACTORS ||
