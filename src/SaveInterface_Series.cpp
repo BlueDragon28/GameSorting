@@ -99,7 +99,7 @@ bool SaveInterface::openSeriesList(QDataStream* in, QVariant& variant)
             return false;
 
         // Store the data into the variant.
-        variant = QVariant::fromValue(variant);
+        variant = QVariant::fromValue(data);
         return true;
     }
     else
