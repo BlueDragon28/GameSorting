@@ -58,7 +58,7 @@ SeriesListView::SeriesListView(const QVariant& data, QSqlDatabase& db, SqlUtilit
     m_model(new TableModelSeries(data, db, utilityTable, this)),
     m_utilityTable(utilityTable)
 {
-    m_type == m_model->listType();
+    m_type = m_model->listType();
     setupWidget();
     setupView();
     setColumnsSizeAndSortingOrder(data);
