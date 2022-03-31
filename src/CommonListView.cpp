@@ -307,7 +307,7 @@ void CommonListView::openUrl()
         QModelIndexList indexList = selectionModel->selectedRows(0);
         QString url = m_model->url(indexList.at(0));
         if (!url.isEmpty())
-            QDesktopServices::openUrl(QUrl(url));
+            QDesktopServices::openUrl(QUrl::fromUserInput(url));
         else
             QMessageBox::warning(
                 this,
