@@ -294,7 +294,7 @@ void SeriesListView::setUrl()
             tr("Set Url: \"%1\"").arg(m_model->data(indexList.at(0)).toString()),
             tr("Url"),
             QLineEdit::Normal,
-            QString(),
+            m_model->url(indexList.at(0)),
             &result);
         if (result)
             m_model->setUrl(indexList.at(0), url);
