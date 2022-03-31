@@ -145,6 +145,13 @@ void GameListView::createMenu(QVBoxLayout* vLayout)
         connect(m_model, &TableModelGame::filterChanged, [delAct](bool value){delAct->setEnabled(!value);});
         toolBar->addAction(delAct);
 
+        QIcon copyIcon(":/Images/Copy.svg");
+        QAction* copyAct = new QAction(copyIcon, tr("Copy games"), this);
+        copyAct->setToolTip(tr("Copying game(s) into the clipboard."));
+        connect(copyAct, &QAction::triggered, this, &GameListView::copy);
+        connect(m_model, &TableModelGame::filterChanged, [copyAct](bool value){copyAct->setEnabled(!value);});
+        toolBar->addAction(copyAct);
+
         // Move item up and down
         QIcon moveUPIcon(":/Images/MoveUP.svg");
         QAction* moveUpAct = new QAction(moveUPIcon, tr("Move up"), this);
@@ -426,4 +433,21 @@ void GameListView::enableAction(QAction* action, bool value) const
         action->setEnabled(false);
     else
         action->setEnabled(true);
+}
+
+void GameListView::copy()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->copyToClipboard(indexList);
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Copy to clipboard"),
+            tr("No games selected!"),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
 }

@@ -19,6 +19,8 @@
 #include "TableModelGame.h"
 #include "TableModelGame_UtilityInterface.h"
 #include <QSqlError>
+#include <QClipboard>
+#include <QApplication>
 #include <iostream>
 #include <algorithm>
 
@@ -1621,4 +1623,23 @@ void TableModelGame::sortUtility(int column)
         };
     
     std::stable_sort(m_data.begin(), m_data.end(), sortTemplate);
+}
+
+void TableModelGame::copyToClipboard(QModelIndexList indexList)
+{
+    if (indexList.size() == 0)
+        return;
+
+    QString gameNames;
+
+    if (indexList.size() == 1)
+        gameNames = m_data.at(indexList.at(0).row()).name;
+    else
+    {
+        foreach(const QModelIndex& index, indexList)
+            gameNames += ':' + m_data.at(index.row()).name;
+    }
+
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(gameNames);
 }
