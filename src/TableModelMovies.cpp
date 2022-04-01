@@ -19,6 +19,8 @@
 #include "TableModelMovies.h"
 #include "TableModelMovies_UtilityInterface.h"
 #include <QSqlError>
+#include <QApplication>
+#include <QClipboard>
 #include <iostream>
 #include <algorithm>
 
@@ -1622,4 +1624,23 @@ void TableModelMovies::sortUtility(int column)
         };
     
     std::stable_sort(m_data.begin(), m_data.end(), sortTemplate);
+}
+
+void TableModelMovies::copyToClipboard(QModelIndexList indexList)
+{
+    if (indexList.size() == 0)
+        return;
+
+    QString moviesNames;
+
+    if (indexList.size() == 1)
+        moviesNames = m_data.at(indexList.at(0).row()).name;
+    else
+    {
+        foreach(const QModelIndex& index, indexList)
+            moviesNames += ':' + m_data.at(index.row()).name;
+    }
+
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(moviesNames);
 }

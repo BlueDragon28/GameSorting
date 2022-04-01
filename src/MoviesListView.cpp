@@ -143,6 +143,13 @@ void MoviesListView::createMenu(QVBoxLayout* vLayout)
         connect(m_model, &TableModelMovies::filterChanged, [delAct](bool value){delAct->setEnabled(!value);});
         toolBar->addAction(delAct);
 
+        QIcon copyIcon(":/Images/Copy.svg");
+        QAction* copyAct = new QAction(copyIcon, tr("Copy common"), this);
+        copyAct->setToolTip(tr("Copying common into the clipboard."));
+        connect(copyAct, &QAction::triggered, this, &MoviesListView::copy);
+        connect(m_model, &TableModelMovies::filterChanged, [copyAct](bool value){copyAct->setEnabled(!value);});
+        toolBar->addAction(copyAct);
+
         // Move item up and down
         QIcon moveUPIcon(":/Images/MoveUP.svg");
         QAction* moveUpAct = new QAction(moveUPIcon, tr("Move up"), this);
@@ -410,4 +417,21 @@ void MoviesListView::enableAction(QAction* action, bool value) const
         action->setEnabled(false);
     else
         action->setEnabled(true);
+}
+
+void MoviesListView::copy()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->copyToClipboard(indexList);
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Copy to clipboard"),
+            tr("No movies selected!"),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
 }
