@@ -61,6 +61,8 @@ public:
     QItemSelection moveItemsDown(const QModelIndexList& indexList);
     QItemSelection moveItemsTo(const QModelIndexList& indexList, int to);
 
+    void copyToClipboard(QModelIndexList indexList);
+
 protected:
     virtual void createTable() override;
     virtual void deleteTable() override;
