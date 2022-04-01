@@ -19,6 +19,8 @@
 #include "TableModelBooks.h"
 #include "TableModelBooks_UtilityInterface.h"
 #include <QSqlError>
+#include <QApplication>
+#include <QClipboard>
 #include <iostream>
 #include <algorithm>
 
@@ -1572,4 +1574,23 @@ void TableModelBooks::sortUtility(int column)
         };
     
     std::stable_sort(m_data.begin(), m_data.end(), sortTemplate);
+}
+
+void TableModelBooks::copyToClipboard(QModelIndexList indexList)
+{
+    if (indexList.size() == 0)
+        return;
+
+    QString booksNames;
+
+    if (indexList.size() == 1)
+        booksNames = m_data.at(indexList.at(0).row()).name;
+    else
+    {
+        foreach(const QModelIndex& index, indexList)
+            booksNames += ':' + m_data.at(index.row()).name;
+    }
+
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(booksNames);
 }

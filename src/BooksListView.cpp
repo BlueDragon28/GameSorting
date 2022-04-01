@@ -142,6 +142,13 @@ void BooksListView::createMenu(QVBoxLayout* vLayout)
         connect(m_model, &TableModelBooks::filterChanged, [delAct](bool value){delAct->setEnabled(!value);}),
         toolBar->addAction(delAct);
 
+        QIcon copyIcon(":/Images/Copy.svg");
+        QAction* copyAct = new QAction(copyIcon, tr("Copy movies"), this);
+        copyAct->setToolTip(tr("Copying book(s) into the clipboard."));
+        connect(copyAct, &QAction::triggered, this, &BooksListView::copy);
+        connect(m_model, &TableModelBooks::filterChanged, [copyAct](bool value){copyAct->setEnabled(!value);});
+        toolBar->addAction(copyAct);
+
         // Move item up and down
         QIcon moveUPIcon(":/Images/MoveUP.svg");
         QAction* moveUPAct = new QAction(moveUPIcon, tr("Move Up"), this);
@@ -401,4 +408,21 @@ void BooksListView::enableAction(QAction* action) const
         action->setEnabled(false);
     else
         action->setEnabled(true);
+}
+
+void BooksListView::copy()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->copyToClipboard(indexList);
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Copy to clipboard"),
+            tr("No books selected!"),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
 }
