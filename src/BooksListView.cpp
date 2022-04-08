@@ -103,7 +103,16 @@ void BooksListView::setupView()
 
 void BooksListView::addingItem()
 {
-    if (m_model)
+    if (!m_model)
+        return;
+    
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->appendRows(indexList);
+    }
+    else
         m_model->appendRows();
 }
 

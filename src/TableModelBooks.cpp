@@ -232,33 +232,41 @@ bool TableModelBooks::insertRows(int row, int count, const QModelIndex& parent)
     if (row >= 0 && row <= rowCount() &&
         count > 0 && m_isTableCreated)
     {
-        // BooksPos Statement
-        QString posStatement = QString(
-            "SELECT\n"
-            "   MAX(BooksPos)\n"
-            "FROM\n"
-            "   \"%1\";").arg(m_tableName);
-
-#ifndef NDEBUG
-        std::cout << posStatement.toLocal8Bit().constData() << "\n" << std::endl;
-#endif
-
-        int maxPos;
-        if (m_query.exec(posStatement))
+        int bookPos;
+        if (m_sortingColumnID >= 0)
         {
-            if (m_query.next())
+            // Retrieve max pos.
+            QString posStatement = QString(
+                "SELECT\n"
+                "   MAX(BooksPos)\n"
+                "FROM\n"
+                "   \"%1\";").arg(m_tableName);
+
+    #ifndef NDEBUG
+            std::cout << posStatement.toLocal8Bit().constData() << "\n" << std::endl;
+    #endif
+
+            if (m_query.exec(posStatement))
             {
-                maxPos = m_query.value(0).toInt();
+                if (m_query.next())
+                {
+                    bookPos = m_query.value(0).toInt();
+                    m_query.clear();
+                }
+            }
+            else
+            {
+                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+                    .arg(m_tableName, m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
                 m_query.clear();
             }
         }
         else
         {
-            std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                .arg(m_tableName, m_query.lastError().text())
-                .toLocal8Bit().constData()
-                << std::endl;
-            m_query.clear();
+            // Insert the row where the user want it if sorting is not enable.
+            bookPos = row;
         }
 
         // Executing the sql statement for inserting new rows.
@@ -275,7 +283,7 @@ bool TableModelBooks::insertRows(int row, int count, const QModelIndex& parent)
         {
             statement += QString(
                 "\n   (%1, \"New Book\", NULL, NULL),")
-                .arg(++maxPos);
+                .arg(bookPos++);
         }
         statement[statement.size() - 1] = ';';
 
@@ -309,10 +317,20 @@ bool TableModelBooks::insertRows(int row, int count, const QModelIndex& parent)
 
             if (m_query.exec(statement))
             {
-                if (count == 1)
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                if (m_sortingColumnID >= 0)
+                {
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                    else
+                        beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
+                }
                 else
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
+                {
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), row, row);
+                    else
+                        beginInsertRows(QModelIndex(), row, row+count-1);
+                }
 
                 QList<BooksItem> booksList;
                 while(m_query.next())
@@ -325,7 +343,14 @@ bool TableModelBooks::insertRows(int row, int count, const QModelIndex& parent)
                     book.rate = m_query.value(4).toInt();
                     booksList.prepend(book);
                 }
-                m_data.append(booksList.cbegin(), booksList.cend());
+                if (m_sortingColumnID >= 0)
+                    m_data.append(booksList.cbegin(), booksList.cend());
+                else
+                {
+                    for (int i = 0; i < booksList.size(); i++)
+                        m_data.insert(row+i, booksList.at(i));
+                    updateBooksPos(row+booksList.size());
+                }
 
                 endInsertRows();
             }
@@ -455,8 +480,28 @@ QVariant TableModelBooks::headerData(int section, Qt::Orientation orientation, i
 
 void TableModelBooks::appendRows(int count)
 {
+    appendRows(QModelIndexList(), count);
+}
+
+void TableModelBooks::appendRows(const QModelIndexList& indexList, int count)
+{
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
     if (count > 0 && m_isTableCreated)
-        insertRows(rowCount(), count);
+    {
+        if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+            insertRows(rowCount(), count);
+        else
+            insertRows(indexListCopy.at(0).row()+1, count);
+    }
 }
 
 void TableModelBooks::deleteRows(const QModelIndexList& indexList)
