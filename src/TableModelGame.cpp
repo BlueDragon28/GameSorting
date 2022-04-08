@@ -234,33 +234,41 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
     if (row >= 0 && row <= rowCount() &&
         count > 0 && m_isTableCreated)
     {
-        // GamePos Statement
-        QString posStatement = QString(
-            "SELECT\n"
-            "   MAX(GamePos)\n"
-            "FROM\n"
-            "   \"%1\";").arg(m_tableName);
-
-#ifndef NDEBUG
-        std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-        int maxPos;
-        if (m_query.exec(posStatement))
+        int gamePos;
+        if (m_sortingColumnID >= 0)
         {
-            if (m_query.next())
+            // Retrieve max pos.
+            QString posStatement = QString(
+                "SELECT\n"
+                "   MAX(GamePos)\n"
+                "FROM\n"
+                "   \"%1\";").arg(m_tableName);
+
+    #ifndef NDEBUG
+            std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+    #endif
+
+            if (m_query.exec(posStatement))
             {
-                maxPos = m_query.value(0).toInt();
+                if (m_query.next())
+                {
+                    gamePos = m_query.value(0).toInt();
+                    m_query.clear();
+                }
+            }
+            else
+            {
+                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+                    .arg(m_tableName, m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
                 m_query.clear();
             }
         }
         else
         {
-            std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                .arg(m_tableName, m_query.lastError().text())
-                .toLocal8Bit().constData()
-                << std::endl;
-            m_query.clear();
+            // Insert the row where the user want it if sorting is not enable.
+            gamePos = row;
         }
 
         // Executing the sql statement for inserting new rows.
@@ -277,7 +285,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         {
             statement += QString(
                 "\n   (%1, \"New Game\", NULL, NULL),")
-                .arg(++maxPos);
+                .arg(gamePos++);
         }
         statement[statement.size() - 1] = ';';
 
@@ -311,10 +319,20 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
 
             if (m_query.exec(statement))
             {
-                if (count == 1)
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                if (m_sortingColumnID >= 0)
+                {
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                    else
+                        beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
+                }
                 else
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
+                {
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), row, row);
+                    else
+                        beginInsertRows(QModelIndex(), row, row + (count - 1));
+                }
 
                 QList<GameItem> gameList;
                 while(m_query.next())
@@ -327,7 +345,14 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
                     game.rate = m_query.value(4).toInt();
                     gameList.prepend(game);
                 }
-                m_data.append(gameList.cbegin(), gameList.cend());
+                if (m_sortingColumnID >= 0)
+                    m_data.append(gameList.cbegin(), gameList.cend());
+                else
+                {
+                    for (int i = 0; i < gameList.size(); i++)
+                        m_data.insert(row+i, gameList.at(i));
+                    updateGamePos(row+gameList.size());
+                }
 
                 endInsertRows();
             }
@@ -461,8 +486,28 @@ QVariant TableModelGame::headerData(int section, Qt::Orientation orientation, in
 
 void TableModelGame::appendRows(int count)
 {
+    appendRows(QModelIndexList(), count);
+}
+
+void TableModelGame::appendRows(const QModelIndexList& indexList, int count)
+{
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
     if (count > 0 && m_isTableCreated)
-        insertRows(rowCount(), count);
+    {
+        if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+            insertRows(rowCount(), count);
+        else
+            insertRows(indexListCopy.at(0).row()+1, count);
+    }
 }
 
 void TableModelGame::deleteRows(const QModelIndexList& indexList)
