@@ -227,33 +227,41 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
     if (row >= 0 && row <= rowCount() &&
         count > 0 && m_isTableCreated)
     {
-        // MoviePos  statement
-        QString posStatement = QString(
-            "SELECT\n"
-            "   MAX(MoviePos)\n"
-            "FROM\n"
-            "   \"%1\";").arg(m_tableName);
-
-#ifndef NDEBUG
-        std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-        int maxPos = 0;
-        if (m_query.exec(posStatement))
+        int moviePos;
+        if (m_sortingColumnID >= 0)
         {
-            if (m_query.next())
+            // Retrieve max pos.
+            QString posStatement = QString(
+                "SELECT\n"
+                "   MAX(MoviePos)\n"
+                "FROM\n"
+                "   \"%1\";").arg(m_tableName);
+
+    #ifndef NDEBUG
+            std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+    #endif
+
+            if (m_query.exec(posStatement))
             {
-                maxPos = m_query.value(0).toInt();
+                if (m_query.next())
+                {
+                    moviePos = m_query.value(0).toInt();
+                    m_query.clear();
+                }
+            }
+            else
+            {
+                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+                    .arg(m_tableName, m_query.lastError().text())
+                    .toLocal8Bit().constData()
+                    << std::endl;
                 m_query.clear();
             }
         }
         else
         {
-            std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                .arg(m_tableName, m_query.lastError().text())
-                .toLocal8Bit().constData()
-                << std::endl;
-            m_query.clear();
+            // Insert the row where the user want it if sorting is not enable.
+            moviePos = row;
         }
 
         // Executing the sql statement for inserting new rows.
@@ -273,7 +281,7 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
 
             statement += QString(
                 "\n\t(%1, \"New Movie\", NULL, NULL)")
-                .arg(++maxPos);
+                .arg(moviePos++);
         }
         statement += ';';
 
@@ -306,11 +314,21 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
 
             if (m_query.exec(statement))
             {
-                if (count == 1)
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                if (m_sortingColumnID >= 0)
+                {
+                    if (count == 1)
+                        beginInsertColumns(QModelIndex(), rowCount(), rowCount());
+                    else
+                        beginInsertColumns(QModelIndex(), rowCount(), rowCount()+count-1);
+                }
                 else
-                    beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
-                
+                {
+                    if (count == 1)
+                        beginInsertRows(QModelIndex(), row, row);
+                    else
+                        beginInsertRows(QModelIndex(), row, row+count-1);
+                }
+
                 QList<MovieItem> movieList;
                 while (m_query.next())
                 {
@@ -322,7 +340,14 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
                     movie.rate = m_query.value(4).toInt();
                     movieList.prepend(movie);
                 }
-                m_data.append(movieList);
+                if (m_sortingColumnID >= 0)
+                    m_data.append(movieList.cbegin(), movieList.cend());
+                else
+                {
+                    for (int i = 0; i < movieList.size(); i++)
+                        m_data.insert(row+i, movieList.at(i));
+                    updateMoviePos(row+movieList.size());
+                }
 
                 endInsertRows();
             }
@@ -454,8 +479,28 @@ QVariant TableModelMovies::headerData(int section, Qt::Orientation orientation, 
 
 void TableModelMovies::appendRows(int count)
 {
+    appendRows(QModelIndexList(), count);
+}
+
+void TableModelMovies::appendRows(const QModelIndexList& indexList, int count)
+{
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
     if (count > 0 && m_isTableCreated)
-        insertRows(rowCount(), count);
+    {
+        if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+            insertRows(rowCount(), count);
+        else
+            insertRows(indexListCopy.at(0).row()+1, count);
+    }
 }
 
 void TableModelMovies::deleteRows(const QModelIndexList& indexList)
