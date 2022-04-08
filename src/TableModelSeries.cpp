@@ -1380,7 +1380,7 @@ void TableModelSeries::updateSeriesPos(int from)
             QString statement = baseStatement
                 .arg(m_tableName)
                 .arg(i)
-                .arg(m_data.at(i).seriePos);
+                .arg(m_data.at(i).serieID);
 
 #ifndef NDEBUG
             std::cout << statement.toLocal8Bit().constData() << "\n" << std::endl;
