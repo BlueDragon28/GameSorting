@@ -236,40 +236,11 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
     {
         int gamePos;
         if (m_sortingColumnID >= 0)
-        {
             // Retrieve max pos.
-            QString posStatement = QString(
-                "SELECT\n"
-                "   MAX(GamePos)\n"
-                "FROM\n"
-                "   \"%1\";").arg(m_tableName);
-
-    #ifndef NDEBUG
-            std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
-    #endif
-
-            if (m_query.exec(posStatement))
-            {
-                if (m_query.next())
-                {
-                    gamePos = m_query.value(0).toInt();
-                    m_query.clear();
-                }
-            }
-            else
-            {
-                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                    .arg(m_tableName, m_query.lastError().text())
-                    .toLocal8Bit().constData()
-                    << std::endl;
-                m_query.clear();
-            }
-        }
+            gamePos = retrieveMaxPos();
         else
-        {
             // Insert the row where the user want it if sorting is not enable.
             gamePos = row;
-        }
 
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
@@ -297,71 +268,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         if (m_query.exec(statement))
         {
             m_query.clear();
-            statement = QString(
-                "SELECT\n"
-                "   GameID,\n"
-                "   GamePos,\n"
-                "   Name,\n"
-                "   Url,\n"
-                "   Rate\n"
-                "FROM\n"
-                "   \"%1\"\n"
-                "ORDER BY\n"
-                "   GameID DESC\n"
-                "LIMIT\n"
-                "   %2;")
-                    .arg(m_tableName)
-                    .arg(count);
-                
-#ifndef NDEBUG
-            std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-            if (m_query.exec(statement))
-            {
-                if (m_sortingColumnID >= 0)
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-                    else
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount() + (count - 1));
-                }
-                else
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), row, row);
-                    else
-                        beginInsertRows(QModelIndex(), row, row + (count - 1));
-                }
-
-                QList<GameItem> gameList;
-                while(m_query.next())
-                {
-                    GameItem game = {};
-                    game.gameID = m_query.value(0).toLongLong();
-                    game.gamePos = m_query.value(1).toLongLong();
-                    game.name = m_query.value(2).toString();
-                    game.url = m_query.value(3).toString();
-                    game.rate = m_query.value(4).toInt();
-                    gameList.prepend(game);
-                }
-                if (m_sortingColumnID >= 0)
-                    m_data.append(gameList.cbegin(), gameList.cend());
-                else
-                {
-                    for (int i = 0; i < gameList.size(); i++)
-                        m_data.insert(row+i, gameList.at(i));
-                    updateGamePos(row+gameList.size());
-                }
-
-                endInsertRows();
-            }
-            else
-                updateQuery();
-            
-            // Emit the signal listEdited, this signal is used to tell that the list has been edited.
-            emit listEdited();
-            m_query.clear();
+            retrieveInsertedRows(row, count);
         }
         else
         {
@@ -507,6 +414,71 @@ void TableModelGame::appendRows(const QModelIndexList& indexList, int count)
             insertRows(rowCount(), count);
         else
             insertRows(indexListCopy.at(0).row()+1, count);
+    }
+}
+
+void TableModelGame::appendRows(const QModelIndexList& indexList, const QStringList& gameList)
+{
+    // Insert list (gameList) into the game list.
+    if (gameList.isEmpty())
+        return;
+    
+    // Sorting the selected index with higher number first.
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
+    // Choose where to add the game(s).
+    int gamePos;
+    if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+        gamePos = retrieveMaxPos()+1;
+    else
+        gamePos = indexListCopy.at(0).row()+1;
+    
+    if (gamePos < 0 || gamePos > rowCount())
+        return;
+    
+    // Insert the game(s).
+    QString statement = QString(
+        "INSERT INTO \"%1\" (\n"
+        "   GamePos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate )\n"
+        "VALUES")
+            .arg(m_tableName);
+    
+    for (int i = 0; i < gameList.size(); i++)
+    {
+        statement += QString(
+            "\n    (%1, \"%2\", NULL, NULL),")
+                .arg(gamePos+i).arg(gameList.at(i));
+    }
+    statement[statement.size()-1] = ';';
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        m_query.clear();
+        // Retrieve the inserted game(s) and showing them in the view.
+        retrieveInsertedRows(gamePos, gameList.size());
+    }
+    else
+    {
+#ifndef NDEBUG
+        std::cerr << QString("Failed to insert row of table %1\n\t%2")
+            .arg(m_tableName)
+            .arg(m_query.lastError().text()).toLocal8Bit().constData() << std::endl;
+#endif
     }
 }
 
@@ -1687,4 +1659,99 @@ void TableModelGame::copyToClipboard(QModelIndexList indexList)
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(gameNames);
+}
+
+int TableModelGame::retrieveMaxPos()
+{
+    // Retrieve max pos.
+    int maxPos;
+    QString posStatement = QString(
+        "SELECT\n"
+        "   MAX(GamePos)\n"
+        "FROM\n"
+        "   \"%1\";").arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(posStatement))
+    {
+        if (m_query.next())
+        {
+            maxPos = m_query.value(0).toInt();
+            m_query.clear();
+        }
+    }
+    else
+    {
+        std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+        m_query.clear();
+        maxPos = 0;
+    }
+
+    return maxPos;
+}
+
+void TableModelGame::retrieveInsertedRows(int row, int count)
+{
+    // Retrieve the inserted data into the SQL table.
+    QString statement = QString(
+        "SELECT\n"
+        "   GameID,\n"
+        "   GamePos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   GameID DESC\n"
+        "LIMIT\n"
+        "   %2;")
+            .arg(m_tableName)
+            .arg(count);
+        
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        if (m_sortingColumnID >= 0)
+            beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
+        else
+            beginInsertRows(QModelIndex(), row, row+count-1);
+
+        QList<GameItem> gameList;
+        while(m_query.next())
+        {
+            GameItem game = {};
+            game.gameID = m_query.value(0).toLongLong();
+            game.gamePos = m_query.value(1).toLongLong();
+            game.name = m_query.value(2).toString();
+            game.url = m_query.value(3).toString();
+            game.rate = m_query.value(4).toInt();
+            gameList.prepend(game);
+        }
+        if (m_sortingColumnID >= 0)
+            m_data.append(gameList.cbegin(), gameList.cend());
+        else
+        {
+            for (int i = 0; i < gameList.size(); i++)
+                m_data.insert(row+i, gameList.at(i));
+            updateGamePos(row+gameList.size());
+        }
+
+        endInsertRows();
+    }
+    else
+        updateQuery();
+    
+    // Emit the signal listEdited, this signal is used to tell that the list has been edited.
+    emit listEdited();
+    m_query.clear();
 }

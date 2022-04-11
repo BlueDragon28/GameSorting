@@ -21,6 +21,7 @@
 
 #include "TableModel.h"
 #include <QItemSelection>
+#include <QStringList>
 
 class TableModelGame_UtilityInterface;
 
@@ -44,6 +45,7 @@ public:
 
     virtual void appendRows(int count = 1) override;
     virtual void appendRows(const QModelIndexList& indexList, int count = 1) override;
+    virtual void appendRows(const QModelIndexList& indexList, const QStringList& gameList);
     virtual void deleteRows(const QModelIndexList& indexList) override;
     virtual int size() const override;
     virtual ListType listType() const override;
@@ -93,6 +95,9 @@ private:
     void sortUtility(int column);
 
     void updateGamePos(int from = -1);
+
+    int retrieveMaxPos();
+    void retrieveInsertedRows(int row, int count = 1);
 
     TableModelGame_UtilityInterface* m_interface;
     QList<GameItem> m_data;
