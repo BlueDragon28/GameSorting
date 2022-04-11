@@ -107,35 +107,7 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
     // Inserting rows into the model.
     if (row > -1 && row <= rowCount() && count > 0)
     {
-        // OrderID statement
-        QString orderIDStatement = QString(
-            "SELECT\n"
-            "   MAX(OrderID)\n"
-            "FROM\n"
-            "   \"%1\";")
-                .arg(SqlUtilityTable::tableName(m_tableName));
-
-#ifndef NDEBUG
-        std::cout << orderIDStatement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-        int maxOrderID = 0;
-        if (m_query.exec(orderIDStatement))
-        {
-            if (m_query.next())
-            {
-                maxOrderID = m_query.value(0).toInt();
-                m_query.clear();
-            }
-        }
-        else
-        {
-            std::cerr << QString("Failed to query max orderID from table %1.\n\t%2")
-                .arg(SqlUtilityTable::tableName(m_tableName), maxOrderID)
-                .toLocal8Bit().constData()
-                << std::endl;
-            m_query.clear();
-        }
+        int itemPos = row;
 
         QString statement = QString(
             "INSERT INTO \"%1\" (OrderID, Name)\n"
@@ -143,7 +115,7 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
             .arg(SqlUtilityTable::tableName(m_tableName));
         
         for (int i = 0; i < count; i++)
-            statement += QString("\n\t(%1, \"New %2\"),").arg(++maxOrderID).arg(SqlUtilityTable::tableName(m_tableName));
+            statement += QString("\n\t(%1, \"New %2\"),").arg(itemPos++).arg(SqlUtilityTable::tableName(m_tableName));
         statement[statement.size()-1] = ';';
 
 #ifndef NDEBUG
@@ -188,10 +160,16 @@ bool UtilityListModel::insertRows(int row, int count, const QModelIndex& parent)
 
                 if (newData.size() > 0)
                 {
-                    beginInsertRows(QModelIndex(), 0, newData.size()-1);
-                    m_data.append(newData);
+                    beginInsertRows(QModelIndex(), row, row+count-1);
+                    if (row >= rowCount())
+                        m_data.append(newData);
+                    else
+                    {
+                        for (int i = 0; i < newData.size(); i++)
+                            m_data.insert(row+i, newData.at(i));
+                        updateOrder(itemPos);
+                    }
                     endInsertRows();
-                    updateOrder(row);
                 }
             }
             else
@@ -350,6 +328,24 @@ void UtilityListModel::queryTable()
 void UtilityListModel::appendRow()
 {
     insertRow(rowCount());
+}
+
+void UtilityListModel::appendRow(const QModelIndexList& indexList)
+{
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty())
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
+    if (indexListCopy.isEmpty())
+        appendRow();
+    else
+        insertRow(indexListCopy.at(0).row()+1);
 }
 
 void UtilityListModel::deleteIndexs(const QModelIndexList& indexList)

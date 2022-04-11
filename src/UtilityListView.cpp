@@ -54,7 +54,7 @@ void UtilityListView::createMenu()
     QIcon addIcon(":/Images/Add.svg");
     QAction* addAct = new QAction(addIcon, tr("Add new item"), this);
     addAct->setToolTip(tr("Adding a new item into the list."));
-    connect(addAct, &QAction::triggered, m_model, &UtilityListModel::appendRow);
+    connect(addAct, &QAction::triggered, this, &UtilityListView::addItem);
     menuBar->addAction(addAct);
 
     QIcon delIcon(":/Images/Del.svg");
@@ -170,4 +170,16 @@ void UtilityListView::moveItemTo()
         selectionModel->clear();
         selectionModel->select(selectedIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
+}
+
+void UtilityListView::addItem()
+{
+    QItemSelectionModel* selectionModel = m_view->selectionModel();
+    if (selectionModel->hasSelection())
+    {
+        QModelIndexList indexList = selectionModel->selectedRows(0);
+        m_model->appendRow(indexList);
+    }
+    else
+        m_model->appendRow();
 }

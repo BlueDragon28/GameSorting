@@ -42,6 +42,7 @@ private slots:
     void moveItemUp();
     void moveItemDown();
     void moveItemTo();
+    void addItem();
 
 private:
     void createMenu();

@@ -48,6 +48,7 @@ public:
 
     void queryTable();
     void appendRow();
+    void appendRow(const QModelIndexList& indexList);
     void deleteIndexs(const QModelIndexList& indexList);
     QItemSelection moveItemUp(const QModelIndexList& indexList);
     QItemSelection moveItemDown(const QModelIndexList& indexList);
