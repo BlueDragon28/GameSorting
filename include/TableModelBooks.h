@@ -43,7 +43,7 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     virtual void appendRows(int count = 1) override;
-    virtual void appendRows(const QModelIndexList& indexList, int count = 1);
+    virtual void appendRows(const QModelIndexList& indexList, int count = 1) override;
     virtual void deleteRows(const QModelIndexList& indexList) override;
     virtual int size() const override;
     virtual ListType listType() const override;
