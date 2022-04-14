@@ -44,6 +44,7 @@ public:
 
     virtual void appendRows(int count = 1) override;
     virtual void appendRows(const QModelIndexList& indexList, int count = 1) override;
+    virtual void appendRows(const QModelIndexList& indexList, const QStringList moviesList);
     virtual void deleteRows(const QModelIndexList& indexList) override;
     virtual int size() const override;
     virtual ListType listType() const override;
@@ -95,6 +96,9 @@ private:
     void sortUtility(int column);
 
     void updateMoviePos(int from = -1);
+
+    int retrieveMaxPos();
+    void retrieveInsertedRows(int row, int count = 1);
 
     TableModelMovies_UtilityInterface* m_interface;
     QList<MovieItem> m_data;

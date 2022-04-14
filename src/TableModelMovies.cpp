@@ -229,40 +229,11 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
     {
         int moviePos;
         if (m_sortingColumnID >= 0)
-        {
             // Retrieve max pos.
-            QString posStatement = QString(
-                "SELECT\n"
-                "   MAX(MoviePos)\n"
-                "FROM\n"
-                "   \"%1\";").arg(m_tableName);
-
-    #ifndef NDEBUG
-            std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
-    #endif
-
-            if (m_query.exec(posStatement))
-            {
-                if (m_query.next())
-                {
-                    moviePos = m_query.value(0).toInt();
-                    m_query.clear();
-                }
-            }
-            else
-            {
-                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                    .arg(m_tableName, m_query.lastError().text())
-                    .toLocal8Bit().constData()
-                    << std::endl;
-                m_query.clear();
-            }
-        }
+            moviePos = retrieveMaxPos()+1;
         else
-        {
             // Insert the row where the user want it if sorting is not enable.
             moviePos = row;
-        }
 
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
@@ -292,71 +263,8 @@ bool TableModelMovies::insertRows(int row, int count, const QModelIndex& parent)
         // Then, querying the new inserted data and add it to the m_listData
         if (m_query.exec(statement))
         {
-            statement = QString(
-                "SELECT\n"
-                "   MovieID,\n"
-                "   MoviePos,\n"
-                "   Name,\n"
-                "   Url,\n"
-                "   Rate\n"
-                "FROM\n"
-                "   \"%1\"\n"
-                "ORDER BY\n"
-                "   MovieID DESC\n"
-                "LIMIT\n"
-                "   %2;")
-                    .arg(m_tableName)
-                    .arg(count);
-            
-#ifndef NDEBUG
-            std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-            if (m_query.exec(statement))
-            {
-                if (m_sortingColumnID >= 0)
-                {
-                    if (count == 1)
-                        beginInsertColumns(QModelIndex(), rowCount(), rowCount());
-                    else
-                        beginInsertColumns(QModelIndex(), rowCount(), rowCount()+count-1);
-                }
-                else
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), row, row);
-                    else
-                        beginInsertRows(QModelIndex(), row, row+count-1);
-                }
-
-                QList<MovieItem> movieList;
-                while (m_query.next())
-                {
-                    MovieItem movie = {};
-                    movie.movieID = m_query.value(0).toLongLong();
-                    movie.moviePos = m_query.value(1).toLongLong();
-                    movie.name = m_query.value(2).toString();
-                    movie.url = m_query.value(3).toString();
-                    movie.rate = m_query.value(4).toInt();
-                    movieList.prepend(movie);
-                }
-                if (m_sortingColumnID >= 0)
-                    m_data.append(movieList.cbegin(), movieList.cend());
-                else
-                {
-                    for (int i = 0; i < movieList.size(); i++)
-                        m_data.insert(row+i, movieList.at(i));
-                    updateMoviePos(row+movieList.size());
-                }
-
-                endInsertRows();
-            }
-            else
-                updateQuery();
-
-            // Emit the signal lsitEdited, this signal is used to tell that the list has been edited.
-            emit listEdited();
             m_query.clear();
+            retrieveInsertedRows(row, count);
         }
         else
         {
@@ -501,6 +409,70 @@ void TableModelMovies::appendRows(const QModelIndexList& indexList, int count)
         else
             insertRows(indexListCopy.at(0).row()+1, count);
     }
+}
+
+void TableModelMovies::appendRows(const QModelIndexList& indexList, const QStringList moviesList)
+{
+    // Insert list (moviesList) into the movie list.
+    if (moviesList.isEmpty())
+        return;
+    
+    // Sorting the selected index with higher number first.
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
+    // Choose where to add the movie(s).
+    int moviePos;
+    if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+        moviePos = retrieveMaxPos()+1;
+    else
+        moviePos = indexListCopy.at(0).row()+1;
+    
+    if (moviePos < 0 || moviePos > rowCount())
+        return;
+    
+    // Insert the movie(s).
+    QString statement = QString(
+        "INSERT INTO \"%1\" (\n"
+        "   MoviePos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate )\n"
+        "VALUES")
+            .arg(m_tableName);
+    
+    for (int i = 0; i < moviesList.size(); i++)
+    {
+        statement += QString(
+            "\n    (%1, \"%2\", NULL, NULL),")
+                .arg(moviePos+i).arg(moviesList.at(i));
+    }
+    statement[statement.size()-1] = ';';
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        m_query.clear();
+        retrieveInsertedRows(moviePos, moviesList.size());
+    }
+#ifndef NDEBUG
+    else
+    {
+        std::cerr << QString("Failed to insert row of table %1\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData() << '\n' << std::endl;
+    }
+#endif
 }
 
 void TableModelMovies::deleteRows(const QModelIndexList& indexList)
@@ -1688,4 +1660,106 @@ void TableModelMovies::copyToClipboard(QModelIndexList indexList)
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(moviesNames);
+}
+
+int TableModelMovies::retrieveMaxPos()
+{
+    int maxPos = 0;
+    QString posStatement = QString(
+        "SELECT\n"
+        "   MAX(MoviePos)\n"
+        "FROM\n"
+        "   \"%1\";").arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(posStatement))
+    {
+        if (m_query.next())
+        {
+            maxPos = m_query.value(0).toInt();
+            m_query.clear();
+        }
+    }
+    else
+    {
+        std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+        m_query.clear();
+    }
+
+    return maxPos;
+}
+
+void TableModelMovies::retrieveInsertedRows(int row, int count)
+{
+    QString statement = QString(
+        "SELECT\n"
+        "   MovieID,\n"
+        "   MoviePos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   MovieID DESC\n"
+        "LIMIT\n"
+        "   %2;")
+            .arg(m_tableName)
+            .arg(count);
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        if (m_sortingColumnID >= 0)
+        {
+            if (count == 1)
+                beginInsertColumns(QModelIndex(), rowCount(), rowCount());
+            else
+                beginInsertColumns(QModelIndex(), rowCount(), rowCount()+count-1);
+        }
+        else
+        {
+            if (count == 1)
+                beginInsertRows(QModelIndex(), row, row);
+            else
+                beginInsertRows(QModelIndex(), row, row+count-1);
+        }
+
+        QList<MovieItem> movieList;
+        while (m_query.next())
+        {
+            MovieItem movie = {};
+            movie.movieID = m_query.value(0).toLongLong();
+            movie.moviePos = m_query.value(1).toLongLong();
+            movie.name = m_query.value(2).toString();
+            movie.url = m_query.value(3).toString();
+            movie.rate = m_query.value(4).toInt();
+            movieList.prepend(movie);
+        }
+        if (m_sortingColumnID >= 0)
+            m_data.append(movieList.cbegin(), movieList.cend());
+        else
+        {
+            for (int i = 0; i < movieList.size(); i++)
+                m_data.insert(row+i, movieList.at(i));
+            updateMoviePos(row+movieList.size());
+        }
+
+        endInsertRows();
+    }
+    else
+        updateQuery();
+
+    // Emit the signal lsitEdited, this signal is used to tell that the list has been edited.
+    emit listEdited();
+    m_query.clear();
 }
