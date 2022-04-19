@@ -275,40 +275,11 @@ bool TableModelSeries::insertRows(int row, int count, const QModelIndex& parent)
     {
         int seriePos;
         if (m_sortingColumnID >= 0)
-        {
             // Retrieve max pos
-            QString posStatement = QString(
-                "SELECT\n"
-                "   MAX(SeriesPos)\n"
-                "FROM\n"
-                "   \"%1\";").arg(m_tableName);
-
-    #ifndef NDEBUG
-            std::cout << posStatement.toLocal8Bit().constData() << "\n" << std::endl;
-    #endif
-
-            if (m_query.exec(posStatement))
-            {
-                if (m_query.next())
-                {
-                    seriePos = m_query.value(0).toInt();
-                    m_query.clear();
-                }
-            }
-            else
-            {
-                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                    .arg(m_tableName, m_query.lastError().text())
-                    .toLocal8Bit().constData()
-                    << std::endl;
-                m_query.clear();
-            }
-        }
+            seriePos = retrieveMaxPos()+1;
         else
-        {
             // Insert the row where the user want it if sorting is not enable.
             seriePos = row;
-        }
 
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
@@ -338,75 +309,7 @@ bool TableModelSeries::insertRows(int row, int count, const QModelIndex& parent)
         if (m_query.exec(statement))
         {
             m_query.clear();
-            statement = QString(
-                "SELECT\n"
-                "   SeriesID,\n"
-                "   SeriesPos,\n"
-                "   Name,\n"
-                "   Episode,\n"
-                "   Season,\n"
-                "   Url,\n"
-                "   Rate\n"
-                "FROM\n"
-                "   \"%1\"\n"
-                "ORDER BY\n"
-                "   SeriesID DESC\n"
-                "LIMIT\n"
-                "   %2;")
-                    .arg(m_tableName)
-                    .arg(count);
-                
-#ifndef NDEBUG
-            std::cout << statement.toLocal8Bit().constData() << "\n" << std::endl;
-#endif
-
-            if (m_query.exec(statement))
-            {
-                if (m_sortingColumnID >= 0)
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-                    else
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
-                }
-                else
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), row, row);
-                    else
-                        beginInsertRows(QModelIndex(), row, row+count-1);
-                }
-
-                QList<SeriesItem> seriesList;
-                while(m_query.next())
-                {
-                    SeriesItem serie = {};
-                    serie.serieID = m_query.value(0).toLongLong();
-                    serie.seriePos = m_query.value(1).toLongLong();
-                    serie.name = m_query.value(2).toString();
-                    serie.episodePos = m_query.value(3).toInt();
-                    serie.seasonPos = m_query.value(4).toInt();
-                    serie.url = m_query.value(5).toString();
-                    serie.rate = m_query.value(6).toInt();
-                    seriesList.prepend(serie);
-                }
-                if (m_sortingColumnID >= 0)
-                    m_data.append(seriesList.cbegin(), seriesList.cend());
-                else
-                {
-                    for (int i = 0; i < seriesList.size(); i++)
-                        m_data.insert(row+i, seriesList.at(i));
-                    updateSeriesPos(row+seriesList.size());
-                }
-
-                endInsertRows();
-            }
-            else
-                updateQuery();
-            
-            // Emit the signal listEdited, this signal is used to tell that the list has been edited.
-            emit listEdited();
-            m_query.clear();
+            retrieveInsertedRows(row, count);
         }
         else
         {
@@ -555,6 +458,73 @@ void TableModelSeries::appendRows(const QModelIndexList& indexList, int count)
         else
             insertRows(indexListCopy.at(0).row()+1, count);
     }
+}
+
+void TableModelSeries::appendRows(const QModelIndexList& indexList, const QStringList& seriesList)
+{
+    // Insert list (seriesList) into the series list.
+    if (seriesList.isEmpty())
+        return;
+    
+    // Sorting the selected index with higher number first.
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
+    // Choose where to add the serie(s).
+    int seriePos;
+    if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+        seriePos = retrieveMaxPos()+1;
+    else
+        seriePos = indexListCopy.at(0).row()+1;
+    
+    if (seriePos < 0 || seriePos > rowCount())
+        return;
+    
+    // Insert the serie(s).
+    QString statement = QString(
+        "INSERT INTO \"%1\" (\n"
+        "   SeriesPos,\n"
+        "   Name,\n"
+        "   Episode,\n"
+        "   Season,\n"
+        "   Url,\n"
+        "   Rate )\n"
+        "VALUES")
+            .arg(m_tableName);
+
+    for (int i = 0; i < seriesList.size(); i++)
+    {
+        statement += QString(
+            "\n   (%1, \"%2\", NULL, NULL, NULL, NULL),")
+            .arg(seriePos+i).arg(seriesList.at(i));
+    }
+    statement[statement.size() - 1] = ';';
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        m_query.clear();
+        // Retrieve the inserted serie(s) and showing them into the view.
+        retrieveInsertedRows(seriePos, seriesList.size());
+    }
+#ifndef NDEBUG
+    else
+    {
+        std::cerr << QString("Failed to insert row of table%1\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData() << '\n' << std::endl;
+    }
+#endif
 }
 
 void TableModelSeries::deleteRows(const QModelIndexList& indexList)
@@ -1758,4 +1728,112 @@ void TableModelSeries::copyToClipboard(QModelIndexList indexList)
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(seriesNames);
+}
+
+int TableModelSeries::retrieveMaxPos()
+{
+    // Retrieve max pos.
+    int maxPos;
+    QString posStatement = QString(
+        "SELECT\n"
+        "   MAX(SeriesPos)\n"
+        "FROM\n"
+        "   \"%1\";").arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << posStatement.toLocal8Bit().constData() << "\n" << std::endl;
+#endif
+
+    if (m_query.exec(posStatement))
+    {
+        if (m_query.next())
+        {
+            maxPos = m_query.value(0).toInt();
+            m_query.clear();
+        }
+    }
+    else
+    {
+        std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+        m_query.clear();
+        maxPos = 0;
+    }
+
+    return maxPos;
+}
+
+void TableModelSeries::retrieveInsertedRows(int row, int count)
+{
+    QString statement = QString(
+        "SELECT\n"
+        "   SeriesID,\n"
+        "   SeriesPos,\n"
+        "   Name,\n"
+        "   Episode,\n"
+        "   Season,\n"
+        "   Url,\n"
+        "   Rate\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   SeriesID DESC\n"
+        "LIMIT\n"
+        "   %2;")
+            .arg(m_tableName)
+            .arg(count);
+        
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << "\n" << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        if (m_sortingColumnID >= 0)
+        {
+            if (count == 1)
+                beginInsertRows(QModelIndex(), rowCount(), rowCount());
+            else
+                beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
+        }
+        else
+        {
+            if (count == 1)
+                beginInsertRows(QModelIndex(), row, row);
+            else
+                beginInsertRows(QModelIndex(), row, row+count-1);
+        }
+
+        QList<SeriesItem> seriesList;
+        while(m_query.next())
+        {
+            SeriesItem serie = {};
+            serie.serieID = m_query.value(0).toLongLong();
+            serie.seriePos = m_query.value(1).toLongLong();
+            serie.name = m_query.value(2).toString();
+            serie.episodePos = m_query.value(3).toInt();
+            serie.seasonPos = m_query.value(4).toInt();
+            serie.url = m_query.value(5).toString();
+            serie.rate = m_query.value(6).toInt();
+            seriesList.prepend(serie);
+        }
+        if (m_sortingColumnID >= 0)
+            m_data.append(seriesList.cbegin(), seriesList.cend());
+        else
+        {
+            for (int i = 0; i < seriesList.size(); i++)
+                m_data.insert(row+i, seriesList.at(i));
+            updateSeriesPos(row+seriesList.size());
+        }
+
+        endInsertRows();
+    }
+    else
+        updateQuery();
+
+    // Emit the signal listEdited, this signal is used to tell that the list has been edited.
+    emit listEdited();
+    m_query.clear();
 }

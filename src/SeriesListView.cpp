@@ -35,6 +35,8 @@
 #include <QUrl>
 #include <QToolButton>
 #include <QMenu>
+#include <QClipboard>
+#include <QApplication>
 #include <iostream>
 
 SeriesListView::SeriesListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
@@ -157,6 +159,13 @@ void SeriesListView::createMenu(QVBoxLayout* vLayout)
         connect(copyAct, &QAction::triggered, this, &SeriesListView::copy);
         connect(m_model, &TableModelSeries::filterChanged, [copyAct](bool value){copyAct->setEnabled(!value);});
         toolBar->addAction(copyAct);
+
+        QIcon pasteIcon(":/Images/Paste.svg");
+        QAction* pasteAct = new QAction(pasteIcon, tr("Paste series"), this);
+        pasteAct->setToolTip(tr("Paste serie(s) from the clipboard into the list."));
+        connect(pasteAct, &QAction::triggered, this, &SeriesListView::paste);
+        connect(m_model, &TableModelSeries::filterChanged, [pasteAct](bool value){pasteAct->setEnabled(!value);});
+        toolBar->addAction(pasteAct);
 
         // Move item up and down
         QIcon moveUPIcon(":/Images/MoveUP.svg");
@@ -440,6 +449,32 @@ void SeriesListView::copy()
             this,
             tr("Copy to clipboard"),
             tr("No series selected!"),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+}
+
+void SeriesListView::paste()
+{
+    // Paste the clipboard text into the list.
+    QClipboard* clipboard = QApplication::clipboard();
+    QString strClipboard = clipboard->text();
+    if (!strClipboard.isEmpty())
+    {
+        QItemSelectionModel* selectionModel = m_view->selectionModel();
+        QModelIndexList indexList;
+        if (selectionModel->hasSelection())
+            indexList = selectionModel->selectedRows(0);
+        
+        if (strClipboard.at(0) == ':')
+            m_model->appendRows(indexList, strClipboard.split(':', Qt::SkipEmptyParts));
+        else
+            m_model->appendRows(indexList, {strClipboard});
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Paste from clipboard"),
+            tr("The clipboard is empty!"),
             QMessageBox::Ok,
             QMessageBox::Ok);
 }
