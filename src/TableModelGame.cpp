@@ -237,7 +237,7 @@ bool TableModelGame::insertRows(int row, int count, const QModelIndex& parent)
         int gamePos;
         if (m_sortingColumnID >= 0)
             // Retrieve max pos.
-            gamePos = retrieveMaxPos();
+            gamePos = retrieveMaxPos()+1;
         else
             // Insert the row where the user want it if sorting is not enable.
             gamePos = row;
