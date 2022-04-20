@@ -35,6 +35,8 @@
 #include <QUrl>
 #include <QToolButton>
 #include <QMenu>
+#include <QApplication>
+#include <QClipboard>
 #include <iostream>
 
 BooksListView::BooksListView(const QString& tableName, ListType type, QSqlDatabase& db, SqlUtilityTable& utilityTable, QWidget* parent) :
@@ -152,11 +154,18 @@ void BooksListView::createMenu(QVBoxLayout* vLayout)
         toolBar->addAction(delAct);
 
         QIcon copyIcon(":/Images/Copy.svg");
-        QAction* copyAct = new QAction(copyIcon, tr("Copy movies"), this);
+        QAction* copyAct = new QAction(copyIcon, tr("Copy books"), this);
         copyAct->setToolTip(tr("Copying book(s) into the clipboard."));
         connect(copyAct, &QAction::triggered, this, &BooksListView::copy);
         connect(m_model, &TableModelBooks::filterChanged, [copyAct](bool value){copyAct->setEnabled(!value);});
         toolBar->addAction(copyAct);
+
+        QIcon pasteIcon(":/Images/Paste.svg");
+        QAction* pasteAct = new QAction(pasteIcon, tr("Paste books"), this);
+        pasteAct->setToolTip(tr("Paste book(s) from the clipboard into the list."));
+        connect(pasteAct, &QAction::triggered, this, &BooksListView::paste);
+        connect(m_model, &TableModelBooks::filterChanged, [pasteAct](bool value){pasteAct->setEnabled(!value);});
+        toolBar->addAction(pasteAct);
 
         // Move item up and down
         QIcon moveUPIcon(":/Images/MoveUP.svg");
@@ -432,6 +441,32 @@ void BooksListView::copy()
             this,
             tr("Copy to clipboard"),
             tr("No books selected!"),
+            QMessageBox::Ok,
+            QMessageBox::Ok);
+}
+
+void BooksListView::paste()
+{
+    // Paste the clipboard text into the list.
+    QClipboard* clipboard = QApplication::clipboard();
+    QString strClipboard = clipboard->text();
+    if (!strClipboard.isEmpty())
+    {
+        QItemSelectionModel* selectionModel = m_view->selectionModel();
+        QModelIndexList indexList;
+        if (selectionModel->hasSelection())
+            indexList = selectionModel->selectedRows(0);
+        
+        if (strClipboard.at(0) == ':')
+            m_model->appendRows(indexList, strClipboard.split(':', Qt::SkipEmptyParts));
+        else
+            m_model->appendRows(indexList, {strClipboard});
+    }
+    else
+        QMessageBox::warning(
+            this,
+            tr("Paste from clipboard"),
+            tr("The clipboard is empty!"),
             QMessageBox::Ok,
             QMessageBox::Ok);
 }

@@ -59,6 +59,7 @@ private slots:
     void moveItemTo();
     void filter();
     void copy();
+    void paste();
 
 private:
     void setupWidget();

@@ -55,6 +55,7 @@ public:
 
     virtual void appendRows(int count = 1) = 0;
     virtual void appendRows(const QModelIndexList& indexList, int count = 1) = 0;
+    virtual void appendRows(const QModelIndexList& indexList, const QStringList& itemList) = 0;
     virtual void deleteRows(const QModelIndexList& indexList) = 0;
     virtual int size() const = 0;
     QString tableName() const;
