@@ -230,41 +230,11 @@ bool TableModelCommon::insertRows(int row, int count, const QModelIndex& parent)
     {
         int commonPos;
         if (m_sortingColumnID >= 0)
-        {
             // Retrieve max pos.
-            QString posStatement = QString(
-                "SELECT\n"
-                "   MAX(CommonPos)\n"
-                "FROM\n"
-                "   \"%1\";").arg(m_tableName);
-
-#ifndef NDEBUG
-            std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-            int maxPos;
-            if (m_query.exec(posStatement))
-            {
-                if (m_query.next())
-                {
-                    commonPos = m_query.value(0).toInt();
-                    m_query.clear();
-                }
-            }
-            else
-            {
-                std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
-                    .arg(m_tableName, m_query.lastError().text())
-                    .toLocal8Bit().constData()
-                    << std::endl;
-                m_query.clear();
-            }
-        }
+            commonPos = retrieveMaxPos()+1;
         else
-        {
             // Insert the row where the user want it if sorting is not enable.
             commonPos = row;
-        }
 
         // Executing the sql statement for inserting new rows.
         QString statement = QString(
@@ -292,71 +262,7 @@ bool TableModelCommon::insertRows(int row, int count, const QModelIndex& parent)
         if (m_query.exec(statement))
         {
             m_query.clear();
-            statement = QString(
-                "SELECT\n"
-                "   CommonID,\n"
-                "   CommonPos,\n"
-                "   Name,\n"
-                "   Url,\n"
-                "   Rate\n"
-                "FROM\n"
-                "   \"%1\"\n"
-                "ORDER BY\n"
-                "   CommonID DESC\n"
-                "LIMIT\n"
-                "   %2;")
-                    .arg(m_tableName)
-                    .arg(count);
-                
-#ifndef NDEBUG
-            std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
-#endif
-
-            if (m_query.exec(statement))
-            {
-                if (m_sortingColumnID >= 0)
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-                    else
-                        beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
-                }
-                else
-                {
-                    if (count == 1)
-                        beginInsertRows(QModelIndex(), row, row);
-                    else
-                        beginInsertRows(QModelIndex(), row, row+count-1);
-                }
-
-                QList<CommonItem> commonList;
-                while(m_query.next())
-                {
-                    CommonItem common = {};
-                    common.commonID = m_query.value(0).toLongLong();
-                    common.commonPos = m_query.value(1).toLongLong();
-                    common.name = m_query.value(2).toString();
-                    common.url = m_query.value(3).toString();
-                    common.rate = m_query.value(4).toInt();
-                    commonList.prepend(common);
-                }
-                if (m_sortingColumnID >= 0)
-                    m_data.append(commonList.cbegin(), commonList.cend());
-                else
-                {
-                    for (int i = 0; i < commonList.size(); i++)
-                        m_data.insert(row+i, commonList.at(i));
-                    updateCommonPos(row+commonList.size());
-                }
-
-                endInsertRows();
-            }
-            else
-                updateQuery();
-            
-            // Emit the signal listEdited, this signal is used to tell that the list has been edited.
-            emit listEdited();
-            m_query.clear();
+            retrieveInsertedRows(row, count);
         }
         else
         {
@@ -497,6 +403,68 @@ void TableModelCommon::appendRows(const QModelIndexList& indexList, int count)
         else
             insertRows(indexListCopy.at(0).row()+1, count);
     }
+}
+
+void TableModelCommon::appendRows(const QModelIndexList& indexList, const QStringList& commonList)
+{
+    // Insert list (commonList) into the common list.
+    if (commonList.isEmpty())
+        return;
+    
+    // Sorting the selected index with higher number first.
+    QModelIndexList indexListCopy(indexList);
+    if (!indexListCopy.isEmpty() && m_sortingColumnID < 0)
+    {
+        std::sort(indexListCopy.begin(), indexListCopy.end(),
+            [](const QModelIndex& index1, const QModelIndex& index2) -> bool
+            {
+                return index1.row() > index2.row();
+            });
+    }
+
+    // Choose where to add the common item.
+    int commonPos;
+    if (indexListCopy.isEmpty() || m_sortingColumnID >= 0)
+        commonPos = retrieveMaxPos()+1;
+    else
+        commonPos = indexListCopy.at(0).row()+1;
+    
+    if (commonPos < 0 || commonPos > rowCount())
+        return;
+    
+    // Insert the common item.
+    QString statement = QString(
+        "INSERT INTO \"%1\" (\n"
+        "   CommonPos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate )\n"
+        "VALUES")
+            .arg(m_tableName);
+
+    for (int i = 0; i < commonList.size(); i++)
+    {
+        statement += QString(
+            "\n   (%1, \"%2\", NULL, NULL),")
+            .arg(commonPos+1).arg(commonList.at(i));
+    }
+    statement[statement.size() - 1] = ';';
+
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        m_query.clear();
+        retrieveInsertedRows(commonPos, commonList.size());
+    }
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to insert row of table %1\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData() << '\n' << std::endl;
+#endif
 }
 
 void TableModelCommon::deleteRows(const QModelIndexList& indexList)
@@ -1583,4 +1551,102 @@ void TableModelCommon::copyToClipboard(QModelIndexList indexList)
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(commonNames);
+}
+
+int TableModelCommon::retrieveMaxPos()
+{
+    // Retrieve max pos.
+    int maxPos = 0;
+    QString posStatement = QString(
+        "SELECT\n"
+        "   MAX(CommonPos)\n"
+        "FROM\n"
+        "   \"%1\";").arg(m_tableName);
+
+#ifndef NDEBUG
+    std::cout << posStatement.toLocal8Bit().constData() << std::endl << std::endl;
+#endif
+
+    if (m_query.exec(posStatement))
+        if (m_query.next())
+            maxPos = m_query.value(0).toInt();
+#ifndef NDEBUG
+    else
+        std::cerr << QString("Failed to get max position on the table %1.\n\t%2")
+            .arg(m_tableName, m_query.lastError().text())
+            .toLocal8Bit().constData()
+            << std::endl;
+#endif
+    m_query.clear();
+    return maxPos;
+}
+
+void TableModelCommon::retrieveInsertedRows(int row, int count)
+{
+    // Retrieve the inserted data into the SQL table.
+    QString statement = QString(
+        "SELECT\n"
+        "   CommonID,\n"
+        "   CommonPos,\n"
+        "   Name,\n"
+        "   Url,\n"
+        "   Rate\n"
+        "FROM\n"
+        "   \"%1\"\n"
+        "ORDER BY\n"
+        "   CommonID DESC\n"
+        "LIMIT\n"
+        "   %2;")
+            .arg(m_tableName)
+            .arg(count);
+        
+#ifndef NDEBUG
+    std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+    if (m_query.exec(statement))
+    {
+        if (m_sortingColumnID >= 0)
+        {
+            if (count == 1)
+                beginInsertRows(QModelIndex(), rowCount(), rowCount());
+            else
+                beginInsertRows(QModelIndex(), rowCount(), rowCount()+count-1);
+        }
+        else
+        {
+            if (count == 1)
+                beginInsertRows(QModelIndex(), row, row);
+            else
+                beginInsertRows(QModelIndex(), row, row+count-1);
+        }
+
+        QList<CommonItem> commonList;
+        while(m_query.next())
+        {
+            CommonItem common = {};
+            common.commonID = m_query.value(0).toLongLong();
+            common.commonPos = m_query.value(1).toLongLong();
+            common.name = m_query.value(2).toString();
+            common.url = m_query.value(3).toString();
+            common.rate = m_query.value(4).toInt();
+            commonList.prepend(common);
+        }
+        if (m_sortingColumnID >= 0)
+            m_data.append(commonList.cbegin(), commonList.cend());
+        else
+        {
+            for (int i = 0; i < commonList.size(); i++)
+                m_data.insert(row+i, commonList.at(i));
+            updateCommonPos(row+commonList.size());
+        }
+
+        endInsertRows();
+    }
+    else
+        updateQuery();
+    
+    // Emit the signal listEdited, this signal is used to tell that the list has been edited.
+    emit listEdited();
+    m_query.clear();
 }
