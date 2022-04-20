@@ -44,6 +44,7 @@ public:
 
     virtual void appendRows(int count = 1) override;
     virtual void appendRows(const QModelIndexList& indexList, int count = 1) override;
+    virtual void appendRows(const QModelIndexList& indexList, const QStringList& booksList);
     virtual void deleteRows(const QModelIndexList& indexList) override;
     virtual int size() const override;
     virtual ListType listType() const override;
@@ -91,6 +92,9 @@ private:
     void sortUtility(int column);
 
     void updateBooksPos(int from = -1);
+
+    int retrieveMaxPos();
+    void retrieveInsertedRows(int row, int count = 1);
 
     TableModelBooks_UtilityInterface* m_interface;
     QList<BooksItem> m_data;
