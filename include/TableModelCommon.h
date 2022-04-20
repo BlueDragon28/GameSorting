@@ -44,7 +44,7 @@ public:
 
     virtual void appendRows(int count = 1) override;
     virtual void appendRows(const QModelIndexList& indexList, int count = 1) override;
-    virtual void appendRows(const QModelIndexList& indexList, const QStringList& commonList);
+    virtual void appendRows(const QModelIndexList& indexList, const QStringList& commonList) override;
     virtual void deleteRows(const QModelIndexList& indexList) override;
     virtual int size() const override;
     virtual ListType listType() const override;

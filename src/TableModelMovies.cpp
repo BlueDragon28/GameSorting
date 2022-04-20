@@ -411,7 +411,7 @@ void TableModelMovies::appendRows(const QModelIndexList& indexList, int count)
     }
 }
 
-void TableModelMovies::appendRows(const QModelIndexList& indexList, const QStringList moviesList)
+void TableModelMovies::appendRows(const QModelIndexList& indexList, const QStringList& moviesList)
 {
     // Insert list (moviesList) into the movie list.
     if (moviesList.isEmpty())
