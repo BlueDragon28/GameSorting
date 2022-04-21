@@ -41,6 +41,8 @@ public:
 	QVariant data() const;
 	bool setData(const QVariant& data);
 
+	long long int addItem(UtilityTableName tableName, const QString& name);
+
 signals:
 	void utilityEdited();
 
