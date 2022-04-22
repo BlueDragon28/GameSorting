@@ -403,8 +403,8 @@ long long int SqlUtilityTable::addItem(UtilityTableName tableName, const QString
 	statement = QString(
 		"INSERT INTO \"%1\" (OrderID, Name)\n"
 		"VALUES\n"
-		"	(%1, \"%2\");")
-			.arg(orderID).arg(name);
+		"	(%2, \"%3\");")
+			.arg(this->tableName(tableName)).arg(orderID).arg(name);
 
 #ifndef NDEBUG
 	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
@@ -440,7 +440,7 @@ long long int SqlUtilityTable::addItem(UtilityTableName tableName, const QString
 			itemID = m_query.value(0).toLongLong();
 #ifndef NDEBUG
 	else
-		std::cerr << QString("Failed to insert item %1 into table %2.\n\t%3")
+		std::cerr << QString("Failed to retrieve item %1 from the table %2.\n\t%3")
 			.arg(name, this->tableName(tableName), m_query.lastError().text())
 			.toLocal8Bit().constData() << '\n' << std::endl;
 #endif
