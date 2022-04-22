@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "TableModel.h"
 #include "StarEditor.h"
+#include "UtilityLineEdit.h"
 #include <iostream>
 
 #include <QPainter>
@@ -39,7 +40,8 @@ ListViewDelegate::ListViewDelegate(
 		m_tableModel(tableModel),
 		m_utilityTable(utilityTable),
 		m_utilityInterface(m_tableModel->utilityInterface()),
-		m_db(db)
+		m_db(db),
+		m_legacyUtilEdit(false)
 {}
 
 ListViewDelegate::~ListViewDelegate()
@@ -233,18 +235,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Game::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
 		{
@@ -596,6 +610,16 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 				return;
 			}
 		}
+		else if (index.column() >= Game::SERIES &&
+				 index.column() <= Game::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				editor->setText("");
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::MOVIESLIST)
 	{
@@ -692,6 +716,15 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			if (spinEditor)
 			{
 				model->setData(index, spinEditor->value());
+				return;
+			}
+		}
+		else if (index.column() >= Game::SERIES &&
+				 index.column() <= Game::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
 				return;
 			}
 		}
