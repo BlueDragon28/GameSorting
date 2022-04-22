@@ -30,6 +30,8 @@
 #include <QBrush>
 #include <QColor>
 #include <QSpinBox>
+#include <QSqlQuery>
+#include <QStringList>
 
 ListViewDelegate::ListViewDelegate(
 	TableModel* tableModel,
@@ -720,11 +722,30 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			}
 		}
 		else if (index.column() >= Game::SERIES &&
-				 index.column() <= Game::SERVICES)
+				 index.column() <= Game::SERVICES &&
+				 !m_legacyUtilEdit)
 		{
+			// Retrieve data from the UtilityLineEdit and appending it into the utilityInterface.
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
 			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Game::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Game::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Game::DEVELOPPERS)
+					tableName = UtilityTableName::DEVELOPPERS;
+				else if (index.column() == Game::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Game::PLATFORMS)
+					tableName = UtilityTableName::PLATFORM;
+				else if (index.column() == Game::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
 				return;
 			}
 		}
@@ -893,4 +914,18 @@ void ListViewDelegate::paintRateStars(QPainter* painter, const QStyleOptionViewI
 		painter->setPen(Qt::SolidLine);
 		painter->drawText(options.rect, starNB);
 	}
+}
+
+void ListViewDelegate::applyUtilityLineEditData(long long int itemID, UtilityTableName tableName, const QString& utilityText) const
+{
+	if (utilityText.isEmpty() || itemID <= 0)
+		return;
+	QStringList utilityList = utilityText.split(',', Qt::SkipEmptyParts);
+	QList<long long int> utilityIDs;
+	foreach(const QString& item, utilityList)
+	{
+		if (!item.trimmed().isEmpty())
+			utilityIDs.append(m_utilityTable.addItem(tableName, item.trimmed()));
+	}
+	m_utilityInterface->updateItemUtility(itemID, tableName, QVariant::fromValue(utilityIDs));
 }
