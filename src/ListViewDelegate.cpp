@@ -32,6 +32,7 @@
 #include <QSpinBox>
 #include <QSqlQuery>
 #include <QStringList>
+#include <QSqlError>
 
 ListViewDelegate::ListViewDelegate(
 	TableModel* tableModel,
@@ -613,12 +614,29 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 		else if (index.column() >= Game::SERIES &&
-				 index.column() <= Game::SERVICES)
+				 index.column() <= Game::SERVICES &&
+				 !m_legacyUtilEdit)
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
 			{
-				editor->setText("");
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Game::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Game::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Game::DEVELOPPERS)
+					tableName = UtilityTableName::DEVELOPPERS;
+				else if (index.column() == Game::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Game::PLATFORMS)
+					tableName = UtilityTableName::PLATFORM;
+				else if (index.column() == Game::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
 				return;
 			}
 		}
@@ -928,4 +946,90 @@ void ListViewDelegate::applyUtilityLineEditData(long long int itemID, UtilityTab
 			utilityIDs.append(m_utilityTable.addItem(tableName, item.trimmed()));
 	}
 	m_utilityInterface->updateItemUtility(itemID, tableName, QVariant::fromValue(utilityIDs));
+}
+
+QString ListViewDelegate::retrieveDataForUtilityLineEdit(long long int itemID, UtilityTableName tableName) const
+{
+	if (itemID <= 0)
+		return "";
+	
+	QString statement = QString(
+		"SELECT\n"
+		"	UtilityID\n"
+		"FROM\n"
+		"	\"%1\""
+		"WHERE\n"
+		"	ItemID = %2;")
+			.arg(m_utilityInterface->tableName(tableName)).arg(itemID);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	QSqlQuery query(m_db);
+	QList<long long int> utilityIDs;
+	if (query.exec(statement))
+	{
+		while (query.next())
+			utilityIDs.append(query.value(0).toLongLong());
+	}
+	else
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to retrieve utility id from utility interface table %1 of itemID %2.\n\t%3")
+			.arg(m_utilityInterface->tableName(tableName)).arg(itemID)
+			.arg(query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+		return "";
+	}
+	query.clear();
+
+	if (utilityIDs.isEmpty())
+		return "";
+
+	statement = QString(
+		"SELECT\n"
+		"	Name\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	\"%1ID\" = %2;")
+			.arg(SqlUtilityTable::tableName(tableName));
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	QStringList strUtilityList;
+	foreach(long long int id, utilityIDs)
+	{
+		if (query.exec(statement.arg(id)))
+		{
+			if (query.next())
+				strUtilityList.append(query.value(0).toString());
+		}
+		else
+		{
+	#ifndef NDEBUG
+			std::cerr << QString("Failed to retrieve utility name list from table %1\n\t%2")
+				.arg(SqlUtilityTable::tableName(tableName), query.lastError().text())
+				.toLocal8Bit().constData() << '\n' << std::endl;
+	#endif
+			return "";
+		}
+	}
+
+	if (strUtilityList.isEmpty())
+		return "";
+	
+	QString strUtilityName;
+	for (int i = 0; i < strUtilityList.size(); i++)
+	{
+		if (i > 0)
+			strUtilityName += ", ";
+		strUtilityName += strUtilityList.at(i);
+	}
+
+	return strUtilityName;
 }
