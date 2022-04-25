@@ -54,6 +54,8 @@ QString TableModelSeries_UtilityInterface::tableName(UtilityTableName tableName)
         return m_parentTableName + "_Music";
     case UtilityTableName::SERVICES:
         return m_parentTableName + "_Services";
+    case UtilityTableName::SENSITIVE_CONTENT:
+        return m_parentTableName + "_SensitiveContent";
     default:
         return QString();
     }
@@ -72,6 +74,7 @@ void TableModelSeries_UtilityInterface::newParentName(const QString& newParentNa
     QString prodCurName = tableName(UtilityTableName::PRODUCTION);
     QString musCurName = tableName(UtilityTableName::MUSIC);
     QString serCurName = tableName(UtilityTableName::SERVICES);
+    QString sensContCurName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Changing m_parentTableName to the new parent name.
     m_parentTableName = newParentName;
@@ -83,6 +86,7 @@ void TableModelSeries_UtilityInterface::newParentName(const QString& newParentNa
     QString prodNewName = tableName(UtilityTableName::PRODUCTION);
     QString musNewName = tableName(UtilityTableName::MUSIC);
     QString serNewName = tableName(UtilityTableName::SERVICES);
+    QString sensContNewName = tableName(UtilityTableName::SENSITIVE_CONTENT);
 
     // Renaming the tables.
     renameTable(catCurName, catNewName);
@@ -91,6 +95,7 @@ void TableModelSeries_UtilityInterface::newParentName(const QString& newParentNa
     renameTable(prodCurName, prodNewName);
     renameTable(musCurName, musNewName);
     renameTable(serCurName, serNewName);
+    renameTable(sensContCurName, sensContNewName);
 }
 
 void TableModelSeries_UtilityInterface::rowRemoved(const QList<long long int>& seriesIDs)
