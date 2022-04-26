@@ -71,23 +71,16 @@ void UtilityLineEdit::applyCompletion(const QString& str)
     QString lineStr = text();
     int cursorPos = cursorPosition();
     int commaBegin = lineStr.mid(0, cursorPos).lastIndexOf(',');
-    int commaEnd = -1;
-    if (commaBegin >= 0)
-        commaEnd = lineStr.mid(cursorPos).indexOf(',');
     
     lineStr.erase(
         lineStr.cbegin()+commaBegin+1,
-        commaEnd >= 0 ? lineStr.cbegin()+commaEnd : lineStr.cend());
+        lineStr.cbegin()+cursorPos);
     
-    QString newStrUtility = QString("%1%2 ").arg(commaBegin < 0 ? "" : " ").arg(str.trimmed());
-    if (commaEnd == -1)
-        newStrUtility += ", ";
+    QString newStrUtility = QString("%1%2, ").arg(commaBegin < 0 ? "" : " ").arg(str.trimmed());
     lineStr.insert(commaBegin+1, newStrUtility);
     setText(lineStr);
-    if (commaEnd == -1)
-        setCursorPosition(lineStr.size());
-    else
-        setCursorPosition(commaBegin+1+lineStr.mid(commaBegin+1).indexOf(',')+1);
+    int commaEnd = lineStr.mid(commaBegin+1).indexOf(',');
+    setCursorPosition(commaBegin+1+newStrUtility.size());
 }
 
 void UtilityLineEdit::focusInEvent(QFocusEvent* e)
