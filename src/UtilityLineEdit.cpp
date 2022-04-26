@@ -149,9 +149,11 @@ void UtilityLineEdit::keyPressEvent(QKeyEvent* e)
     }
     
     // Show completion popup.
+    int widthSizeHint = m_completer->popup()->sizeHintForColumn(0) +
+        m_completer->popup()->verticalScrollBar()->sizeHint().width();
     QRect lineRect = rect();
-    lineRect.setWidth(m_completer->popup()->sizeHintForColumn(0) +
-        m_completer->popup()->verticalScrollBar()->sizeHint().width());
+    if (lineRect.width() < widthSizeHint)
+        lineRect.setWidth(widthSizeHint);
     m_completer->complete(lineRect);
 }
 
