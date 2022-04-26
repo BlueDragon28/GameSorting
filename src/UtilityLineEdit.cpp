@@ -79,7 +79,7 @@ void UtilityLineEdit::applyCompletion(const QString& str)
         lineStr.cbegin()+commaBegin+1,
         commaEnd >= 0 ? lineStr.cbegin()+commaEnd : lineStr.cend());
     
-    QString newStrUtility = QString(" %1 ").arg(str.trimmed());
+    QString newStrUtility = QString("%1%2 ").arg(commaBegin < 0 ? "" : " ").arg(str.trimmed());
     if (commaEnd == -1)
         newStrUtility += ", ";
     lineStr.insert(commaBegin+1, newStrUtility);
