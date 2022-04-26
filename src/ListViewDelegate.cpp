@@ -936,7 +936,7 @@ void ListViewDelegate::paintRateStars(QPainter* painter, const QStyleOptionViewI
 
 void ListViewDelegate::applyUtilityLineEditData(long long int itemID, UtilityTableName tableName, const QString& utilityText) const
 {
-	if (utilityText.isEmpty() || itemID <= 0)
+	if (itemID <= 0)
 		return;
 	QStringList utilityList = utilityText.split(',', Qt::SkipEmptyParts);
 	QList<long long int> utilityIDs;
