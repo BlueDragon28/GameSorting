@@ -32,10 +32,23 @@ public:
     UtilityLineEdit(UtilityTableName tableName, SqlUtilityTable& utilityTable, QSqlDatabase& db, QWidget* parent = nullptr);
     virtual ~UtilityLineEdit();
 
+    void setCompleter(QCompleter* completer);
+    QCompleter *completer() const;
+
+protected:
+    virtual void keyPressEvent(QKeyEvent* e) override;
+    virtual void focusInEvent(QFocusEvent* e) override;
+
+private slots:
+    void applyCompletion(const QString& str);
+
 private:
+    void createCompleter();
+
     UtilityTableName m_tableName;
     SqlUtilityTable& m_utilityTable;
     QSqlDatabase& m_db;
+    QCompleter* m_completer;
 };
 
 #endif // GAMESORTING_UTILITYLINEEDIT_H_
