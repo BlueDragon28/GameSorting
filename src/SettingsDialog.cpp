@@ -17,6 +17,7 @@
 */
 
 #include "SettingsDialog.h"
+#include "Settings.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -61,6 +62,7 @@ void SettingsDialog::apply()
 #endif
 
     settings.setValue("settings/isLegacyUtilityEditor", m_legUtilEditCheckBox->isChecked());
+    Settings::instance().setLegacyUtilEditor(m_legUtilEditCheckBox->isChecked());
 
     accept();
 }
