@@ -181,6 +181,7 @@ void MainWindow::createMenu()
 	QAction* addItemAct = new QAction(addItemIcon, tr("Add item"), this);
 	addItemAct->setToolTip(tr("Add an item into the current view."));
 	addItemAct->setEnabled(false);
+	addItemAct->setShortcut(Qt::CTRL | Qt::Key_A);
 	connect(addItemAct, &QAction::triggered, m_tabAndList, &TabAndList::addItem);
 	connect(m_tabAndList, &TabAndList::isAddDelEditVisible, addItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(addItemAct);
@@ -189,6 +190,7 @@ void MainWindow::createMenu()
 	QAction* delItemAct = new QAction(delItemIcon, tr("Delete item"), this);
 	delItemAct->setToolTip(tr("Delete an item from the current view."));
 	delItemAct->setEnabled(false);
+	delItemAct->setShortcut(Qt::CTRL | Qt::Key_D);
 	connect(delItemAct, &QAction::triggered, m_tabAndList, &TabAndList::delItem);
 	connect(m_tabAndList, &TabAndList::isAddDelEditVisible, delItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(delItemAct);
@@ -197,6 +199,7 @@ void MainWindow::createMenu()
 	QAction* copyItemAct = new QAction(copyItemIcon, tr("Copy item"), this);
 	copyItemAct->setToolTip(tr("Copy the selected items from the current view."));
 	copyItemAct->setEnabled(false);
+	copyItemAct->setShortcut(QKeySequence::Copy);
 	connect(copyItemAct, &QAction::triggered, m_tabAndList, &TabAndList::copyItem);
 	connect(m_tabAndList, &TabAndList::isCopyPasteEditVisible, copyItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(copyItemAct);
@@ -205,6 +208,7 @@ void MainWindow::createMenu()
 	QAction* pasteItemAct = new QAction(pasteItemIcon, tr("Paste item"), this);
 	pasteItemAct->setToolTip(tr("Paste item from the clipboard into the current view."));
 	pasteItemAct->setEnabled(false);
+	pasteItemAct->setShortcut(QKeySequence::Paste);
 	connect(pasteItemAct, &QAction::triggered, m_tabAndList, &TabAndList::pasteItem);
 	connect(m_tabAndList, &TabAndList::isCopyPasteEditVisible, pasteItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(pasteItemAct);
