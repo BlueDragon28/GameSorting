@@ -440,6 +440,9 @@ void TableModelGame::appendRows(const QModelIndexList& indexList, const QStringL
         gamePos = retrieveMaxPos()+1;
     else
         gamePos = indexListCopy.at(0).row()+1;
+
+    if (gamePos > rowCount())
+        gamePos = rowCount();
     
     if (gamePos < 0 || gamePos > rowCount())
         return;

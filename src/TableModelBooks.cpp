@@ -435,6 +435,9 @@ void TableModelBooks::appendRows(const QModelIndexList& indexList, const QString
     else
         bookPos = indexListCopy.at(0).row()+1;
     
+    if (bookPos > rowCount())
+        bookPos = rowCount();
+    
     if (bookPos < 0 || bookPos > rowCount())
         return;
     

@@ -429,6 +429,9 @@ void TableModelCommon::appendRows(const QModelIndexList& indexList, const QStrin
     else
         commonPos = indexListCopy.at(0).row()+1;
     
+    if (commonPos > rowCount())
+        commonPos = rowCount();
+    
     if (commonPos < 0 || commonPos > rowCount())
         return;
     

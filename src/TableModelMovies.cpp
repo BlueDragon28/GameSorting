@@ -435,6 +435,9 @@ void TableModelMovies::appendRows(const QModelIndexList& indexList, const QStrin
     else
         moviePos = indexListCopy.at(0).row()+1;
     
+    if (moviePos > rowCount())
+        moviePos = rowCount();
+    
     if (moviePos < 0 || moviePos > rowCount())
         return;
     

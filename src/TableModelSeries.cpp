@@ -484,6 +484,9 @@ void TableModelSeries::appendRows(const QModelIndexList& indexList, const QStrin
     else
         seriePos = indexListCopy.at(0).row()+1;
     
+    if (seriePos > rowCount())
+        seriePos = rowCount();
+    
     if (seriePos < 0 || seriePos > rowCount())
         return;
     
