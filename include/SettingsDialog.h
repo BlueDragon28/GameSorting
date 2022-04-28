@@ -33,6 +33,8 @@ private slots:
     void apply();
 
 private:
+    void retrieveSettings();
+
     // If true, use the legacy utility editor,
     // otherwise, use the line edit utility editor.
     QCheckBox* m_legUtilEditCheckBox;

@@ -47,6 +47,8 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
     hLayout->addWidget(cancelBtn);
     hLayout->addWidget(applyBtn);
     vLayout->addLayout(hLayout);
+
+    retrieveSettings();
 }
 
 SettingsDialog::~SettingsDialog()
@@ -65,4 +67,11 @@ void SettingsDialog::apply()
     Settings::instance().setLegacyUtilEditor(m_legUtilEditCheckBox->isChecked());
 
     accept();
+}
+
+void SettingsDialog::retrieveSettings()
+{
+    // Retrieve the settings and apply then to the widgets.
+    // legacy Utility Editor.
+    m_legUtilEditCheckBox->setChecked(Settings::instance().isLegacyUtilEditor());
 }
