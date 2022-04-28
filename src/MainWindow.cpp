@@ -314,7 +314,7 @@ void MainWindow::createCommonToolBar()
 	m_listToolBar->setMouseTracking(false);
 
 	// Create the utility menu.
-	m_utilityMenu = new QMenu(tr("Movie Utility"), m_listToolBar);
+	m_utilityMenu = new QMenu(tr("Common Utility"), m_listToolBar);
 	connect(m_utilityMenu, &QMenu::destroyed, [this](){this->m_utilityMenu = nullptr;});
 	reinsertMenu();
 
