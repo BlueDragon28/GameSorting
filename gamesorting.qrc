@@ -19,5 +19,6 @@
         <file>Images/MoveDown.svg</file>
         <file>Images/MoveTo.svg</file>
         <file>Images/Search.svg</file>
+        <file>Images/GearWheels.svg</file>
     </qresource>
 </RCC>

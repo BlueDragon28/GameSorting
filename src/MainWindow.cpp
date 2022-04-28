@@ -214,7 +214,8 @@ void MainWindow::createMenu()
 	connect(m_tabAndList, &TabAndList::isCopyPasteEditVisible, pasteItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(pasteItemAct);
 
-	QAction* settingsAct = new QAction(tr("Settings"), this);
+	QIcon settingsIcon(":/Images/GearWheels.svg");
+	QAction* settingsAct = new QAction(settingsIcon, tr("Settings"), this);
 	settingsAct->setToolTip(tr("Edit settings."));
 	connect(settingsAct, &QAction::triggered, this, &MainWindow::openSettings);
 	m_editMenu->addAction(settingsAct);
