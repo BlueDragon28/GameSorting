@@ -21,6 +21,7 @@
 #include "LicenceDialog.h"
 #include "AboutDialog.h"
 #include "Common.h"
+#include "SettingsDialog.h"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -212,6 +213,11 @@ void MainWindow::createMenu()
 	connect(pasteItemAct, &QAction::triggered, m_tabAndList, &TabAndList::pasteItem);
 	connect(m_tabAndList, &TabAndList::isCopyPasteEditVisible, pasteItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(pasteItemAct);
+
+	QAction* settingsAct = new QAction(tr("Settings"), this);
+	settingsAct->setToolTip(tr("Edit settings."));
+	connect(settingsAct, &QAction::triggered, this, &MainWindow::openSettings);
+	m_editMenu->addAction(settingsAct);
 
 	// Add help menu
 	m_helpMenu = menuBar()->addMenu(tr("Help"));
@@ -765,4 +771,11 @@ void MainWindow::openRecentFile(const QString& filePath)
 			QMessageBox::Ok);
 		removeInvalidRecentFile(filePath);
 	}
+}
+
+void MainWindow::openSettings()
+{
+	// Open the settings dialog.
+	SettingsDialog dialog(this);
+	dialog.exec();
 }
