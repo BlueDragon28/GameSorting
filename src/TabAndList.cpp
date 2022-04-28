@@ -88,7 +88,23 @@ void TabAndList::setupView()
 void TabAndList::tabChanged(int index)
 {
     if (index >= 0 && index < m_stackedViews->count())
+    {
         m_stackedViews->setCurrentIndex(index);
+        AbstractListView* v = dynamic_cast<AbstractListView*>(m_stackedViews->currentWidget());
+        if (v)
+        {
+            emit isAddDelEditVisible(true);
+            if (v->viewType() == ViewType::UTILITY)
+                emit isCopyPasteEditVisible(false);
+            else
+                emit isCopyPasteEditVisible(true);
+        }
+    }
+    else
+    {
+        emit isAddDelEditVisible(false);
+        emit isCopyPasteEditVisible(false);
+    }
 }
 
 void TabAndList::addTable()
@@ -961,4 +977,168 @@ void TabAndList::newEmptyList()
     m_filePath.clear();
     emit newList(ListType::UNKNOWN);
     emit newListFileName(m_filePath);
+}
+
+void TabAndList::addItem()
+{
+    AbstractListView* v = dynamic_cast<AbstractListView*>(m_stackedViews->currentWidget());
+    if (v)
+    {
+        if (v->viewType() == ViewType::UTILITY)
+        {
+            UtilityListView* view = dynamic_cast<UtilityListView*>(v);
+            if (view)
+                view->addItem();
+        }
+        else if (v->viewType() == ViewType::GAME)
+        {
+            GameListView* view = dynamic_cast<GameListView*>(v);
+            if (view)
+                view->addingItem();
+        }
+        else if (v->viewType() == ViewType::MOVIE)
+        {
+            MoviesListView* view = dynamic_cast<MoviesListView*>(v);
+            if (view)
+                view->addingItem();
+        }
+        else if (v->viewType() == ViewType::COMMON)
+        {
+            CommonListView* view = dynamic_cast<CommonListView*>(v);
+            if (view)
+                view->addingItem();
+        }
+        else if (v->viewType() == ViewType::SERIES)
+        {
+            SeriesListView* view = dynamic_cast<SeriesListView*>(v);
+            if (view)
+                view->addingItem();
+        }
+        else if (v->viewType() == ViewType::BOOKS)
+        {
+            BooksListView* view = dynamic_cast<BooksListView*>(v);
+            if (view)
+                view->addingItem();
+        }
+    }
+}
+
+void TabAndList::delItem()
+{
+    AbstractListView* v = dynamic_cast<AbstractListView*>(m_stackedViews->currentWidget());
+    if (v)
+    {
+        if (v->viewType() == ViewType::UTILITY)
+        {
+            UtilityListView* view = dynamic_cast<UtilityListView*>(v);
+            if (view)
+                view->deleteSelectedRows();
+        }
+        else if (v->viewType() == ViewType::GAME)
+        {
+            GameListView* view = dynamic_cast<GameListView*>(v);
+            if (view)
+                view->deletingItems();
+        }
+        else if (v->viewType() == ViewType::MOVIE)
+        {
+            MoviesListView* view = dynamic_cast<MoviesListView*>(v);
+            if (view)
+                view->deletingItems();
+        }
+        else if (v->viewType() == ViewType::COMMON)
+        {
+            CommonListView* view = dynamic_cast<CommonListView*>(v);
+            if (view)
+                view->deletingItems();
+        }
+        else if (v->viewType() == ViewType::SERIES)
+        {
+            SeriesListView* view = dynamic_cast<SeriesListView*>(v);
+            if (view)
+                view->deletingItems();
+        }
+        else if (v->viewType() == ViewType::BOOKS)
+        {
+            BooksListView* view = dynamic_cast<BooksListView*>(v);
+            if (view)
+                view->deletingItems();
+        }
+    }
+}
+
+void TabAndList::copyItem()
+{
+    QWidget* v = m_stackedViews->currentWidget();
+    if (v)
+    {
+        if (m_listType == ListType::GAMELIST)
+        {
+            GameListView* view = dynamic_cast<GameListView*>(v);
+            if (view)
+                view->copy();
+        }
+        else if (m_listType == ListType::MOVIESLIST)
+        {
+            MoviesListView* view = dynamic_cast<MoviesListView*>(v);
+            if (view)
+                view->copy();
+        }
+        else if (m_listType == ListType::COMMONLIST)
+        {
+            CommonListView* view = dynamic_cast<CommonListView*>(v);
+            if (view)
+                view->copy();
+        }
+        else if (m_listType == ListType::SERIESLIST)
+        {
+            SeriesListView* view = dynamic_cast<SeriesListView*>(v);
+            if (view)
+                view->copy();
+        }
+        else if (m_listType == ListType::BOOKSLIST)
+        {
+            BooksListView* view = dynamic_cast<BooksListView*>(v);
+            if (view)
+                view->copy();
+        }
+    }
+}
+
+void TabAndList::pasteItem()
+{
+    QWidget* v = m_stackedViews->currentWidget();
+    if (v)
+    {
+        if (m_listType == ListType::GAMELIST)
+        {
+            GameListView* view = dynamic_cast<GameListView*>(v);
+            if (view)
+                view->paste();
+        }
+        else if (m_listType == ListType::MOVIESLIST)
+        {
+            MoviesListView* view = dynamic_cast<MoviesListView*>(v);
+            if (view)
+                view->paste();
+        }
+        else if (m_listType == ListType::COMMONLIST)
+        {
+            CommonListView* view = dynamic_cast<CommonListView*>(v);
+            if (view)
+                view->paste();
+        }
+        else if (m_listType == ListType::SERIESLIST)
+        {
+            SeriesListView* view = dynamic_cast<SeriesListView*>(v);
+            if (view)
+                view->paste();
+        }
+        else if (m_listType == ListType::BOOKSLIST)
+        {
+            BooksListView* view = dynamic_cast<BooksListView*>(v);
+            if (view)
+                view->paste();
+        }
+    }
 }

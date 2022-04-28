@@ -38,16 +38,18 @@ public:
     virtual ViewType viewType() const override;
     UtilityTableName tableName() const;
 
+public slots:
+    void addItem();
+    void deleteSelectedRows();
+
 private slots:
     void moveItemUp();
     void moveItemDown();
     void moveItemTo();
-    void addItem();
 
 private:
     void createMenu();
     void createView();
-    void deleteSelectedRows();
 
     UtilityTableName m_uName;
     QTableView* m_view;

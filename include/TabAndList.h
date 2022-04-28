@@ -53,11 +53,17 @@ public slots:
     void save();
     void saveAs();
     void openUtility(UtilityTableName tableName);
+    void addItem();
+    void delItem();
+    void copyItem();
+    void pasteItem();
 
 signals:
     void newList(ListType listType);
     void newListFileName(const QString& filePath);
     void listChanged(bool isChanged);
+    void isAddDelEditVisible(bool value);
+    void isCopyPasteEditVisible(bool value);
 
 private slots:
     void tabChanged(int index);

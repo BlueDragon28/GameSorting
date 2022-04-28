@@ -72,6 +72,7 @@ private:
 	bool m_doNotSaveSettings;
 
 	QMenu* m_fileMenu;
+	QMenu* m_editMenu;
 	QMenu* m_utilityMenu;
 	QMenu* m_helpMenu;
 	QMenu* m_recentFileMenu;
