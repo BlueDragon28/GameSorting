@@ -24,6 +24,7 @@
 #include "TableModel.h"
 #include "StarEditor.h"
 #include "UtilityLineEdit.h"
+#include "Settings.h"
 #include <iostream>
 
 #include <QPainter>
@@ -43,8 +44,7 @@ ListViewDelegate::ListViewDelegate(
 		m_tableModel(tableModel),
 		m_utilityTable(utilityTable),
 		m_utilityInterface(m_tableModel->utilityInterface()),
-		m_db(db),
-		m_legacyUtilEdit(false)
+		m_db(db)
 {}
 
 ListViewDelegate::~ListViewDelegate()
@@ -238,7 +238,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Game::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!m_legacyUtilEdit)
+			if (!Settings::instance().isLegacyUtilEditor())
 			{
 				UtilityLineEdit* editor = new UtilityLineEdit(
 					tableName,
@@ -326,7 +326,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Movie::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!m_legacyUtilEdit)
+			if (!Settings::instance().isLegacyUtilEditor())
 			{
 				UtilityLineEdit* editor = new UtilityLineEdit(
 					tableName,
@@ -407,7 +407,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Common::AUTHORS)
 				tableName = UtilityTableName::AUTHORS;
 			
-			if (!m_legacyUtilEdit)
+			if (!Settings::instance().isLegacyUtilEditor())
 			{
 				UtilityLineEdit* editor = new UtilityLineEdit(
 					tableName,
@@ -494,7 +494,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Books::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!m_legacyUtilEdit)
+			if (!Settings::instance().isLegacyUtilEditor())
 			{
 				UtilityLineEdit* editor = new UtilityLineEdit(
 					tableName,
@@ -591,7 +591,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Series::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!m_legacyUtilEdit)
+			if (!Settings::instance().isLegacyUtilEditor())
 			{
 				UtilityLineEdit* editor = new UtilityLineEdit(
 					tableName,
@@ -663,7 +663,7 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 		}
 		else if (index.column() >= Game::SERIES &&
 				 index.column() <= Game::SERVICES &&
-				 !m_legacyUtilEdit)
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -707,7 +707,8 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 		else if (index.column() >= Movie::SERIES &&
-				 index.column() <= Movie::SERVICES)
+				 index.column() <= Movie::SERVICES &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -753,7 +754,8 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 		else if (index.column() >= Common::SERIES &&
-			 	 index.column() <= Common::AUTHORS)
+			 	 index.column() <= Common::AUTHORS &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -791,7 +793,8 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 		else if (index.column() >= Books::SERIES &&
-				 index.column() <= Books::SERVICES)
+				 index.column() <= Books::SERVICES &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -833,7 +836,8 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			}
 		}
 		else if (index.column() >= Series::CATEGORIES &&
-				 index.column() <= Series::SERVICES)
+				 index.column() <= Series::SERVICES &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -887,7 +891,7 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 		}
 		else if (index.column() >= Game::SERIES &&
 				 index.column() <= Game::SERVICES &&
-				 !m_legacyUtilEdit)
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			// Retrieve data from the UtilityLineEdit and appending it into the utilityInterface.
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
@@ -932,7 +936,8 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			}
 		}
 		else if (index.column() >= Movie::SERIES &&
-				 index.column() <= Movie::SERVICES)
+				 index.column() <= Movie::SERVICES &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -978,7 +983,8 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			}
 		}
 		else if (index.column() >= Common::SERIES &&
-				 index.column() <= Common::AUTHORS)
+				 index.column() <= Common::AUTHORS &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -1016,7 +1022,8 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			}
 		}
 		else if (index.column() >= Books::SERIES &&
-				 index.column() <= Books::SERVICES)
+				 index.column() <= Books::SERVICES &&
+				 Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
@@ -1058,7 +1065,8 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			}
 		}
 		else if (index.column() >= Series::CATEGORIES &&
-				 index.column() <= Series::SERVICES)
+				 index.column() <= Series::SERVICES &&
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)

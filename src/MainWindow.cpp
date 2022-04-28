@@ -21,6 +21,8 @@
 #include "LicenceDialog.h"
 #include "AboutDialog.h"
 #include "Common.h"
+#include "Settings.h"
+#include "SettingsDialog.h"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -212,6 +214,12 @@ void MainWindow::createMenu()
 	connect(pasteItemAct, &QAction::triggered, m_tabAndList, &TabAndList::pasteItem);
 	connect(m_tabAndList, &TabAndList::isCopyPasteEditVisible, pasteItemAct, &QAction::setEnabled);
 	m_editMenu->addAction(pasteItemAct);
+
+	QIcon settingsIcon(":/Images/GearWheels.svg");
+	QAction* settingsAct = new QAction(settingsIcon, tr("Settings"), this);
+	settingsAct->setToolTip(tr("Edit settings."));
+	connect(settingsAct, &QAction::triggered, this, &MainWindow::openSettings);
+	m_editMenu->addAction(settingsAct);
 
 	// Add help menu
 	m_helpMenu = menuBar()->addMenu(tr("Help"));
@@ -644,6 +652,11 @@ void MainWindow::readSettings()
 			m_recentFileData[i] = getRecentFileData(recentFileList.at(i));
 		updateRecentFileMenu();
 	}
+
+	// Read "isLegacyUtilityEditor" bool value.
+	QVariant vIsLegacyUtilityEditor = settings.value("settings/isLegacyUtilityEditor");
+	if (vIsLegacyUtilityEditor.isValid() && !m_isResetSettings)
+		Settings::instance().setLegacyUtilEditor(vIsLegacyUtilityEditor.toBool());
 }
 
 void MainWindow::showLicence()
@@ -765,4 +778,11 @@ void MainWindow::openRecentFile(const QString& filePath)
 			QMessageBox::Ok);
 		removeInvalidRecentFile(filePath);
 	}
+}
+
+void MainWindow::openSettings()
+{
+	// Open the settings dialog.
+	SettingsDialog dialog(this);
+	dialog.exec();
 }

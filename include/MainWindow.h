@@ -40,6 +40,9 @@ public:
 protected:
 	void closeEvent(QCloseEvent* evt) override;
 
+private slots:
+	void openSettings();
+
 private:
 	void createMenu();
 	void createCentralWidget();

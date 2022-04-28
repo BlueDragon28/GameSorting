@@ -54,7 +54,6 @@ private:
 	SqlUtilityTable& m_utilityTable;
 	TableModel_UtilityInterface* m_utilityInterface;
 	QSqlDatabase& m_db;
-	bool m_legacyUtilEdit;
 };
 
 #endif // GAMESORTING_LISTVIEWDELETAGE_H_
