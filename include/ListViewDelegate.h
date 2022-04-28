@@ -47,11 +47,14 @@ private:
 	void commitAndCloseEditor(QWidget* editor);
 	void paintSensitiveStars(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const;
 	void paintRateStars(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const;
+	void applyUtilityLineEditData(long long int itemID, UtilityTableName tableName, const QString& utilityText) const;
+	QString retrieveDataForUtilityLineEdit(long long int itemID, UtilityTableName tableName) const;
 
 	TableModel* m_tableModel;
 	SqlUtilityTable& m_utilityTable;
 	TableModel_UtilityInterface* m_utilityInterface;
 	QSqlDatabase& m_db;
+	bool m_legacyUtilEdit;
 };
 
 #endif // GAMESORTING_LISTVIEWDELETAGE_H_

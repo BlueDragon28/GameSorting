@@ -333,3 +333,118 @@ bool SqlUtilityTable::setStandardData(UtilityTableName tName, const QList<ItemUt
 
 	return true;
 }
+
+long long int SqlUtilityTable::addItem(UtilityTableName tableName, const QString& name)
+{
+	// Add an item if it is not already existing.
+	// Find if item is existing and return the id.
+	QString statement = QString(
+		"SELECT\n"
+		"	\"%1ID\",\n"
+		"	Name\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	Name = \"%2\";")
+			.arg(this->tableName(tableName), name);
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	if (m_query.exec(statement))
+	{
+		if (m_query.next())
+		{
+			long long int itemID = m_query.value(0).toLongLong();
+			m_query.clear();
+			return itemID;
+		}
+	}
+	else
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to check if item of table %1 already existing!\n\t%2")
+			.arg(this->tableName(tableName), m_query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif 
+		m_query.clear();
+	}
+
+	// If not, inserting it into the list.
+	// First, find the higher value of OrderID.
+	statement = QString(
+		"SELECT\n"
+		"	MAX(OrderID)\n"
+		"FROM\n"
+		"	\"%1\"")
+			.arg(this->tableName(tableName));
+	
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	long long int orderID = -1;
+	if (m_query.exec(statement))
+		if (m_query.next())
+			orderID = m_query.value(0).toLongLong()+1;
+#ifndef NDEBUG
+	else
+		std::cerr << QString("Failed to query the max number of column OrderID of table %1.\n\t%2")
+			.arg(this->tableName(tableName), m_query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+	m_query.exec();
+
+	if (orderID == -1)
+		return -1;
+	
+	// Insert new item.
+	statement = QString(
+		"INSERT INTO \"%1\" (OrderID, Name)\n"
+		"VALUES\n"
+		"	(%2, \"%3\");")
+			.arg(this->tableName(tableName)).arg(orderID).arg(name);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	if (!m_query.exec(statement))
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to insert item %1 into table %2.\n\t%3")
+			.arg(name, this->tableName(tableName), m_query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+	}
+
+	// Retrieve inserted data.
+	statement = QString(
+		"SELECT\n"
+		"	\"%1ID\",\n"
+		"	Name\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	OrderID = %2")
+			.arg(this->tableName(tableName)).arg(orderID);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	long long int itemID = -1;
+	if (m_query.exec(statement))
+		if (m_query.next())
+			itemID = m_query.value(0).toLongLong();
+#ifndef NDEBUG
+	else
+		std::cerr << QString("Failed to retrieve item %1 from the table %2.\n\t%3")
+			.arg(name, this->tableName(tableName), m_query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+	
+	m_query.clear();
+	return itemID;
+}

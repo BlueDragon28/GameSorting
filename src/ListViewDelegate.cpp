@@ -23,12 +23,16 @@
 #include "Common.h"
 #include "TableModel.h"
 #include "StarEditor.h"
+#include "UtilityLineEdit.h"
 #include <iostream>
 
 #include <QPainter>
 #include <QBrush>
 #include <QColor>
 #include <QSpinBox>
+#include <QSqlQuery>
+#include <QStringList>
+#include <QSqlError>
 
 ListViewDelegate::ListViewDelegate(
 	TableModel* tableModel,
@@ -39,7 +43,8 @@ ListViewDelegate::ListViewDelegate(
 		m_tableModel(tableModel),
 		m_utilityTable(utilityTable),
 		m_utilityInterface(m_tableModel->utilityInterface()),
-		m_db(db)
+		m_db(db),
+		m_legacyUtilEdit(false)
 {}
 
 ListViewDelegate::~ListViewDelegate()
@@ -233,18 +238,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Game::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
 		{
@@ -309,18 +326,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Movie::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Movie::SENSITIVE_CONTENT)
 		{
@@ -378,18 +407,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Common::AUTHORS)
 				tableName = UtilityTableName::AUTHORS;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Common::SENSITIVE_CONTENT)
 		{
@@ -453,18 +494,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Books::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Books::SENSITIVE_CONTENT)
 		{
@@ -538,18 +591,30 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Series::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-				tableName,
-				itemID,
-				m_tableModel,
-				m_utilityInterface,
-				m_utilityTable,
-				m_db,
-				parent);
-			editor->raise();
-			editor->activateWindow();
-			editor->show();
-			return nullptr;
+			if (!m_legacyUtilEdit)
+			{
+				UtilityLineEdit* editor = new UtilityLineEdit(
+					tableName,
+					m_utilityTable,
+					m_db,
+					parent);
+				return editor;
+			}
+			else
+			{
+				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+					tableName,
+					itemID,
+					m_tableModel,
+					m_utilityInterface,
+					m_utilityTable,
+					m_db,
+					parent);
+				editor->raise();
+				editor->activateWindow();
+				editor->show();
+				return nullptr;
+			}
 		}
 		else if (index.column() == Series::SENSITIVE_CONTENT)
 		{
@@ -596,6 +661,33 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 				return;
 			}
 		}
+		else if (index.column() >= Game::SERIES &&
+				 index.column() <= Game::SERVICES &&
+				 !m_legacyUtilEdit)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Game::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Game::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Game::DEVELOPPERS)
+					tableName = UtilityTableName::DEVELOPPERS;
+				else if (index.column() == Game::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Game::PLATFORMS)
+					tableName = UtilityTableName::PLATFORM;
+				else if (index.column() == Game::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::MOVIESLIST)
 	{
@@ -611,6 +703,34 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			if (spinEditor)
 			{
 				spinEditor->setValue(index.data().toInt());
+				return;
+			}
+		}
+		else if (index.column() >= Movie::SERIES &&
+				 index.column() <= Movie::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Movie::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Movie::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Movie::DIRECTORS)
+					tableName = UtilityTableName::DIRECTOR;
+				else if (index.column() == Movie::ACTORS)
+					tableName = UtilityTableName::ACTORS;
+				else if (index.column() == Movie::PRODUCTIONS)
+					tableName = UtilityTableName::PRODUCTION;
+				else if (index.column() == Movie::MUSIC)
+					tableName = UtilityTableName::MUSIC;
+				else if (index.column() == Movie::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
 				return;
 			}
 		}
@@ -632,6 +752,26 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 				return;
 			}
 		}
+		else if (index.column() >= Common::SERIES &&
+			 	 index.column() <= Common::AUTHORS)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Common::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Common::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Common::AUTHORS)
+					tableName = UtilityTableName::AUTHORS;
+				
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::BOOKSLIST)
 	{
@@ -650,6 +790,30 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 				return;
 			}
 		}
+		else if (index.column() >= Books::SERIES &&
+				 index.column() <= Books::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Books::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Books::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Books::AUTHORS)
+					tableName = UtilityTableName::AUTHORS;
+				else if (index.column() == Books::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Books::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::SERIESLIST)
 	{
@@ -665,6 +829,32 @@ void ListViewDelegate::setEditorData(QWidget* e, const QModelIndex& index) const
 			if (spinEditor)
 			{
 				spinEditor->setValue(index.data().toInt());
+				return;
+			}
+		}
+		else if (index.column() >= Series::CATEGORIES &&
+				 index.column() <= Series::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Series::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Series::DIRECTORS)
+					tableName = UtilityTableName::DIRECTOR;
+				else if (index.column() == Series::ACTORS)
+					tableName = UtilityTableName::ACTORS;
+				else if (index.column() == Series::PRODUCTION)
+					tableName = UtilityTableName::PRODUCTION;
+				else if (index.column() == Series::MUSIC)
+					tableName = UtilityTableName::MUSIC;
+				else if (index.column() == Series::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				editor->setText(retrieveDataForUtilityLineEdit(itemID, tableName));
 				return;
 			}
 		}
@@ -695,6 +885,34 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 				return;
 			}
 		}
+		else if (index.column() >= Game::SERIES &&
+				 index.column() <= Game::SERVICES &&
+				 !m_legacyUtilEdit)
+		{
+			// Retrieve data from the UtilityLineEdit and appending it into the utilityInterface.
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Game::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Game::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Game::DEVELOPPERS)
+					tableName = UtilityTableName::DEVELOPPERS;
+				else if (index.column() == Game::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Game::PLATFORMS)
+					tableName = UtilityTableName::PLATFORM;
+				else if (index.column() == Game::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::MOVIESLIST)
 	{
@@ -710,6 +928,34 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			if (spinEditor)
 			{
 				model->setData(index, spinEditor->value());
+				return;
+			}
+		}
+		else if (index.column() >= Movie::SERIES &&
+				 index.column() <= Movie::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Movie::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Movie::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Movie::DIRECTORS)
+					tableName = UtilityTableName::DIRECTOR;
+				else if (index.column() == Movie::ACTORS)
+					tableName = UtilityTableName::ACTORS;
+				else if (index.column() == Movie::PRODUCTIONS)
+					tableName = UtilityTableName::PRODUCTION;
+				else if (index.column() == Movie::MUSIC)
+					tableName = UtilityTableName::MUSIC;
+				else if (index.column() == Movie::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
 				return;
 			}
 		}
@@ -731,6 +977,26 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 				return;
 			}
 		}
+		else if (index.column() >= Common::SERIES &&
+				 index.column() <= Common::AUTHORS)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Common::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Common::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Common::AUTHORS)
+					tableName = UtilityTableName::AUTHORS;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::BOOKSLIST)
 	{
@@ -749,6 +1015,30 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 				return;
 			}
 		}
+		else if (index.column() >= Books::SERIES &&
+				 index.column() <= Books::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Books::SERIES)
+					tableName = UtilityTableName::SERIES;
+				else if (index.column() == Books::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Books::AUTHORS)
+					tableName = UtilityTableName::AUTHORS;
+				else if (index.column() == Books::PUBLISHERS)
+					tableName = UtilityTableName::PUBLISHERS;
+				else if (index.column() == Books::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
+				return;
+			}
+		}
 	}
 	else if (model->listType() == ListType::SERIESLIST)
 	{
@@ -764,6 +1054,32 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 			if (spinEditor)
 			{
 				model->setData(index, spinEditor->value());
+				return;
+			}
+		}
+		else if (index.column() >= Series::CATEGORIES &&
+				 index.column() <= Series::SERVICES)
+		{
+			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
+			if (editor)
+			{
+				long long int itemID = m_tableModel->itemID(index);
+
+				UtilityTableName tableName;
+				if (index.column() == Series::CATEGORIES)
+					tableName = UtilityTableName::CATEGORIES;
+				else if (index.column() == Series::DIRECTORS)
+					tableName = UtilityTableName::DIRECTOR;
+				else if (index.column() == Series::ACTORS)
+					tableName = UtilityTableName::ACTORS;
+				else if (index.column() == Series::PRODUCTION)
+					tableName = UtilityTableName::PRODUCTION;
+				else if (index.column() == Series::MUSIC)
+					tableName = UtilityTableName::MUSIC;
+				else if (index.column() == Series::SERVICES)
+					tableName = UtilityTableName::SERVICES;
+				
+				applyUtilityLineEditData(itemID, tableName, editor->text());
 				return;
 			}
 		}
@@ -860,4 +1176,104 @@ void ListViewDelegate::paintRateStars(QPainter* painter, const QStyleOptionViewI
 		painter->setPen(Qt::SolidLine);
 		painter->drawText(options.rect, starNB);
 	}
+}
+
+void ListViewDelegate::applyUtilityLineEditData(long long int itemID, UtilityTableName tableName, const QString& utilityText) const
+{
+	if (itemID <= 0)
+		return;
+	QStringList utilityList = utilityText.split(',', Qt::SkipEmptyParts);
+	QList<long long int> utilityIDs;
+	foreach(const QString& item, utilityList)
+	{
+		if (!item.trimmed().isEmpty())
+			utilityIDs.append(m_utilityTable.addItem(tableName, item.trimmed()));
+	}
+	m_utilityInterface->updateItemUtility(itemID, tableName, QVariant::fromValue(utilityIDs));
+}
+
+QString ListViewDelegate::retrieveDataForUtilityLineEdit(long long int itemID, UtilityTableName tableName) const
+{
+	if (itemID <= 0)
+		return "";
+	
+	QString statement = QString(
+		"SELECT\n"
+		"	UtilityID\n"
+		"FROM\n"
+		"	\"%1\""
+		"WHERE\n"
+		"	ItemID = %2;")
+			.arg(m_utilityInterface->tableName(tableName)).arg(itemID);
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	QSqlQuery query(m_db);
+	QList<long long int> utilityIDs;
+	if (query.exec(statement))
+	{
+		while (query.next())
+			utilityIDs.append(query.value(0).toLongLong());
+	}
+	else
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to retrieve utility id from utility interface table %1 of itemID %2.\n\t%3")
+			.arg(m_utilityInterface->tableName(tableName)).arg(itemID)
+			.arg(query.lastError().text())
+			.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+		return "";
+	}
+	query.clear();
+
+	if (utilityIDs.isEmpty())
+		return "";
+
+	statement = QString(
+		"SELECT\n"
+		"	Name\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	\"%1ID\" = %2;")
+			.arg(SqlUtilityTable::tableName(tableName));
+
+#ifndef NDEBUG
+	std::cout << statement.toLocal8Bit().constData() << '\n' << std::endl;
+#endif
+
+	QStringList strUtilityList;
+	foreach(long long int id, utilityIDs)
+	{
+		if (query.exec(statement.arg(id)))
+		{
+			if (query.next())
+				strUtilityList.append(query.value(0).toString());
+		}
+		else
+		{
+	#ifndef NDEBUG
+			std::cerr << QString("Failed to retrieve utility name list from table %1\n\t%2")
+				.arg(SqlUtilityTable::tableName(tableName), query.lastError().text())
+				.toLocal8Bit().constData() << '\n' << std::endl;
+	#endif
+			return "";
+		}
+	}
+
+	if (strUtilityList.isEmpty())
+		return "";
+	
+	QString strUtilityName;
+	for (int i = 0; i < strUtilityList.size(); i++)
+	{
+		if (i > 0)
+			strUtilityName += ", ";
+		strUtilityName += strUtilityList.at(i);
+	}
+
+	return strUtilityName;
 }
