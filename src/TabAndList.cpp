@@ -88,7 +88,23 @@ void TabAndList::setupView()
 void TabAndList::tabChanged(int index)
 {
     if (index >= 0 && index < m_stackedViews->count())
+    {
         m_stackedViews->setCurrentIndex(index);
+        AbstractListView* v = dynamic_cast<AbstractListView*>(m_stackedViews->currentWidget());
+        if (v)
+        {
+            emit isAddDelEditVisible(true);
+            if (v->viewType() == ViewType::UTILITY)
+                emit isCopyPasteEditVisible(false);
+            else
+                emit isCopyPasteEditVisible(true);
+        }
+    }
+    else
+    {
+        emit isAddDelEditVisible(false);
+        emit isCopyPasteEditVisible(false);
+    }
 }
 
 void TabAndList::addTable()
