@@ -21,6 +21,7 @@
 #include "LicenceDialog.h"
 #include "AboutDialog.h"
 #include "Common.h"
+#include "Settings.h"
 #include "SettingsDialog.h"
 
 #include <QApplication>
@@ -651,6 +652,11 @@ void MainWindow::readSettings()
 			m_recentFileData[i] = getRecentFileData(recentFileList.at(i));
 		updateRecentFileMenu();
 	}
+
+	// Read "isLegacyUtilityEditor" bool value.
+	QVariant vIsLegacyUtilityEditor = settings.value("settings/isLegacyUtilityEditor");
+	if (vIsLegacyUtilityEditor.isValid() && !m_isResetSettings)
+		Settings::instance().setLegacyUtilEditor(vIsLegacyUtilityEditor.toBool());
 }
 
 void MainWindow::showLicence()
