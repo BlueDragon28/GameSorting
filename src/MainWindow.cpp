@@ -180,21 +180,25 @@ void MainWindow::createMenu()
 	QIcon addItemIcon(":/Images/Add.svg");
 	QAction* addItemAct = new QAction(addItemIcon, tr("Add item"), this);
 	addItemAct->setToolTip(tr("Add an item into the current view."));
+	connect(addItemAct, &QAction::triggered, m_tabAndList, &TabAndList::addItem);
 	m_editMenu->addAction(addItemAct);
 
 	QIcon delItemIcon(":/Images/Del.svg");
 	QAction* delItemAct = new QAction(delItemIcon, tr("Delete item"), this);
 	delItemAct->setToolTip(tr("Delete an item from the current view."));
+	connect(delItemAct, &QAction::triggered, m_tabAndList, &TabAndList::delItem);
 	m_editMenu->addAction(delItemAct);
 
 	QIcon copyItemIcon(":/Images/Copy.svg");
 	QAction* copyItemAct = new QAction(copyItemIcon, tr("Copy item"), this);
 	copyItemAct->setToolTip(tr("Copy the selected items from the current view."));
+	connect(copyItemAct, &QAction::triggered, m_tabAndList, &TabAndList::copyItem);
 	m_editMenu->addAction(copyItemAct);
 
 	QIcon pasteItemIcon(":/Images/Paste.svg");
 	QAction* pasteItemAct = new QAction(pasteItemIcon, tr("Paste item"), this);
 	pasteItemAct->setToolTip(tr("Paste item from the clipboard into the current view."));
+	connect(pasteItemAct, &QAction::triggered, m_tabAndList, &TabAndList::pasteItem);
 	m_editMenu->addAction(pasteItemAct);
 
 	// Add help menu

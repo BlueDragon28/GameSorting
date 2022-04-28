@@ -50,6 +50,8 @@ signals:
 public slots:
     void addingItem();
     void deletingItems();
+    void copy();
+    void paste();
 
 private slots:
     void setUrl();
@@ -58,8 +60,6 @@ private slots:
     void moveItemDown();
     void moveItemTo();
     void filter();
-    void copy();
-    void paste();
 
 private:
     void setupWidget();

@@ -53,6 +53,10 @@ public slots:
     void save();
     void saveAs();
     void openUtility(UtilityTableName tableName);
+    void addItem();
+    void delItem();
+    void copyItem();
+    void pasteItem();
 
 signals:
     void newList(ListType listType);
