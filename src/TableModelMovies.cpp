@@ -1277,11 +1277,11 @@ void TableModelMovies::setUrl(const QModelIndex& index, const QString& url)
 
         QString statement = QString(
             "UPDATE \"%1\"\n"
-            "SET Url = \"%2\"\n"
-            "WHERE MovieID = %3;")
+            "SET Url = \"%3\"\n"
+            "WHERE MovieID = %2;")
                 .arg(m_tableName)
-                .arg(url)
-                .arg(m_data.at(index.row()).movieID);
+                .arg(m_data.at(index.row()).movieID)
+                .arg(url);
         
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;

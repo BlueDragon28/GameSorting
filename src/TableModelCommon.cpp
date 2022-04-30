@@ -1175,11 +1175,11 @@ void TableModelCommon::setUrl(const QModelIndex& index, const QString& url)
 
         QString statement = QString(
             "UPDATE \"%1\"\n"
-            "SET Url = \"%2\"\n"
-            "WHERE CommonID = %3;")
+            "SET Url = \"%3\"\n"
+            "WHERE CommonID = %2;")
                 .arg(m_tableName)
-                .arg(url)
-                .arg(m_data.at(index.row()).commonID);
+                .arg(m_data.at(index.row()).commonID)
+                .arg(url);
 
 #ifndef NDEBUG
         std::cout << statement.toLocal8Bit().constData() << std::endl << std::endl;
