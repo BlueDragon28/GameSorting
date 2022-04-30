@@ -1023,7 +1023,7 @@ void ListViewDelegate::setModelData(QWidget* e, QAbstractItemModel* m, const QMo
 		}
 		else if (index.column() >= Books::SERIES &&
 				 index.column() <= Books::SERVICES &&
-				 Settings::instance().isLegacyUtilEditor())
+				 !Settings::instance().isLegacyUtilEditor())
 		{
 			UtilityLineEdit* editor = dynamic_cast<UtilityLineEdit*>(e);
 			if (editor)
