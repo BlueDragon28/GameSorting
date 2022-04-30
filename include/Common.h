@@ -22,7 +22,7 @@
 #include "DataStruct.h"
 #include <QString>
 
-#define GAMESORTING_VERSION "1.3"
+#define GAMESORTING_VERSION "1.3.1"
 
 QString removeFirstSpaces(const QString& str);
 QString removeLastSpaces(const QString& str);
