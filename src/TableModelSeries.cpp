@@ -798,14 +798,14 @@ bool TableModelSeries::setItemData(const QVariant& variant)
         for (long long int j = i; j < i+10 && j < data.serieList.size(); j++)
         {
             strData +=
-                QString("\n\t(%1, %2, \"%3\", %4, %5, \"%6\", %7),")
+                QString("\n\t(%1, %2, \"%3\", %4, %5, \"%7\", %6),")
                     .arg(data.serieList.at(j).serieID)
                     .arg(data.serieList.at(j).seriePos)
                     .arg(data.serieList.at(j).name)
                     .arg(data.serieList.at(j).episodePos)
                     .arg(data.serieList.at(j).seasonPos)
-                    .arg(data.serieList.at(j).url)
-                    .arg(data.serieList.at(j).rate);
+                    .arg(data.serieList.at(j).rate)
+                    .arg(data.serieList.at(j).url);
         }
         if (strData.size() > 0)
         {

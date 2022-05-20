@@ -744,12 +744,12 @@ bool TableModelMovies::setItemData(const QVariant& variant)
                 strData += ',';
             
             strData +=
-                QString("\n\t(%1, %2, \"%3\", \"%4\", %5)")
+                QString("\n\t(%1, %2, \"%3\", \"%5\", %4)")
                     .arg(data.movieList.at(j).movieID)
                     .arg(data.movieList.at(j).moviePos)
                     .arg(data.movieList.at(j).name)
-                    .arg(data.movieList.at(j).url)
-                    .arg(data.movieList.at(j).rate);
+                    .arg(data.movieList.at(j).rate)
+                    .arg(data.movieList.at(j).url);
         }
         if (strData.size() > 0)
         {

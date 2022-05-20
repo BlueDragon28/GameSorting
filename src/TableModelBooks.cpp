@@ -726,12 +726,12 @@ bool TableModelBooks::setItemData(const QVariant& variant)
         for (long long int j = i; j < i+10 && j < data.booksList.size(); j++)
         {
             strData +=
-                QString("\n\t(%1, %2, \"%3\", \"%4\", %5),")
+                QString("\n\t(%1, %2, \"%3\", \"%5\", %4),")
                     .arg(data.booksList.at(j).bookID)
                     .arg(data.booksList.at(j).bookPos)
                     .arg(data.booksList.at(j).name)
-                    .arg(data.booksList.at(j).url)
-                    .arg(data.booksList.at(j).rate);
+                    .arg(data.booksList.at(j).rate)
+                    .arg(data.booksList.at(j).url);
         }
         if (strData.size() > 0)
         {

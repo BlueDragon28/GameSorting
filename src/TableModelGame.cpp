@@ -735,12 +735,12 @@ bool TableModelGame::setItemData(const QVariant& variant)
         for (long long int j = i; j < i+10 && j < data.gameList.size(); j++)
         {
             strData +=
-                QString("\n\t(%1, %2, \"%3\", \"%4\", %5),")
+                QString("\n\t(%1, %2, \"%3\", \"%5\", %4),")
                     .arg(data.gameList.at(j).gameID)
                     .arg(data.gameList.at(j).gamePos)
                     .arg(data.gameList.at(j).name)
-                    .arg(data.gameList.at(j).url)
-                    .arg(data.gameList.at(j).rate);
+                    .arg(data.gameList.at(j).rate)
+                    .arg(data.gameList.at(j).url);
         }
         if (strData.size() > 0)
         {

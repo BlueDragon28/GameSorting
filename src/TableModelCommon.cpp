@@ -711,12 +711,12 @@ bool TableModelCommon::setItemData(const QVariant& variant)
         for (long long int j = i; j < i+10 && j < data.commonList.size(); j++)
         {
             strData +=
-                QString("\n\t(%1, %2, \"%3\", \"%4\", %5),")
+                QString("\n\t(%1, %2, \"%3\", \"%5\", %4),")
                     .arg(data.commonList.at(j).commonID)
                     .arg(data.commonList.at(j).commonPos)
                     .arg(data.commonList.at(j).name)
-                    .arg(data.commonList.at(j).url)
-                    .arg(data.commonList.at(j).rate);
+                    .arg(data.commonList.at(j).rate)
+                    .arg(data.commonList.at(j).url);
         }
         if (strData.size() > 0)
         {
