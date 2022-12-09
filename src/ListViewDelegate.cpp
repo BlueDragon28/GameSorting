@@ -19,6 +19,7 @@
 #include "ListViewDelegate.h"
 #include "TableModel_UtilityInterface.h"
 #include "UtilityInterfaceEditor.h"
+#include "UtilityLineEditDialog.h"
 #include "UtilitySensitiveContentEditor.h"
 #include "Common.h"
 #include "TableModel.h"
@@ -238,30 +239,42 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Game::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!Settings::instance().isLegacyUtilEditor())
-			{
-				UtilityLineEdit* editor = new UtilityLineEdit(
-					tableName,
-					m_utilityTable,
-					m_db,
-					parent);
-				return editor;
-			}
-			else
-			{
-				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-					tableName,
-					itemID,
-					m_tableModel,
-					m_utilityInterface,
-					m_utilityTable,
-					m_db,
-					parent);
-				editor->raise();
-				editor->activateWindow();
-				editor->show();
-				return nullptr;
-			}
+			// if (!Settings::instance().isLegacyUtilEditor())
+			// {
+			// 	UtilityLineEdit* editor = new UtilityLineEdit(
+			// 		tableName,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	return editor;
+			// }
+			// else
+			// {
+			// 	UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+			// 		tableName,
+			// 		itemID,
+			// 		m_tableModel,
+			// 		m_utilityInterface,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	editor->raise();
+			// 	editor->activateWindow();
+			// 	editor->show();
+			// 	return nullptr;
+			// }
+
+			UtilityLineEditDialog* editor = new UtilityLineEditDialog(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 		else if (index.column() == Game::SENSITIVE_CONTENT)
 		{
@@ -326,30 +339,42 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Movie::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!Settings::instance().isLegacyUtilEditor())
-			{
-				UtilityLineEdit* editor = new UtilityLineEdit(
-					tableName,
-					m_utilityTable,
-					m_db,
-					parent);
-				return editor;
-			}
-			else
-			{
-				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-					tableName,
-					itemID,
-					m_tableModel,
-					m_utilityInterface,
-					m_utilityTable,
-					m_db,
-					parent);
-				editor->raise();
-				editor->activateWindow();
-				editor->show();
-				return nullptr;
-			}
+			// if (!Settings::instance().isLegacyUtilEditor())
+			// {
+			// 	UtilityLineEdit* editor = new UtilityLineEdit(
+			// 		tableName,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	return editor;
+			// }
+			// else
+			// {
+			// 	UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+			// 		tableName,
+			// 		itemID,
+			// 		m_tableModel,
+			// 		m_utilityInterface,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	editor->raise();
+			// 	editor->activateWindow();
+			// 	editor->show();
+			// 	return nullptr;
+			// }
+
+			UtilityLineEditDialog* editor = new UtilityLineEditDialog(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 		else if (index.column() == Movie::SENSITIVE_CONTENT)
 		{
@@ -407,30 +432,42 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Common::AUTHORS)
 				tableName = UtilityTableName::AUTHORS;
 			
-			if (!Settings::instance().isLegacyUtilEditor())
-			{
-				UtilityLineEdit* editor = new UtilityLineEdit(
-					tableName,
-					m_utilityTable,
-					m_db,
-					parent);
-				return editor;
-			}
-			else
-			{
-				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-					tableName,
-					itemID,
-					m_tableModel,
-					m_utilityInterface,
-					m_utilityTable,
-					m_db,
-					parent);
-				editor->raise();
-				editor->activateWindow();
-				editor->show();
-				return nullptr;
-			}
+			// if (!Settings::instance().isLegacyUtilEditor())
+			// {
+			// 	UtilityLineEdit* editor = new UtilityLineEdit(
+			// 		tableName,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	return editor;
+			// }
+			// else
+			// {
+			// 	UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+			// 		tableName,
+			// 		itemID,
+			// 		m_tableModel,
+			// 		m_utilityInterface,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	editor->raise();
+			// 	editor->activateWindow();
+			// 	editor->show();
+			// 	return nullptr;
+			// }
+
+			UtilityLineEditDialog* editor = new UtilityLineEditDialog(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 		else if (index.column() == Common::SENSITIVE_CONTENT)
 		{
@@ -494,30 +531,42 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Books::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!Settings::instance().isLegacyUtilEditor())
-			{
-				UtilityLineEdit* editor = new UtilityLineEdit(
-					tableName,
-					m_utilityTable,
-					m_db,
-					parent);
-				return editor;
-			}
-			else
-			{
-				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-					tableName,
-					itemID,
-					m_tableModel,
-					m_utilityInterface,
-					m_utilityTable,
-					m_db,
-					parent);
-				editor->raise();
-				editor->activateWindow();
-				editor->show();
-				return nullptr;
-			}
+			// if (!Settings::instance().isLegacyUtilEditor())
+			// {
+			// 	UtilityLineEdit* editor = new UtilityLineEdit(
+			// 		tableName,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	return editor;
+			// }
+			// else
+			// {
+			// 	UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+			// 		tableName,
+			// 		itemID,
+			// 		m_tableModel,
+			// 		m_utilityInterface,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	editor->raise();
+			// 	editor->activateWindow();
+			// 	editor->show();
+			// 	return nullptr;
+			// }
+
+			UtilityLineEditDialog* editor = new UtilityLineEditDialog(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 		else if (index.column() == Books::SENSITIVE_CONTENT)
 		{
@@ -591,30 +640,42 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 			else if (index.column() == Series::SERVICES)
 				tableName = UtilityTableName::SERVICES;
 			
-			if (!Settings::instance().isLegacyUtilEditor())
-			{
-				UtilityLineEdit* editor = new UtilityLineEdit(
-					tableName,
-					m_utilityTable,
-					m_db,
-					parent);
-				return editor;
-			}
-			else
-			{
-				UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
-					tableName,
-					itemID,
-					m_tableModel,
-					m_utilityInterface,
-					m_utilityTable,
-					m_db,
-					parent);
-				editor->raise();
-				editor->activateWindow();
-				editor->show();
-				return nullptr;
-			}
+			// if (!Settings::instance().isLegacyUtilEditor())
+			// {
+			// 	UtilityLineEdit* editor = new UtilityLineEdit(
+			// 		tableName,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	return editor;
+			// }
+			// else
+			// {
+			// 	UtilityInterfaceEditor* editor = new UtilityInterfaceEditor(
+			// 		tableName,
+			// 		itemID,
+			// 		m_tableModel,
+			// 		m_utilityInterface,
+			// 		m_utilityTable,
+			// 		m_db,
+			// 		parent);
+			// 	editor->raise();
+			// 	editor->activateWindow();
+			// 	editor->show();
+			// 	return nullptr;
+			// }
+
+			UtilityLineEditDialog* editor = new UtilityLineEditDialog(
+				tableName,
+				itemID,
+				m_tableModel,
+				m_utilityTable,
+				m_db,
+				parent);
+			editor->raise();
+			editor->activateWindow();
+			editor->show();
+			return nullptr;
 		}
 		else if (index.column() == Series::SENSITIVE_CONTENT)
 		{
