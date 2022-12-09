@@ -17,8 +17,10 @@
 */
 
 #include "SqlUtilityTable.h"
+#include "DataStruct.h"
 #include <iostream>
 #include <QSqlError>
+#include <qforeach.h>
 
 SqlUtilityTable::SqlUtilityTable(ListType type, QSqlDatabase& db) :
 	m_type(type),
@@ -447,4 +449,95 @@ long long int SqlUtilityTable::addItem(UtilityTableName tableName, const QString
 	
 	m_query.clear();
 	return itemID;
+}
+
+QString SqlUtilityTable::retrieveUtilityDataFromItem(long long int itemID, UtilityTableName tableName, const QString& utilityInterfaceTableName) const
+{
+	if (itemID <= 0)
+		return "";
+	
+	// Retrieve utility IDs.
+	QString statement = QString(
+		"SELECT\n"
+		"	UtilityID\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	ItemID = %2;")
+			.arg(utilityInterfaceTableName).arg(itemID);
+	
+#ifndef NDEBUG
+	std::cout << statement.toStdString() << "\n" << std::endl;
+#endif
+
+	QList<long long int> utilityIDs;
+	QSqlQuery query(m_db);
+	if (query.exec(statement))
+	{
+		while (query.next())
+		{
+			utilityIDs.append(query.value(0).toLongLong());
+		}
+	} 
+	else
+	{
+#ifndef NDEBUG
+		std::cerr << QString("Failed to retrieve utility id from utility interface table %1 of itemID %2.\n\n%3")
+			.arg(utilityInterfaceTableName).arg(itemID).arg(query.lastError().text())
+			.toStdString() << "\n" << std::endl;
+#endif
+		return "";
+	}
+	query.clear();
+
+	// Get names from the utilityID.
+	statement = QString(
+		"SELECT\n"
+		"	Name\n"
+		"FROM\n"
+		"	\"%1\"\n"
+		"WHERE\n"
+		"	\"%1ID\" = %2;")
+			.arg(this->tableName(tableName));
+	
+	QStringList strUtilityList;
+	for (long long int id : utilityIDs)
+	{
+#ifndef NDEBUG
+		std::cout << statement.arg(id).toStdString() << "\n" << std::endl;
+#endif
+
+		if (query.exec(statement.arg(id)))
+		{
+			if (query.next())
+			{
+				strUtilityList.append(query.value(0).toString());
+			}
+		}
+		else
+		{
+#ifndef NDEBUG
+			std::cerr << QString("Failed to retrieve utility name list from table %1\n\t%2")
+				.arg(utilityInterfaceTableName, query.lastError().text())
+				.toStdString() << "\n" << std::endl;
+#endif
+			return "";
+		}
+	}
+
+	if (strUtilityList.isEmpty())
+	{
+		return "";
+	}
+
+	// Putting every element in a single string.
+	QString strUtilityNames;
+	for (int i = 0; i < strUtilityList.size(); i++)
+	{
+		if (i > 0)
+			strUtilityNames += ", ";
+		strUtilityNames += strUtilityList.at(i);
+	}
+
+	return strUtilityNames;
 }

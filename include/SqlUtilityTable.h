@@ -43,6 +43,8 @@ public:
 
 	long long int addItem(UtilityTableName tableName, const QString& name);
 
+	QString retrieveUtilityDataFromItem(long long int itemID, UtilityTableName tableName, const QString& utilityInterfaceTableName) const;
+
 signals:
 	void utilityEdited();
 
